@@ -1,0 +1,2 @@
+# wzmap
+wz map editor
