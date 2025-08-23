@@ -769,22 +769,6 @@ function updateSelectedInfo() {
     }
   } catch(e) {}
 }
-  group.userData.centerX = blockCenters[0].cX;
-  group.userData.centerY = blockCenters[0].cY;
-  group.userData.centerZ = blockCenters[0].cZ;
-group.updateMatrixWorld(true);
-const bboxGroup = new THREE.Box3().setFromObject(group);
-group.userData.minY = bboxGroup.min.y;
-  // Culling data (added 2025-08-16)
-  const __sphere = new THREE.Sphere();
-  bboxGroup.getBoundingSphere(__sphere);
-  group.userData.boundingSphere = __sphere;
-  group.userData.cullable = true;
-  group.userData.structureId = def.id;
-if (rotation && group) {
-}
-  return group;
-}
 function updateStructurePreview() {
   const label = document.getElementById('structureNameLabel');
   if (!previewScene || !previewRenderer || !previewCamera) {
