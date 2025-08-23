@@ -116,3 +116,15 @@ group.userData.minY = minY;
 if (minY !== 0) {
   group.position.y -= minY;
 }
+  // Expose base block center for placement calculations
+  group.userData.centerX = blockCenters[0].cX;
+  group.userData.centerY = blockCenters[0].cY;
+  group.userData.centerZ = blockCenters[0].cZ;
+  // Precompute bounding sphere for culling
+  const __sphere = new THREE.Sphere();
+  bbox.getBoundingSphere(__sphere);
+  group.userData.boundingSphere = __sphere;
+  group.userData.cullable = true;
+  group.userData.structureId = def.id;
+  return group;
+}
