@@ -7,12 +7,8 @@ const gameModulePath = (location.hostname === 'htmlpreview.github.io')
   ? 'https://cdn.jsdelivr.net/gh/MaWay2000/wzmap/js/game.js'
   : './js/game.js';
 
-import(`${baseUrl}js/game.js`);
-import(gameModulePath);
-// Dynamically import the game script using the resolved path.
-// Previously this file expected a `baseUrl` global which was not
-// defined when viewing the project through htmlpreview.github.io,
-// leading to a "baseUrl is not defined" ReferenceError. The direct
-// import below works in both the htmlpreview environment and when
-// the project is served locally.
-import(gameModulePath);
+// Create a module script element to load the game logic
+const moduleScript = document.createElement('script');
+moduleScript.type = 'module';
+moduleScript.src = gameModulePath;
+document.head.appendChild(moduleScript);
