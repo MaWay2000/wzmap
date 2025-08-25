@@ -63,11 +63,7 @@ export function clearTileCache(tilesetIndex){
 // 1) Attempt declared count (0..count-1).
 // 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
 // 3) Try multiple bases and lowercase/uppercase filenames before giving up a given index.
-<<<<<<< ours
-export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = true){
-=======
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = false){
->>>>>>> theirs
   // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
   const key = String(tilesetIndex|0);
   if (__tileCache.has(key)) return __tileCache.get(key);
