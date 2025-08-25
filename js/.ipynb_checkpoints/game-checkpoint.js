@@ -301,7 +301,6 @@ if (heightBrushSlider) {
   }
 };
 
-};
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', initDom);
 } else {
