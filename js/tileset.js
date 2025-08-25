@@ -39,8 +39,9 @@ export function clearTileCache(tilesetIndex){
   else __tileCache.clear();
 }
 
-// Core loader. It will try the declared range (0..count-1) using padded and
-// unpadded filenames. No probing beyond the declared range is performed.
+// Core loader. It will try the declared range (0..count-1) using padded
+// filenames only. No probing beyond the declared range is performed, and
+// we avoid extra network requests by dropping the old unpadded fallback.
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)){
   const key = String(tilesetIndex|0);
   if (__tileCache.has(key)) return __tileCache.get(key);
@@ -50,25 +51,15 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
 
     const loadOne = (idx) => new Promise((resolve) => {
       const p2 = String(idx).padStart(2, '0');
-      const candidates = [
-        `tile-${p2}.png`,
-        `tile-${idx}.png`,
-      ];
-      let ni = 0;
-      const tryNext = () => {
-        if (ni >= candidates.length) {
-          // not found anywhere: resolve to a 1x1 marker image
-          const img = new Image(); img.width = 1; img.height = 1; resolve(img); return;
-        }
-        const name = candidates[ni];
-        const url = `${folder}/${name}`;
-        const img = new Image();
-        img.decoding = 'async';
-        img.onload = () => resolve(img);
-        img.onerror = () => { ni += 1; tryNext(); };
-        img.src = url;
+      const url = `${folder}/tile-${p2}.png`;
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        // not found anywhere: resolve to a 1x1 marker image
+        const marker = new Image(); marker.width = 1; marker.height = 1; resolve(marker);
       };
-      tryNext();
+      img.src = url;
     });
 
     const imgs = [];
