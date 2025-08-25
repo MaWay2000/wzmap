@@ -307,13 +307,11 @@ if (document.readyState === 'loading') {
   initDom();
 }
 threeContainer.addEventListener('click', handleEditClick);
-=======
   if (threeContainer) {
     threeContainer.addEventListener('click', handleEditClick);
   }
 };
 
->>>>>>> theirs
 function handleEditClick(event) {
   if (activeTab !== 'textures' && activeTab !== 'height' && activeTab !== 'objects') return;
   const rect = threeContainer.getBoundingClientRect();
