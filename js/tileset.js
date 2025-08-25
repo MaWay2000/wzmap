@@ -7,9 +7,10 @@
 // and looks only in the configured base folder.
 
 export const TILESETS = [
-  { name: 'Arizona',         folder: 'tertilesc1hw-128', count: 78 },
-  { name: 'Urban',           folder: 'tertilesc2hw-128', count: 81 },
-  { name: 'Rocky Mountains', folder: 'tertilesc3hw-128', count: 80 },
+  // Direct mapping of tileset folders to display names
+  { name: 'arizona',         folder: 'tertilesc1hw-128', count: 78 },
+  { name: 'urban',           folder: 'tertilesc2hw-128', count: 81 },
+  { name: 'rocky mountains', folder: 'tertilesc3hw-128', count: 80 },
 ];
 
 let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
