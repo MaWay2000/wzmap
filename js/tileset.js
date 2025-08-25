@@ -20,7 +20,16 @@ let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
 // Optional fallbacks. You can override by setting window.TILES_BASES before load.
 let __tilesBases = (typeof window !== 'undefined' && Array.isArray(window.TILES_BASES))
   ? window.TILES_BASES.slice()
-  : [__tilesBase, 'classic/texpages/texpages/', 'texpages/', 'classic/images/', 'images/'];
+  // Include the canonical classic path so we can fall back to the full
+  // tileset when a map's datapack only contains a subset of tiles
+  : [
+      __tilesBase,
+      'classic/texpages/',
+      'classic/texpages/texpages/',
+      'texpages/',
+      'classic/images/',
+      'images/'
+    ];
 
 export function setTilesBase(pathOrArray){
   if (Array.isArray(pathOrArray)) {
@@ -46,7 +55,8 @@ export function getTileCount(tilesetIndex){
 export function buildTileUrl(tilesetIndex, idx, baseOverride){
   const folder = getTileFolder(tilesetIndex);
   const base = baseOverride || __tilesBase;
-  return `${base}${folder}/tile-${idx}.png`;
+  const padded = String(idx).padStart(2, '0');
+  return `${base}${folder}/tile-${padded}.png`;
 }
 
 // Simple per-tileset cache (Promise<Image[]>)
