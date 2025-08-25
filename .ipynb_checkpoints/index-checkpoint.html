@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Warzone Map Viewer (3D Only)</title>
+  <!-- Use local favicon to avoid network errors when previewing -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -93,9 +96,7 @@
     </div>
 
     <div id="showOptions" style="display:flex; gap:8px; margin-bottom:2px;">
-      <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label><label class="toggle-label"><input type="checkbox" id="showPanelIds" checked>Show IDs</label>      
-      <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
-
+      <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label>
     </div>
 
     <!-- TILES TAB -->
@@ -115,6 +116,11 @@
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
       <div style="display:block; margin-top:6px; margin-bottom:4px;">
+        <label class="toggle-label" style="display:block;">
+          <input type="checkbox" id="showPanelIds" checked> Show IDs
+        </label>
+      </div>
+      <div style="display:block; margin-top:2px; margin-bottom:4px;">
         <label class="toggle-label" style="display:block;">
           <input type="checkbox" id="displayTileTypes"> Show tile types
         </label>
@@ -188,13 +194,15 @@
     <div style="text-align:center;">
       <div id="overlayText" style="font-size:42px;color:#ddd;letter-spacing:1px;margin-bottom:16px;">Please select map</div>
       <label for="wzLoader" id="overlayBrowseBtn" class="overlay-btn">Browse map…</label>
+      <button id="overlayServerBtn" class="overlay-btn" style="margin-left:8px;">Server maps…</button>
       <input type="file" id="wzLoader" accept=".wz,.zip,.7z,.map,.gam,.json" style="position:absolute;left:-9999px;width:0.1px;height:0.1px;opacity:0;">
       <div style="margin-top:10px;font-size:14px;color:#aab;">Please wait, it can take some time…</div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script type="module" src="js/game.js?v=1755914044" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+          onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';document.head.appendChild(s);"></script>
+  <script src="js/main.js?v=1755914046" defer></script>
 
   <script>
     // Minimal UI bridge your game.js can use
@@ -214,6 +222,119 @@
           ev.preventDefault();
           ev.stopPropagation();
           try { input.click(); } catch(e) {}
+        });
+      }
+      var serverBtn = document.getElementById('overlayServerBtn');
+      if (serverBtn) {
+        serverBtn.addEventListener('click', async function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            const resp = await fetch('maps/filelist.txt');
+            if (!resp.ok) throw new Error('filelist.txt not found');
+            const text = await resp.text();
+            const files = text.split(/\r?\n/).filter(f => f.trim() !== '');
+            const listDiv = document.getElementById('fileList');
+            listDiv.innerHTML = '';
+            files.forEach(f => {
+              const div = document.createElement('div');
+              const a = document.createElement('a');
+              a.href = '#';
+              a.textContent = f;
+              a.addEventListener('click', async e => {
+                e.preventDefault();
+                listDiv.innerHTML = '';
+                try {
+                  if (typeof window.loadServerMap === 'function') {
+                    await window.loadServerMap(f);
+                  }
+                } catch(err) {
+                  console.error('Map load error:', err);
+                }
+              });
+              div.appendChild(a);
+              listDiv.appendChild(div);
+            });
+            window.UI.hideOverlay();
+          } catch(err) {
+            console.error('Failed to load map list', err);
+          }
+        });
+      }
+
+      var serverBtn = document.getElementById('overlayServerBtn');
+      if (serverBtn) {
+        serverBtn.addEventListener('click', async function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            const resp = await fetch('maps/filelist.txt');
+            if (!resp.ok) throw new Error('filelist.txt not found');
+            const text = await resp.text();
+            const files = text.split(/\r?\n/).filter(f => f.trim() !== '');
+            const listDiv = document.getElementById('fileList');
+            listDiv.innerHTML = '';
+            files.forEach(f => {
+              const div = document.createElement('div');
+              const a = document.createElement('a');
+              a.href = '#';
+              a.textContent = f;
+              a.addEventListener('click', async e => {
+                e.preventDefault();
+                listDiv.innerHTML = '';
+                try {
+                  if (typeof window.loadServerMap === 'function') {
+                    await window.loadServerMap(f);
+                  }
+                } catch(err) {
+                  console.error('Map load error:', err);
+                }
+              });
+              div.appendChild(a);
+              listDiv.appendChild(div);
+            });
+            window.UI.hideOverlay();
+          } catch(err) {
+            console.error('Failed to load map list', err);
+          }
+        });
+      }
+
+      var serverBtn = document.getElementById('overlayServerBtn');
+      if (serverBtn) {
+        serverBtn.addEventListener('click', async function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            const resp = await fetch('maps/filelist.txt');
+            if (!resp.ok) throw new Error('filelist.txt not found');
+            const text = await resp.text();
+            const files = text.split(/\r?\n/).filter(f => f.trim() !== '');
+            const listDiv = document.getElementById('fileList');
+            listDiv.innerHTML = '';
+            files.forEach(f => {
+              const div = document.createElement('div');
+              const a = document.createElement('a');
+              a.href = '#';
+              a.textContent = f;
+              a.addEventListener('click', async e => {
+                e.preventDefault();
+                listDiv.innerHTML = '';
+                try {
+                  if (typeof window.loadServerMap === 'function') {
+                    await window.loadServerMap(f);
+                  }
+                } catch(err) {
+                  console.error('Map load error:', err);
+                }
+              });
+              div.appendChild(a);
+              listDiv.appendChild(div);
+            });
+            window.UI.hideOverlay();
+          } catch(err) {
+            console.error('Failed to load map list', err);
+          }
         });
       }
 
@@ -242,6 +363,3 @@
         }
       });
     });
-  </script>
-</body>
-</html>
