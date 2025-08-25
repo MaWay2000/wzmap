@@ -8,28 +8,19 @@ function normalizeTexPath(name){
   return n;
 }
 
-// Exports: TILESETS, setTilesBase, getTileCount, getTileFolder,
+// Exports: TILESETS, getTileCount, getTileFolder,
 //          buildTileUrl, loadAllTiles, clearTileCache
 //
 // If a tileset folder only has 78 images, we can’t conjure the rest.
 // By default this loader grabs exactly the declared range of tiles
-// and looks only in the configured base folder.
+// and looks only in the configured folders.
 
 export const TILESETS = [
   // Direct mapping of tileset folders to display names
-  { name: 'arizona',         folder: 'tertilesc1hw-128', count: 78 },
-  { name: 'urban',           folder: 'tertilesc2hw-128', count: 81 },
-  { name: 'rocky mountains', folder: 'tertilesc3hw-128', count: 80 },
+  { name: 'arizona',         folder: 'classic/texpages/tertilesc1hw-128', count: 78 },
+  { name: 'urban',           folder: 'classic/texpages/tertilesc2hw-128', count: 81 },
+  { name: 'rocky mountains', folder: 'classic/texpages/tertilesc3hw-128', count: 80 },
 ];
-
-let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
-  ? window.TILES_BASE
-  : 'classic/texpages/';
-
-// Configure the single base directory used for tile loading.
-export function setTilesBase(path){
-  __tilesBase = String(path || '');
-}
 
 export function getTileFolder(tilesetIndex){
   const i = Math.max(0, Math.min(TILESETS.length - 1, tilesetIndex|0));
@@ -41,13 +32,12 @@ export function getTileCount(tilesetIndex){
   return TILESETS[i].count|0;
 }
 
-export function buildTileUrl(tilesetIndex, idx, baseOverride){
+export function buildTileUrl(tilesetIndex, idx){
   const folder = getTileFolder(tilesetIndex);
-  const base = baseOverride || __tilesBase;
   const max = getTileCount(tilesetIndex) - 1;
   const clamped = Math.max(0, Math.min(max, idx|0));
   const p2 = String(clamped).padStart(2, '0');
-  return `${base}${folder}/tile-${p2}.png`;
+  return `${folder}/tile-${p2}.png`;
 }
 
 // Simple per-tileset cache (Promise<Image[]>)
@@ -82,7 +72,7 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
           const img = new Image(); img.width = 1; img.height = 1; resolve(img); return;
         }
         const name = candidates[ni];
-        const url = `${__tilesBase}${folder}/${name}`;
+        const url = `${folder}/${name}`;
         const img = new Image();
         img.decoding = 'async';
         img.onload = () => resolve(img);
