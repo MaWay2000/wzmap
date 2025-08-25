@@ -4,6 +4,8 @@ import * as THREE from './three.module.js';
 // https://github.com/MaWay2000/wzmap/edit/main/js/game.js#L3C7
 // https://github.dev/MaWay2000/wzmap/blob/main/js/game.js cia testinu
 
+// sudas kazkoks
+
 // aaa main
 
 /// cia editinu: https://github.com/MaWay2000/wzmap/edit/main/js/game.js
