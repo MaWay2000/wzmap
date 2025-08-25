@@ -296,7 +296,11 @@ if (heightBrushSlider) {
     renderPreview();
     updateStructurePreview();
   }
-<<<<<<< ours
+  if (threeContainer) {
+    threeContainer.addEventListener('click', handleEditClick);
+  }
+};
+
 };
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', initDom);
