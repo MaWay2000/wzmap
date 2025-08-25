@@ -1,6 +1,6 @@
 import * as THREE from './three.module.js';
 let showPanelIdsCheckbox;
-import { TILESETS, getTileCount, loadAllTiles } from './tileset.js';
+import { TILESETS, getTileCount, loadAllTiles, clearTileCache } from './tileset.js';
 import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
 import { cameraState, resetCameraTarget, setupKeyboard } from './camera.js';
 import { parsePie, loadPieGeometry } from "./pie.js";
@@ -956,9 +956,9 @@ function colorizeTileTypeOptions() {
   if (!sel) return;
   for (let i = 0; i < sel.options.length; i++) {
     const opt = sel.options[i];
-    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^■\s*/,'').trim();
+    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^â– \s*/,'').trim();
     const color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[i]) ? TILE_TYPE_COLORS[i] : '#888';
-    opt.textContent = '■ ' + baseName;
+    opt.textContent = 'â–  ' + baseName;
     opt.style.color = color;
   }
 }
@@ -1012,6 +1012,9 @@ if (tilesetSelect && !tilesetSelect.__wzBound) {
 }
 setupKeyboard(() => resetCameraTarget(mapW, mapH, threeContainer));
 async function setTileset(idx) {
+  // ensure fresh tiles when switching sets
+  clearTileCache(idx);
+
   if (idx < 0 || idx >= TILESETS.length) idx = 0;
   tilesetIndex = idx;
   tilesetSelect.value = tilesetIndex;
