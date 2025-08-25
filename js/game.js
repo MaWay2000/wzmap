@@ -965,9 +965,9 @@ function colorizeTileTypeOptions() {
   if (!sel) return;
   for (let i = 0; i < sel.options.length; i++) {
     const opt = sel.options[i];
-    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^Ã¢â€“Â \s*/,'').trim();
+    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^■\s*/, '').trim();
     const color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[i]) ? TILE_TYPE_COLORS[i] : '#888';
-    opt.textContent = 'Ã¢â€“Â  ' + baseName;
+    opt.textContent = '■ ' + baseName;
     opt.style.color = color;
   }
 }
