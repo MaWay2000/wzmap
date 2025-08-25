@@ -115,7 +115,7 @@ let highlightCachedRot = null;
 let highlightModelGroup = null;
 let highlightLoadingId = null;
 let highlightLoadingRot = null;
-window.addEventListener('DOMContentLoaded', () => {
+const initDom = () => {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.getAttribute('data-tab');
@@ -296,7 +296,12 @@ if (heightBrushSlider) {
     renderPreview();
     updateStructurePreview();
   }
-});
+};
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initDom);
+} else {
+  initDom();
+}
 threeContainer.addEventListener('click', handleEditClick);
 function handleEditClick(event) {
   if (activeTab !== 'textures' && activeTab !== 'height' && activeTab !== 'objects') return;
