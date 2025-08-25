@@ -1006,25 +1006,22 @@ async function setTileset(idx) {
   updateSelectedInfo();
   drawMap3D();
 }
-document.getElementById('wzLoader').addEventListener('change', async evt => {
-  const file = evt.target.files[0];
-  if (!file) return;
+
+async function loadMapFile(file) {
   fileListDiv.innerHTML = "";
   infoDiv.textContent = "";
   if (mapFilenameSpan) mapFilenameSpan.textContent = file.name;
-  // Hide top bar UI after a file is selected
   try {
     const inputEl = document.getElementById('wzLoader');
     if (inputEl) inputEl.style.display = 'none';
     if (mapFilenameSpan) mapFilenameSpan.style.display = 'none';
     if (typeof uiBar !== 'undefined' && uiBar) uiBar.style.display = 'none';
-  // Expand canvas to full height once top bar is hidden
-  try {
-    const threeEl = document.getElementById('threeContainer');
-    if (threeEl) { threeEl.style.top = '0px'; threeEl.style.height = '100vh'; }
-    const overlayEl = document.getElementById('overlayMsg');
-    if (overlayEl) overlayEl.style.top = '0px';
-  } catch(e) {}
+    try {
+      const threeEl = document.getElementById('threeContainer');
+      if (threeEl) { threeEl.style.top = '0px'; threeEl.style.height = '100vh'; }
+      const overlayEl = document.getElementById('overlayMsg');
+      if (overlayEl) overlayEl.style.top = '0px';
+    } catch(e) {}
   } catch(e) {}
   let fileExt = file.name.toLowerCase().split('.').pop();
   let found = false;
@@ -1108,16 +1105,36 @@ document.getElementById('wzLoader').addEventListener('change', async evt => {
       }
     }
     if (!found) {
-      infoDiv.innerHTML = '<b style="color:red">Failed to decode any map grid in this archive!</b>';
+      infoDiv.innerHTML = '<b style=\"color:red\">Failed to decode any map grid in this archive!</b>';
       showOverlay("Failed to load map. Please select another file.");
       resetCameraTarget(mapW, mapH, threeContainer);
     }
   } catch (err) {
-    infoDiv.innerHTML = '<b style="color:red">Failed to open archive!</b>';
+    infoDiv.innerHTML = '<b style=\"color:red\">Failed to open archive!</b>';
     showOverlay("Failed to open file. Please select another map.");
     resetCameraTarget(mapW, mapH, threeContainer);
   }
+}
+
+document.getElementById('wzLoader').addEventListener('change', async evt => {
+  const file = evt.target.files[0];
+  if (!file) return;
+  await loadMapFile(file);
 });
+
+async function loadServerMap(filename) {
+  try {
+    const resp = await fetch('maps/' + filename);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const blob = await resp.blob();
+    const file = new File([blob], filename);
+    await loadMapFile(file);
+  } catch (err) {
+    infoDiv.innerHTML = '<b style="color:red">Failed to load server map!</b>';
+    console.error(err);
+  }
+}
+window.loadServerMap = loadServerMap;
 loadAllTiles(tilesetIndex, getTileCount(tilesetIndex)).then(images => {
   tileImages = images;
   showOverlay("Please select map");
