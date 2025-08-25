@@ -78,7 +78,7 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
     const folder = getTileFolder(tilesetIndex);
 
     const loadOneAtAnyBase = (idx) => new Promise((resolve) => {
-      const tryNames = [`tile-${idx}.png`, `tile-${idx}.PNG`]; // PNG sometimes uppercase on mirrors
+      const tryNames = [`tile-${idx}.png`, `tile-${idx}.PNG`, `tile-${String(idx).padStart(2,'0')}.png`, `tile-${String(idx).padStart(2,'0')}.PNG`]; // PNG sometimes uppercase on mirrors
       const tryBases = __tilesBases.slice();
       let bi = 0, ni = 0;
       const tryNext = () => {
@@ -121,15 +121,13 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
 
     // Step 2: probe past gaps
     const MAX_SAFE_INDEX = 96;              // hard cap: classic sets never exceed this
-    const MAX_CONSECUTIVE_MISSES = 8;       // stop after this many misses in a row
     let idx = count;
-    let misses = 0;
-    while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
+    while (idx <= MAX_SAFE_INDEX) {
       // skip already-filled (if count was larger than actual, rare)
       if (imgs[idx]) { idx++; misses = 0; continue; }
       /* eslint no-await-in-loop: "off" */
       const ok = pushIfReal(await loadOneAtAnyBase(idx), idx);
-      misses = ok ? 0 : (misses + 1);
+      // we no longer stop on consecutive misses; keep probing to the cap
       idx++;
     }
 
@@ -137,7 +135,13 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
     const last = imgs.reduceRight((p, v, i) => (p >= 0 ? p : (v ? i : -1)), -1);
     const out = [];
     for (let i = 0; i <= last; i++) if (imgs[i]) out.push(imgs[i]);
-    return out;
+    
+    try {
+      const found = out.length;
+      console.log(`[tileset] %s -> loaded %d tiles (requested %d..%d)`,
+                  folder, found, 0, MAX_SAFE_INDEX);
+    } catch(e) {}
+return out;
   })();
 
   __tileCache.set(key, p);
