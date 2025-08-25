@@ -1,4 +1,13 @@
 import * as THREE from './three.module.js';
+function normalizeTexPath(name){
+  let n = String(name || '').replace(/\\/g,'/').toLowerCase();
+  n = n.replace(/^\.+\//, '');
+  n = n.replace(/^(images|texpages)\//, '');
+  n = n.replace(/^classic\/texpages\//, '');
+  n = n.replace(/texpages\/texpages\//g, 'texpages/');
+  return n;
+}
+
 let showPanelIdsCheckbox;
 import { TILESETS, getTileCount, loadAllTiles, clearTileCache } from './tileset.js';
 import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
@@ -39,7 +48,7 @@ window.hideOverlay = hideOverlay;
 if (typeof window !== 'undefined') {
   if (typeof window.STRUCTURES_JSON === 'undefined') window.STRUCTURES_JSON = 'structure.json';
   if (typeof window.PIES_BASE === 'undefined') window.PIES_BASE = 'pies/';
-  if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/texpages/';
+  if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/';
 }
 // ---------------------------------------------------------
 
@@ -587,7 +596,7 @@ function __old_updateHighlight(event) {
         let baseMat;
         if (g.userData && g.userData.textureName) {
           const texLoader = new THREE.TextureLoader();
-          const texName = g.userData.textureName.toLowerCase();
+          const texName = gnormalizeTexPath(g.userData.textureName);
           const tex = texLoader.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName, undefined, undefined, () => {});
           tex.magFilter = THREE.NearestFilter;
           tex.minFilter = THREE.LinearMipMapLinearFilter;
@@ -635,7 +644,7 @@ function __old_updateHighlight(event) {
               let tMat;
               if (tg.userData && tg.userData.textureName) {
                 const texLoader2 = new THREE.TextureLoader();
-                const texName2 = tg.userData.textureName.toLowerCase();
+                const texName2 = tgnormalizeTexPath(g.userData.textureName);
                 const tex2 = texLoader2.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName2, undefined, undefined, () => {});
                 tex2.magFilter = THREE.NearestFilter;
                 tex2.minFilter = THREE.LinearMipMapLinearFilter;
@@ -956,9 +965,9 @@ function colorizeTileTypeOptions() {
   if (!sel) return;
   for (let i = 0; i < sel.options.length; i++) {
     const opt = sel.options[i];
-    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^â– \s*/,'').trim();
+    const baseName = opt.getAttribute('data-name') || opt.textContent.replace(/^Ã¢â€“Â \s*/,'').trim();
     const color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[i]) ? TILE_TYPE_COLORS[i] : '#888';
-    opt.textContent = 'â–  ' + baseName;
+    opt.textContent = 'Ã¢â€“Â  ' + baseName;
     opt.style.color = color;
   }
 }
