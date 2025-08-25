@@ -711,6 +711,10 @@ function setActiveTab(tab) {
   if (tileToggle && tileToggle.parentElement) {
     tileToggle.parentElement.style.display = (tab === 'textures') ? 'flex' : 'none';
   }
+  const panelIdsToggle = document.getElementById('showPanelIds');
+  if (panelIdsToggle && panelIdsToggle.parentElement) {
+    panelIdsToggle.parentElement.style.display = (tab === 'textures') ? 'flex' : 'none';
+  }
   const heightToggle = document.getElementById('showHeight');
   if (heightToggle && heightToggle.parentElement) {
     heightToggle.parentElement.style.display = (tab === 'height') ? 'flex' : 'none';
