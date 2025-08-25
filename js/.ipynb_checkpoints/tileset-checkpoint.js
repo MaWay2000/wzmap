@@ -1,88 +1,146 @@
 // tileset.js — robust tile set utilities for WZ Map Maker
+// Exports: TILESETS, setTilesBase, getTileCount, getTileFolder,
+//          buildTileUrl, loadAllTiles, clearTileCache
 //
-// Provides helpers for listing available tilesets, building tile URLs and
-// loading all tile images for a given set. The original implementation stopped
-// after a fixed number of tiles (usually 78), which meant tiles with higher
-// indices (80 or 81) were never shown in the palette.  This version probes
-// beyond the declared count and updates the tileset's count after loading so
-// that every available tile is displayed.
+// Fixes the palette stopping at tile 78 by probing beyond the declared
+// count for each tileset and continuing past missing indices until a run
+// of misses is seen. Also tries lowercase filenames and multiple base
+// paths so the viewer works in more hosting setups.
 
+// Canonical tilesets bundled with the classic game. Each entry contains the
+// folder name and the expected tile count from the original assets. The
+// loader will probe past these counts in case extra tiles are present.
 export const TILESETS = [
   { name: 'Arizona',         folder: 'tertilesc1hw-128', count: 78 },
   { name: 'Urban',           folder: 'tertilesc2hw-128', count: 81 },
   { name: 'Rocky Mountains', folder: 'tertilesc3hw-128', count: 80 },
 ];
 
-// ---------------------------------------------------------------------------
-// Basic helpers
+// ---- Base path configuration ------------------------------------------------
+let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
+  ? window.TILES_BASE
+  : 'classic/texpages/';
+
+// Optional fallbacks. You can override by setting window.TILES_BASES before load.
+let __tilesBases = (typeof window !== 'undefined' && Array.isArray(window.TILES_BASES))
+  ? window.TILES_BASES.slice()
+  : [__tilesBase, 'classic/texpages/texpages/', 'texpages/', 'classic/images/', 'images/'];
+
+export function setTilesBase(pathOrArray) {
+  if (Array.isArray(pathOrArray)) {
+    __tilesBases = pathOrArray.slice();
+    __tilesBase = __tilesBases[0] || '';
+  } else {
+    __tilesBase = String(pathOrArray || '');
+    __tilesBases = [__tilesBase];
+  }
+}
+
+// ---- Utilities ---------------------------------------------------------------
+export function getTileFolder(tilesetIndex) {
+  const i = Math.max(0, Math.min(TILESETS.length - 1, tilesetIndex | 0));
+  return TILESETS[i].folder;
+}
 
 export function getTileCount(tilesetIndex) {
   const i = Math.max(0, Math.min(TILESETS.length - 1, tilesetIndex | 0));
   return TILESETS[i].count | 0;
 }
 
-export function getTileFolder(tilesetIndex) {
-  const i = Math.max(0, Math.min(TILESETS.length - 1, tilesetIndex | 0));
-  return TILESETS[i].folder;
+// Helper to pad numeric indices to the 2‑digit filenames used by the assets.
+function padIndex(idx) {
+  return idx.toString().padStart(2, '0');
 }
 
-export function buildTileUrl(tilesetIndex, idx, base = 'classic/texpages/') {
+export function buildTileUrl(tilesetIndex, idx, baseOverride) {
   const folder = getTileFolder(tilesetIndex);
-  return `${base}${folder}/tile-${idx}.png`;
+  const base = baseOverride || __tilesBase;
+  return `${base}${folder}/tile-${padIndex(idx)}.png`;
 }
 
-// ---------------------------------------------------------------------------
-// Tile loading
+// ---- Tile loading -----------------------------------------------------------
+// Simple per-tileset cache (Promise<Image[]>)
+const __tileCache = new Map();
 
-const cache = new Map(); // Map<string, Promise<Image[]>>
+export function clearTileCache(tilesetIndex) {
+  if (typeof tilesetIndex === 'number') __tileCache.delete(String(tilesetIndex | 0));
+  else __tileCache.clear();
+}
 
-export async function loadAllTiles(tilesetIndex) {
+// Core loader. It will:
+// 1) Attempt declared count (0..count-1).
+// 2) Continue probing indices until MAX_CONSECUTIVE_MISSES is hit, up to
+//    MAX_SAFE_INDEX.
+// 3) Try multiple bases and lowercase filenames before giving up a given index.
+export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)) {
   const key = String(tilesetIndex | 0);
-  if (cache.has(key)) return cache.get(key);
+  if (__tileCache.has(key)) return __tileCache.get(key);
 
-  const promise = (async () => {
-    const images = [];
+  const p = (async () => {
     const folder = getTileFolder(tilesetIndex);
 
-    const loadImage = (url) => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = url;
+    const loadOneAtAnyBase = (idx) => new Promise((resolve) => {
+      const idxStr = padIndex(idx);
+      const tryNames = [`tile-${idxStr}.png`, `tile-${idxStr}.PNG`];
+      const tryBases = __tilesBases.slice();
+      let bi = 0, ni = 0;
+      const tryNext = () => {
+        if (bi >= tryBases.length) {
+          // lowercase fallback as very last resort
+          const img = new Image(); img.width = 1; img.height = 1; resolve(img); return;
+        }
+        const base = tryBases[bi];
+        const name = tryNames[ni];
+        const url = `${base}${folder}/${name}`;
+        const img = new Image();
+        img.decoding = 'async';
+        img.onload = () => resolve(img);
+        img.onerror = () => {
+          ni += 1;
+          if (ni >= tryNames.length) { ni = 0; bi += 1; }
+          tryNext();
+        };
+        img.src = url;
+      };
+      tryNext();
     });
 
-    // Step 1: load declared range
-    const initial = getTileCount(tilesetIndex);
-    for (let i = 0; i < initial; i++) {
-      const url = buildTileUrl(tilesetIndex, i);
-      const img = await loadImage(url); // eslint-disable-line no-await-in-loop
-      if (img) images[i] = img;
-    }
+    const imgs = [];
+    const pushIfReal = (img, idx) => {
+      if (img && !(img.width === 1 && img.height === 1)) {
+        imgs[idx] = img;
+        return true;
+      }
+      return false;
+    };
 
-    // Step 2: probe beyond declared count until several misses are found
-    const MAX_SAFE_INDEX = 96;            // classic sets never exceed this
-    const MAX_CONSECUTIVE_MISSES = 8;     // stop after this many misses
-    let idx = initial;
+    // Step 1: load declared range
+    const tasks1 = [];
+    for (let i = 0; i < count; i++) {
+      tasks1.push(loadOneAtAnyBase(i).then(img => pushIfReal(img, i)));
+    }
+    await Promise.all(tasks1);
+
+    // Step 2: probe past gaps
+    const MAX_SAFE_INDEX = 96;              // hard cap: classic sets never exceed this
+    const MAX_CONSECUTIVE_MISSES = 8;       // stop after this many misses in a row
+    let idx = count;
     let misses = 0;
     while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
-      const url = buildTileUrl(tilesetIndex, idx);
-      // eslint-disable-next-line no-await-in-loop
-      const img = await loadImage(url);
-      if (img) {
-        images[idx] = img;
-        misses = 0;
-      } else {
-        misses++;
-      }
+      if (imgs[idx]) { idx++; misses = 0; continue; }
+      /* eslint no-await-in-loop: "off" */
+      const ok = pushIfReal(await loadOneAtAnyBase(idx), idx);
+      misses = ok ? 0 : (misses + 1);
       idx++;
     }
 
-    // Compact array and update stored count so getTileCount reflects reality
-    const out = images.filter(Boolean);
-    TILESETS[tilesetIndex].count = out.length;
+    // Pack into dense array [0..lastReal]
+    const last = imgs.reduceRight((p, v, i) => (p >= 0 ? p : (v ? i : -1)), -1);
+    const out = [];
+    for (let i = 0; i <= last; i++) if (imgs[i]) out.push(imgs[i]);
     return out;
   })();
 
-  cache.set(key, promise);
-  return promise;
+  __tileCache.set(key, p);
+  return p;
 }
