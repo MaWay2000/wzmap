@@ -1,4 +1,13 @@
 // tileset.js — robust tile set utilities for WZ Map Maker
+function normalizeTexPath(name){
+  let n = String(name || '').replace(/\\/g,'/').toLowerCase();
+  n = n.replace(/^\.+\//, '');
+  n = n.replace(/^(images|texpages)\//, '');
+  n = n.replace(/^classic\/texpages\//, '');
+  n = n.replace(/texpages\/texpages\//g, 'texpages/');
+  return n;
+}
+
 // Exports: TILESETS, setTilesBase, getTileCount, getTileFolder,
 //          buildTileUrl, loadAllTiles, clearTileCache
 //
