@@ -1,4 +1,6 @@
 import * as THREE from './three.module.js';
+
+// taisau v1 versija
 function normalizeTexPath(name){
   let n = String(name || '').replace(/\\/g,'/').toLowerCase();
   n = n.replace(/^\.+\//, '');
