@@ -1018,7 +1018,7 @@ async function setTileset(idx) {
   if (idx < 0 || idx >= TILESETS.length) idx = 0;
   tilesetIndex = idx;
   tilesetSelect.value = tilesetIndex;
-  tileImages = await loadAllTiles(tilesetIndex, getTileCount(tilesetIndex), false);
+  tileImages = await loadAllTiles(tilesetIndex);
   renderTexturePalette();
   updateSelectedInfo();
   drawMap3D();
@@ -1152,7 +1152,7 @@ async function loadServerMap(filename) {
   }
 }
 window.loadServerMap = loadServerMap;
-loadAllTiles(tilesetIndex, getTileCount(tilesetIndex), false).then(images => {
+loadAllTiles(tilesetIndex).then(images => {
   tileImages = images;
   showOverlay("Please select map");
   resetCameraTarget(mapW, mapH, threeContainer);
