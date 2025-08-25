@@ -845,7 +845,12 @@ function renderTexturePalette() {
   const palette = document.getElementById('texturePalette');
   if (!palette) return;
   palette.innerHTML = '';
-  const total = getTileCount(tilesetIndex);
+  // Use the actual number of loaded tile images rather than the
+  // expected count from the tileset definition. This ensures we
+  // don't accidentally clip tiles when a tileset provides more (or
+  // fewer) images than the hard-coded metadata. For example the
+  // Rocky Mountains tileset should display all 80 tiles.
+  const total = tileImages.length;
   for (let idx = 0; idx < total; idx++) {
     const img = tileImages[idx];
     const canvas = document.createElement('canvas');
