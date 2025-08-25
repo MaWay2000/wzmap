@@ -96,7 +96,7 @@
     </div>
 
     <div id="showOptions" style="display:flex; gap:8px; margin-bottom:2px;">
-      <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label><label class="toggle-label"><input type="checkbox" id="showPanelIds" checked>Show IDs</label>      
+      <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label>
       <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
 
     </div>
@@ -117,6 +117,11 @@
         <input type="number" id="brushSizeInput" value="1" min="1" max="10" step="1" style="width:60px;">
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
+      <div style="display:block; margin-top:6px; margin-bottom:4px;">
+        <label class="toggle-label" style="display:block;">
+          <input type="checkbox" id="showPanelIds" checked> Show IDs
+        </label>
+      </div>
       <div style="display:block; margin-top:6px; margin-bottom:4px;">
         <label class="toggle-label" style="display:block;">
           <input type="checkbox" id="displayTileTypes"> Show tile types
@@ -197,11 +202,10 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
-          onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';document.head.appendChild(s);"></script>
-  <script src="js/main.js?v=1755914046" defer></script>
+  <script type="module" src="https://cdn.jsdelivr.net/gh/MaWay2000/wzmap@main/js/jszip.min.js"></script>
+  <script type="module" src="https://raw.githubusercontent.com/MaWay2000/wzmap/main/js/game.js"></script>
 
-  <script>
+<script>
     // Minimal UI bridge your game.js can use
     window.UI = {
       setMapFilename(name){ const el=document.getElementById('mapFilename'); if(el){ el.textContent = name || ''; } },
