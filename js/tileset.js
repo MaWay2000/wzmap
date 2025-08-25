@@ -64,9 +64,10 @@ export function clearTileCache(tilesetIndex){
 
 // Core loader. It will:
 // 1) Attempt declared count (0..count-1).
-// 2) Continue probing indices until MAX_CONSECUTIVE_MISSES is hit, up to MAX_SAFE_INDEX.
+// 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
 // 3) Try multiple bases and lowercase/uppercase filenames before giving up a given index.
-export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)){
+export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = true){
+  // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
   const key = String(tilesetIndex|0);
   if (__tileCache.has(key)) return __tileCache.get(key);
 
@@ -120,15 +121,17 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
 
     // Step 2: probe past gaps
     const MAX_SAFE_INDEX = 96;
-    const MAX_CONSECUTIVE_MISSES = 8;
     let idx = count;
-    let misses = 0;
-    while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
-      if (imgs[idx]) { idx++; misses = 0; continue; }
-      /* eslint no-await-in-loop: "off" */
-      const ok = pushIfReal(await loadOneAtAnyBase(idx), idx);
-      misses = ok ? 0 : (misses + 1);
-      idx++;
+    if (includeExtras) {
+      const MAX_CONSECUTIVE_MISSES = 8;
+      let misses = 0;
+      while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
+        if (imgs[idx]) { idx++; misses = 0; continue; }
+        /* eslint no-await-in-loop: "off" */
+        const ok = pushIfReal(await loadOneAtAnyBase(idx), idx);
+        misses = ok ? 0 : (misses + 1);
+        idx++;
+      }
     }
 
     // Pack dense array
