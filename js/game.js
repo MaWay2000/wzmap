@@ -845,7 +845,9 @@ function renderTexturePalette() {
   const palette = document.getElementById('texturePalette');
   if (!palette) return;
   palette.innerHTML = '';
-  tileImages.forEach((img, idx) => {
+  const total = getTileCount(tilesetIndex);
+  for (let idx = 0; idx < total; idx++) {
+    const img = tileImages[idx];
     const canvas = document.createElement('canvas');
     canvas.width = TILE_ICON_SIZE;
     canvas.height = TILE_ICON_SIZE;
@@ -910,7 +912,7 @@ function renderTexturePalette() {
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
     palette.appendChild(imgElem);
-  });
+  }
   const selectedImg = palette.querySelector("img[data-index='" + selectedTileId + "']");
   if (selectedImg) {
     selectedImg.style.outline = '2px solid #8cf';
