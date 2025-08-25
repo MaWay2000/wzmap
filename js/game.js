@@ -301,17 +301,6 @@ if (heightBrushSlider) {
   }
 };
 
-if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', initDom);
-} else {
-  initDom();
-}
-threeContainer.addEventListener('click', handleEditClick);
-  if (threeContainer) {
-    threeContainer.addEventListener('click', handleEditClick);
-  }
-};
-
 function handleEditClick(event) {
   if (activeTab !== 'textures' && activeTab !== 'height' && activeTab !== 'objects') return;
   const rect = threeContainer.getBoundingClientRect();
