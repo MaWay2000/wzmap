@@ -459,7 +459,7 @@ function __old_updateHighlight(event) {
         const tx = tileX + dx;
         const ty = tileY + dy;
         if (tx < 0 || tx >= mapW || ty < 0 || ty >= mapH) continue;
-        const img = tileImages[selectedTileId % getTileCount(tilesetIndex)];
+        const img = tileImages.length ? tileImages[selectedTileId % tileImages.length] : null;
         const canvas2 = document.createElement('canvas');
         canvas2.width = 32;
         canvas2.height = 32;
@@ -1083,11 +1083,11 @@ async function loadMapFile(file) {
         if (ttpName) {
           const ttpData = await zip.files[ttpName].async('uint8array');
           tileTypesById = parseTileTypes(ttpData);
-          if (tileTypesById.length < getTileCount(tilesetIndex)) {
-            for (let i = tileTypesById.length; i < getTileCount(tilesetIndex); i++) tileTypesById[i] = 0;
+          if (tileTypesById.length < tileImages.length) {
+            for (let i = tileTypesById.length; i < tileImages.length; i++) tileTypesById[i] = 0;
           }
         } else {
-          tileTypesById = new Array(getTileCount(tilesetIndex)).fill(0);
+          tileTypesById = new Array(tileImages.length).fill(0);
         }
         resetCameraTarget(mapW, mapH, threeContainer);
         infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + mapFileName + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
@@ -1232,10 +1232,11 @@ function drawMap3D() {
   renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
   const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
   const showHeight = !!(typeof showHeightCheckbox !== "undefined" && showHeightCheckbox && showHeightCheckbox.checked);
+  const tileCount = tileImages.length || getTileCount(tilesetIndex);
   const uniqueTiles = new Set();
   for (let y = 0; y < mapH; ++y) {
     for (let x = 0; x < mapW; ++x) {
-      uniqueTiles.add(mapTiles[y][x] % getTileCount(tilesetIndex));
+      uniqueTiles.add(mapTiles[y][x] % tileCount);
     }
   }
   const tileGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -1286,7 +1287,7 @@ try {
     let count = 0;
     for (let y = 0; y < mapH; ++y) {
       for (let x = 0; x < mapW; ++x) {
-        if ((mapTiles[y][x] % getTileCount(tilesetIndex)) === tileIdx) count++;
+        if ((mapTiles[y][x] % tileCount) === tileIdx) count++;
       }
     }
     if (count === 0) return;
@@ -1294,7 +1295,7 @@ try {
     let i = 0;
     for (let y = 0; y < mapH; ++y) {
       for (let x = 0; x < mapW; ++x) {
-        if ((mapTiles[y][x] % getTileCount(tilesetIndex)) !== tileIdx) continue;
+        if ((mapTiles[y][x] % tileCount) !== tileIdx) continue;
         let height = Math.max(mapHeights[y][x] * HEIGHT_SCALE, 0.01);
         const rotation = (mapRotations[y][x] % 4) * Math.PI / 2;
 const matrix = new THREE.Matrix4();
