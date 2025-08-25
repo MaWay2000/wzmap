@@ -17,21 +17,9 @@ let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
   ? window.TILES_BASE
   : 'classic/texpages/';
 
-// Optional additional bases can be supplied via window.TILES_BASES.
-// By default we only look in a single directory to avoid redundant
-// network requests.
-let __tilesBases = (typeof window !== 'undefined' && Array.isArray(window.TILES_BASES))
-  ? window.TILES_BASES.slice()
-  : [__tilesBase];
-
-export function setTilesBase(pathOrArray){
-  if (Array.isArray(pathOrArray)) {
-    __tilesBases = pathOrArray.slice();
-    __tilesBase = __tilesBases[0] || '';
-  } else {
-    __tilesBase = String(pathOrArray || '');
-    __tilesBases = [__tilesBase];
-  }
+// Configure the single base directory used for tile loading.
+export function setTilesBase(path){
+  __tilesBase = String(path || '');
 }
 
 export function getTileFolder(tilesetIndex){
@@ -63,7 +51,7 @@ export function clearTileCache(tilesetIndex){
 // Core loader. It will:
 // 1) Attempt declared count (0..count-1).
 // 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
-// 3) Try multiple bases and lowercase/uppercase filenames before giving up a given index.
+// 3) Try lowercase/uppercase filenames before giving up a given index.
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = false){
   // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
   const key = String(tilesetIndex|0);
@@ -72,30 +60,24 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
   const p = (async () => {
     const folder = getTileFolder(tilesetIndex);
 
-    const loadOneAtAnyBase = (idx) => new Promise((resolve) => {
+    const loadOne = (idx) => new Promise((resolve) => {
       const p2 = String(idx).padStart(2, '0');
       const candidates = [
         `tile-${p2}.png`, `tile-${p2}.PNG`,
         `tile-${idx}.png`, `tile-${idx}.PNG`,
       ];
-      const tryBases = __tilesBases.slice();
-      let bi = 0, ni = 0;
+      let ni = 0;
       const tryNext = () => {
-        if (bi >= tryBases.length) {
+        if (ni >= candidates.length) {
           // not found anywhere: resolve to a 1x1 marker image
           const img = new Image(); img.width = 1; img.height = 1; resolve(img); return;
         }
-        const base = tryBases[bi];
         const name = candidates[ni];
-        const url = `${base}${folder}/${name}`;
+        const url = `${__tilesBase}${folder}/${name}`;
         const img = new Image();
         img.decoding = 'async';
         img.onload = () => resolve(img);
-        img.onerror = () => {
-          ni += 1;
-          if (ni >= candidates.length) { ni = 0; bi += 1; }
-          tryNext();
-        };
+        img.onerror = () => { ni += 1; tryNext(); };
         img.src = url;
       };
       tryNext();
@@ -113,7 +95,7 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
     // Step 1: load declared range
     const tasks1 = [];
     for (let i = 0; i < count; i++) {
-      tasks1.push(loadOneAtAnyBase(i).then(img => pushIfReal(img, i)));
+      tasks1.push(loadOne(i).then(img => pushIfReal(img, i)));
     }
     await Promise.all(tasks1);
 
@@ -126,7 +108,7 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
       while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
         if (imgs[idx]) { idx++; misses = 0; continue; }
         /* eslint no-await-in-loop: "off" */
-        const ok = pushIfReal(await loadOneAtAnyBase(idx), idx);
+        const ok = pushIfReal(await loadOne(idx), idx);
         misses = ok ? 0 : (misses + 1);
         idx++;
       }
