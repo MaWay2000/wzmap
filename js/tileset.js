@@ -3,9 +3,8 @@
 //          buildTileUrl, loadAllTiles, clearTileCache
 //
 // If a tileset folder only has 78 images, we can’t conjure the rest.
-// This loader will, however, probe past the declared count and try
-// multiple base paths and filename casings so it will load all that
-// actually exist (up to index 96).
+// By default this loader grabs exactly the declared range of tiles
+// and looks only in the configured base folder.
 
 export const TILESETS = [
   { name: 'Arizona',         folder: 'tertilesc1hw-128', count: 78 },
@@ -17,16 +16,12 @@ let __tilesBase = (typeof window !== 'undefined' && window.TILES_BASE)
   ? window.TILES_BASE
   : 'classic/texpages/';
 
-// Optional fallbacks. You can override by setting window.TILES_BASES before load.
+// Optional additional bases can be supplied via window.TILES_BASES.
+// By default we only look in a single directory to avoid redundant
+// network requests.
 let __tilesBases = (typeof window !== 'undefined' && Array.isArray(window.TILES_BASES))
   ? window.TILES_BASES.slice()
-  : [
-      __tilesBase,
-      'classic/texpages/',
-      'classic/texpages/texpages/',
-      'texpages/',
-      'images/'
-    ];
+  : [__tilesBase];
 
 export function setTilesBase(pathOrArray){
   if (Array.isArray(pathOrArray)) {
@@ -51,7 +46,9 @@ export function getTileCount(tilesetIndex){
 export function buildTileUrl(tilesetIndex, idx, baseOverride){
   const folder = getTileFolder(tilesetIndex);
   const base = baseOverride || __tilesBase;
-  const p2 = String(idx).padStart(2, '0');
+  const max = getTileCount(tilesetIndex) - 1;
+  const clamped = Math.max(0, Math.min(max, idx|0));
+  const p2 = String(clamped).padStart(2, '0');
   return `${base}${folder}/tile-${p2}.png`;
 }
 
@@ -66,7 +63,11 @@ export function clearTileCache(tilesetIndex){
 // 1) Attempt declared count (0..count-1).
 // 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
 // 3) Try multiple bases and lowercase/uppercase filenames before giving up a given index.
+<<<<<<< ours
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = true){
+=======
+export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = false){
+>>>>>>> theirs
   // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
   const key = String(tilesetIndex|0);
   if (__tileCache.has(key)) return __tileCache.get(key);
