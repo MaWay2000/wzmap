@@ -1,4 +1,5 @@
 import * as THREE from './three.module.js';
+//test
 function normalizeTexPath(name){
   let n = String(name || '').replace(/\\/g,'/').toLowerCase();
   n = n.replace(/^\.+\//, '');
