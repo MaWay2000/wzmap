@@ -39,12 +39,9 @@ export function clearTileCache(tilesetIndex){
   else __tileCache.clear();
 }
 
-// Core loader. It will:
-// 1) Attempt declared count (0..count-1).
-// 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
-// 3) Try padded and unpadded filenames before giving up a given index.
-export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = false){
-  // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
+// Core loader. It will try the declared range (0..count-1) using padded and
+// unpadded filenames. No probing beyond the declared range is performed.
+export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)){
   const key = String(tilesetIndex|0);
   if (__tileCache.has(key)) return __tileCache.get(key);
 
@@ -83,35 +80,18 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
       return false;
     };
 
-    // Step 1: load declared range
-    const tasks1 = [];
+    // Load declared range
+    const tasks = [];
     for (let i = 0; i < count; i++) {
-      tasks1.push(loadOne(i).then(img => pushIfReal(img, i)));
+      tasks.push(loadOne(i).then(img => pushIfReal(img, i)));
     }
-    await Promise.all(tasks1);
+    await Promise.all(tasks);
 
-    // Step 2: probe past gaps
-    const MAX_SAFE_INDEX = 96;
-    let idx = count;
-    if (includeExtras) {
-      const MAX_CONSECUTIVE_MISSES = 8;
-      let misses = 0;
-      while (idx <= MAX_SAFE_INDEX && misses < MAX_CONSECUTIVE_MISSES) {
-        if (imgs[idx]) { idx++; misses = 0; continue; }
-        /* eslint no-await-in-loop: "off" */
-        const ok = pushIfReal(await loadOne(idx), idx);
-        misses = ok ? 0 : (misses + 1);
-        idx++;
-      }
-    }
-
-    // Pack dense array
-    const last = imgs.reduceRight((p, v, i) => (p >= 0 ? p : (v ? i : -1)), -1);
     const out = [];
-    for (let i = 0; i <= last; i++) if (imgs[i]) out.push(imgs[i]);
+    for (let i = 0; i < count; i++) if (imgs[i]) out.push(imgs[i]);
 
     try {
-      console.log(`[tileset] ${folder} -> loaded ${out.length} tiles (requested 0..${Math.min(idx-1, MAX_SAFE_INDEX)})`);
+      console.log(`[tileset] ${folder} -> loaded ${out.length} tiles (declared count ${count})`);
     } catch {}
     return out;
   })();
