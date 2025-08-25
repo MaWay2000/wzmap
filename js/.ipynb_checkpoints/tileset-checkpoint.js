@@ -51,30 +51,47 @@ export function clearTileCache(tilesetIndex) {
   __tileCache.delete(String(tilesetIndex | 0));
 }
 
+// Load tiles for a tileset, automatically grabbing any extra images that exist
+// beyond the expected count. This lets tilesets expose more tiles than the
+// metadata might claim (for example the Urban and Rocky Mountains sets).
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)) {
-  const key = String(tilesetIndex | 0) + ':' + (count | 0);
+  const key = String(tilesetIndex | 0);
   if (__tileCache.has(key)) return __tileCache.get(key);
 
-  const p = new Promise((resolve) => {
-    const images = new Array(count);
-    let done = 0;
+  const p = (async () => {
+    const images = [];
 
-    function finish() { if (done >= count) resolve(images); }
-
-    for (let i = 0; i < count; i++) {
+    // helper to load a single tile image, resolving with a placeholder on
+    // error so array indices remain stable
+    const loadOne = (idx) => new Promise((resolve) => {
       const img = new Image();
       img.decoding = 'async';
-      img.src = buildTileUrl(tilesetIndex, i);
-
-      img.onload = () => { images[i] = img; done++; finish(); };
+      img.onload = () => resolve(img);
       img.onerror = () => {
-        // keep spot with a transparent 1x1 if fetch fails
         const fail = new Image();
         fail.width = 1; fail.height = 1;
-        images[i] = fail; done++; finish();
+        resolve(fail);
       };
+      img.src = buildTileUrl(tilesetIndex, idx);
+    });
+
+    // load the expected number of tiles in parallel
+    const initial = [];
+    for (let i = 0; i < count; i++) {
+      initial.push(loadOne(i).then(img => { images[i] = img; }));
     }
-  });
+    await Promise.all(initial);
+
+    // attempt to load any additional tiles until a request fails
+    for (let i = count; ; i++) {
+      const img = await loadOne(i);
+      // if the placeholder came back (width 1), assume no more tiles
+      if (img.width === 1 && img.height === 1) break;
+      images[i] = img;
+    }
+
+    return images;
+  })();
 
   __tileCache.set(key, p);
   return p;
