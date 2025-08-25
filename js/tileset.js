@@ -42,7 +42,7 @@ export function clearTileCache(tilesetIndex){
 // Core loader. It will:
 // 1) Attempt declared count (0..count-1).
 // 2) Optionally probe indices past the declared range (up to MAX_SAFE_INDEX).
-// 3) Try lowercase/uppercase filenames before giving up a given index.
+// 3) Try padded and unpadded filenames before giving up a given index.
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex), includeExtras = false){
   // Set includeExtras=false to load exactly `count` tiles without probing past gaps.
   const key = String(tilesetIndex|0);
@@ -54,8 +54,8 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
     const loadOne = (idx) => new Promise((resolve) => {
       const p2 = String(idx).padStart(2, '0');
       const candidates = [
-        `tile-${p2}.png`, `tile-${p2}.PNG`,
-        `tile-${idx}.png`, `tile-${idx}.PNG`,
+        `tile-${p2}.png`,
+        `tile-${idx}.png`,
       ];
       let ni = 0;
       const tryNext = () => {
