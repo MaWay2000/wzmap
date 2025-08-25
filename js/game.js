@@ -1,7 +1,6 @@
 import * as THREE from './three.module.js';
 
 // https://github.dev/MaWay2000/wzmap/tree/v.1.0
-=======
 
 
 // taisau v1 versija
