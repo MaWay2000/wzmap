@@ -54,6 +54,7 @@ export function clearTileCache(tilesetIndex) {
 // Load tiles for a tileset, automatically grabbing any extra images that exist
 // beyond the expected count. This lets tilesets expose more tiles than the
 // metadata might claim (for example the Urban and Rocky Mountains sets).
+
 export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetIndex)) {
   const key = String(tilesetIndex | 0);
   if (__tileCache.has(key)) return __tileCache.get(key);
@@ -61,8 +62,9 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
   const p = (async () => {
     const images = [];
 
-    // helper to load a single tile image, resolving with a placeholder on
-    // error so array indices remain stable
+    const isPlaceholder = (img) => (img && img.width === 1 && img.height === 1);
+
+    // helper to load a single tile image, resolving with a placeholder on error
     const loadOne = (idx) => new Promise((resolve) => {
       const img = new Image();
       img.decoding = 'async';
@@ -75,19 +77,25 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
       img.src = buildTileUrl(tilesetIndex, idx);
     });
 
-    // load the expected number of tiles in parallel
-    const initial = [];
+    // Load the expected range first (0..count-1)
     for (let i = 0; i < count; i++) {
-      initial.push(loadOne(i).then(img => { images[i] = img; }));
+      images[i] = await loadOne(i);
     }
-    await Promise.all(initial);
 
-    // attempt to load any additional tiles until a request fails
-    for (let i = count; ; i++) {
+    // Probe for extras but DON'T stop at the first gap.
+    // Keep going until we hit a run of consecutive misses.
+    const MAX_PROBE = 96;           // hard safety cap
+    const MAX_CONSECUTIVE_MISSES = 8;
+    let consecutiveMisses = 0;
+    for (let i = count; i < MAX_PROBE; i++) {
       const img = await loadOne(i);
-      // if the placeholder came back (width 1), assume no more tiles
-      if (img.width === 1 && img.height === 1) break;
       images[i] = img;
+      if (isPlaceholder(img)) {
+        consecutiveMisses++;
+        if (consecutiveMisses >= MAX_CONSECUTIVE_MISSES) break;
+      } else {
+        consecutiveMisses = 0; // reset when we find a valid tile
+      }
     }
 
     return images;
