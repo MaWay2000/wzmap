@@ -278,6 +278,10 @@
         urlFrame.addEventListener('load', () => {
           const src = urlFrame.src;
           if(/\.(wz|zip|map|json)(\?|#|$)/i.test(src)){
+            // prevent the browser from downloading the map
+            urlFrame.src = 'about:blank';
+            // copy the URL to clipboard if possible
+            try{ navigator.clipboard?.writeText(src); }catch(e){}
             urlPopup.style.display = 'none';
             fileListDiv.classList.add('hidden');
             if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
