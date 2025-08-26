@@ -1,22 +1,6 @@
 import * as THREE from './three.module.js';
 
-// https://github.dev/MaWay2000/wzmap/tree/v.1.0
-
-
-// taisau v1 versija
-
-//test
-//test2
-// https://github.com/MaWay2000/wzmap/edit/main/js/game.js#L3C7
-// https://github.dev/MaWay2000/wzmap/blob/main/js/game.js cia testinu
-
-// sudas kazkoks
-
-// aaa main
-
-/// cia editinu: https://github.com/MaWay2000/wzmap/edit/main/js/game.js
-/// tada paleidziu purge https://purge.jsdelivr.net/gh/MaWay2000/wzmap@main/js/game.js
-
+// nu dabar tai testas !
 function normalizeTexPath(name){
   let n = String(name || '').replace(/\\/g,'/').toLowerCase();
   n = n.replace(/^\.+\//, '');
