@@ -1,6 +1,7 @@
 import * as THREE from './three.module.js';
 
 // nu dabar tai testas !
+// https://github.dev/MaWay2000/wzmap 1013
 function normalizeTexPath(name){
   let n = String(name || '').replace(/\\/g,'/').toLowerCase();
   n = n.replace(/^\.+\//, '');
