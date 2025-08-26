@@ -32,13 +32,16 @@
     #uiBar.hidden { display:none; }
     #mapFilename { color:#8cf; }
     #fileList {
-      position: fixed; left:0; top:0; width:220px; height:100vh;
+      position: fixed; left:0; top:0; width:360px; height:100vh;
       background: rgba(24,32,48,0.95);
       padding:8px; overflow-y:auto;
       z-index:60;
     }
     #fileList.hidden{ display:none; }
-    #fileList div{ padding:4px; cursor:pointer; border-bottom:1px solid var(--border); }
+    #fileList div{
+      padding:4px; cursor:pointer; border-bottom:1px solid var(--border);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
     #fileList div:hover{ background:#283445; }
     #info {
       position: absolute; right: 8px; bottom: 8px;
@@ -223,12 +226,16 @@
       const overlayEl = document.getElementById('overlayMsg');
       const serverBtn = document.getElementById('overlayServerBtn');
       if(serverBtn){
+        const fileListWidth = 360;
         serverBtn.addEventListener('click', () => {
           fileListDiv.classList.toggle('hidden');
           if(fileListDiv.classList.contains('hidden')){
             if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
           }else{
-            if(overlayEl){ overlayEl.style.left='220px'; overlayEl.style.width='calc(100vw - 220px)'; }
+            if(overlayEl){
+              overlayEl.style.left = fileListWidth + 'px';
+              overlayEl.style.width = `calc(100vw - ${fileListWidth}px)`;
+            }
           }
         });
       }
