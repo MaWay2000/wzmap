@@ -1165,6 +1165,21 @@ async function loadServerMap(filename) {
   }
 }
 window.loadServerMap = loadServerMap;
+
+async function loadRemoteMap(url) {
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const blob = await resp.blob();
+    const name = url.split('/').pop() || 'remote.wz';
+    const file = new File([blob], name);
+    await loadMapFile(file);
+  } catch (err) {
+    infoDiv.innerHTML = '<b style="color:red">Failed to load remote map!</b>';
+    console.error(err);
+  }
+}
+window.loadRemoteMap = loadRemoteMap;
 loadAllTiles(tilesetIndex).then(images => {
   tileImages = images;
   showOverlay("Please select map");

@@ -201,13 +201,14 @@
       <div id="overlayText" style="font-size:42px;color:#ddd;letter-spacing:1px;margin-bottom:16px;">Please select map</div>
       <label for="wzLoader" id="overlayBrowseBtn" class="overlay-btn">Browse map…</label>
       <button id="overlayServerBtn" class="overlay-btn" style="margin-left:10px;">Browse server maps</button>
+      <button id="overlayUrlBtn" class="overlay-btn" style="margin-left:10px;">Open map URL</button>
       <input type="file" id="wzLoader" accept=".wz,.zip,.7z,.map,.gam,.json" style="position:absolute;left:-9999px;width:0.1px;height:0.1px;opacity:0;">
       <div style="margin-top:10px;font-size:14px;color:#aab;">Please wait, it can take some time…</div>
     </div>
   </div>
 
-  <script type="module" src="https://cdn.jsdelivr.net/gh/MaWay2000/wzmap@main/js/jszip.min.js"></script>
-  <script type="module" src="https://maway2000.github.io/wzmap/js/game.js"></script>
+  <script type="module" src="js/jszip.min.js"></script>
+  <script type="module" src="js/game.js"></script>
 
 <script>
     // Minimal UI bridge your game.js can use
@@ -225,6 +226,7 @@
       const fileListDiv = document.getElementById('fileList');
       const overlayEl = document.getElementById('overlayMsg');
       const serverBtn = document.getElementById('overlayServerBtn');
+      const urlBtn = document.getElementById('overlayUrlBtn');
       if(serverBtn){
         const fileListWidth = 360;
         serverBtn.addEventListener('click', () => {
@@ -236,6 +238,25 @@
               overlayEl.style.left = fileListWidth + 'px';
               overlayEl.style.width = `calc(100vw - ${fileListWidth}px)`;
             }
+          }
+        });
+      }
+      if(urlBtn){
+        urlBtn.addEventListener('click', async () => {
+          const url = prompt('Enter direct map URL (.wz file)');
+          if(!url) return;
+          fileListDiv.classList.add('hidden');
+          if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
+          window.UI.hideOverlay();
+          window.UI.showTopBar(true);
+          window.UI.setMapFilename(url.split('/').pop());
+          try{
+            await window.loadRemoteMap(url);
+          }catch(err){
+            console.error('Map load error:', err);
+            window.UI.showOverlay();
+            window.UI.showTopBar(false);
+            window.UI.setMapFilename('');
           }
         });
       }
@@ -272,6 +293,20 @@
         }
       }
       loadServerList();
+
+      const params = new URLSearchParams(location.search);
+      const remoteUrl = params.get('url');
+      if(remoteUrl){
+        window.UI.hideOverlay();
+        window.UI.showTopBar(true);
+        window.UI.setMapFilename(remoteUrl.split('/').pop());
+        window.loadRemoteMap(remoteUrl).catch(err => {
+          console.error('Map load error:', err);
+          window.UI.showOverlay();
+          window.UI.showTopBar(false);
+          window.UI.setMapFilename('');
+        });
+      }
 
       // When user picks a file: hide overlay, notify the app
       input.addEventListener('change', async (e) => {
