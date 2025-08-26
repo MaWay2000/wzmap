@@ -31,14 +31,21 @@
     }
     #uiBar.hidden { display:none; }
     #mapFilename { color:#8cf; }
-    #fileList, #info {
-      position: absolute; left: 8px; bottom: 8px;
-      background: rgba(24,32,48,0.8);
-      padding:8px;
-      border-radius: 5px;
-      z-index: 50;
+    #fileList {
+      position: fixed; left:0; top:0; width:220px; height:100vh;
+      background: rgba(24,32,48,0.95);
+      padding:8px; overflow-y:auto;
+      z-index:60;
     }
-    #info { left: auto; right: 8px; }
+    #fileList.hidden{ display:none; }
+    #fileList div{ padding:4px; cursor:pointer; border-bottom:1px solid var(--border); }
+    #fileList div:hover{ background:#283445; }
+    #info {
+      position: absolute; right: 8px; bottom: 8px;
+      background: rgba(24,32,48,0.8);
+      padding:8px; border-radius:5px;
+      z-index:50;
+    }
 
     /* Left editor panel */
     #editPanel {
@@ -59,7 +66,7 @@
 
     /* Overlay (initial file chooser) */
     #overlayMsg {
-      position: fixed; left:0; top:0; width:100vw; height:100vh;
+      position: fixed; left:220px; top:0; width:calc(100vw - 220px); height:100vh;
       display: flex; align-items: center; justify-content: center;
       font-size: 2.5rem; color: #ccc; pointer-events: auto; z-index: 100;
       background: rgba(21,30,40,0.98); text-shadow: 0 2px 10px #000, 0 0 1px #fff;
@@ -73,8 +80,7 @@
   
     /* Hide panel while overlay is shown */
     body.overlay-open #editPanel {
-      position:absolute; left:0; top:0; width:280px; height:100vh;
-      background: rgba(24,32,48,0.95); padding:6px; z-index:12; overflow-y:auto;
+      display:none;
     }
 
   </style>
@@ -99,7 +105,6 @@
       <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label>
       <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Show IDs</label>
       <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
-
     </div>
 
     <!-- TILES TAB -->
@@ -192,7 +197,6 @@
     <div style="text-align:center;">
       <div id="overlayText" style="font-size:42px;color:#ddd;letter-spacing:1px;margin-bottom:16px;">Please select map</div>
       <label for="wzLoader" id="overlayBrowseBtn" class="overlay-btn">Browse map…</label>
-      <a id="overlayServerBtn" class="overlay-btn" style="margin-left:8px;" href="maps/index.html" target="_blank">Server maps…</a>
       <input type="file" id="wzLoader" accept=".wz,.zip,.7z,.map,.gam,.json" style="position:absolute;left:-9999px;width:0.1px;height:0.1px;opacity:0;">
       <div style="margin-top:10px;font-size:14px;color:#aab;">Please wait, it can take some time…</div>
     </div>
@@ -214,6 +218,8 @@
     document.addEventListener('DOMContentLoaded', function(){
       var btn = document.getElementById('overlayBrowseBtn');
       var input = document.getElementById('wzLoader');
+      const fileListDiv = document.getElementById('fileList');
+      const overlayEl = document.getElementById('overlayMsg');
       if (btn && input){
         btn.addEventListener('click', function(ev){
           ev.preventDefault();
@@ -221,9 +227,34 @@
           try { input.click(); } catch(e) {}
         });
       }
-        // server maps button now links directly to maps/index.html
-        // which loads filelist.txt and displays it as a browsable list
-        // so no additional JS handling is required here
+      async function loadServerList(){
+        try{
+          const resp = await fetch('maps/filelist.txt');
+          if(!resp.ok) throw new Error('HTTP ' + resp.status);
+          const text = await resp.text();
+          const files = text.split(/\r?\n/).filter(f => f.trim() !== '');
+          fileListDiv.innerHTML = '';
+          files.forEach(file => {
+            const div = document.createElement('div');
+            div.textContent = file;
+            div.addEventListener('click', () => {
+              window.UI.hideOverlay();
+              fileListDiv.classList.add('hidden');
+              if (overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
+              fileListDiv.classList.add('hidden');
+              if (overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
+              window.UI.showTopBar(true);
+              window.UI.setMapFilename(file);
+              window.loadServerMap(file);
+            });
+            fileListDiv.appendChild(div);
+          });
+        }catch(err){
+          fileListDiv.textContent = 'Error loading map list.';
+          console.error(err);
+        }
+      }
+      loadServerList();
 
       // When user picks a file: hide overlay, notify the app
       input.addEventListener('change', async (e) => {
