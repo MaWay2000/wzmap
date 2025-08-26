@@ -1,8 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Folder Explorer Landing Page</title>
+<h2>File List</h2>
+<ul id="fileList">
+  <li>Loading files...</li>
+</ul>
+
+<p style="font-size:0.9em;color:#90a4b8;">Click a map to copy its link and view it in the browser.</p>
+      files.forEach(file => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = file;
+        link.textContent = file;
+        link.target = "_blank";
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const url = link.href;
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).catch(err => console.error('Clipboard error:', err));
+          }
+          window.open('../index.html?url=' + encodeURIComponent(url), '_blank');
+        });
 <style>
   body { font-family: Arial, sans-serif; background: #151e28; color: #dde; margin: 0; padding: 20px; }
   h1 { color: #4da3ff; }
