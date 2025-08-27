@@ -99,12 +99,6 @@
         background:#2c7be5; color:#fff; border:none; border-radius:4px;
         padding:6px 10px; cursor:pointer;
       }
-      #urlPopupLoad{
-        position:absolute; top:8px; left:8px; z-index:201;
-        background:#2c7be5; color:#fff; border:none; border-radius:4px;
-        padding:6px 10px; cursor:pointer;
-      }
-
   </style>
 </head>
 <body class="overlay-open">
@@ -229,7 +223,6 @@
   <!-- Remote URL popup -->
   <div id="urlPopup">
     <button id="urlPopupClose">Close</button>
-    <button id="urlPopupLoad">Open copied link</button>
     <iframe id="urlPopupFrame" src=""></iframe>
   </div>
 
@@ -256,16 +249,26 @@
       const urlPopup = document.getElementById('urlPopup');
       const urlFrame = document.getElementById('urlPopupFrame');
       const urlClose = document.getElementById('urlPopupClose');
-      const urlLoad = document.getElementById('urlPopupLoad');
-      let pendingMapUrl = '';
+      const handleMapUrl = (src, name) => {
+        if(!src) return;
+        urlFrame.src = '';
+        urlPopup.style.display = 'none';
+        fileListDiv.classList.add('hidden');
+        if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
+        window.UI.hideOverlay();
+        window.UI.showTopBar(true);
+        window.UI.setMapFilename((name || src.split('/').pop()));
+        window.loadRemoteMap(src).catch(err => {
+          console.error('Map load error:', err);
+          window.UI.showOverlay();
+          window.UI.showTopBar(false);
+          window.UI.setMapFilename('');
+        });
+      };
       window.addEventListener('message', ev => {
         const data = ev.data;
         if(data && data.type === 'map-select' && data.url){
-          pendingMapUrl = data.url;
-          if(urlLoad){
-            const fname = data.name || data.url.split('/').pop();
-            urlLoad.textContent = 'Load ' + fname;
-          }
+          handleMapUrl(data.url, data.name);
         }
       });
       if(serverBtn){
@@ -293,33 +296,6 @@
             urlPopup.style.display = 'none';
           });
         }
-        if(urlLoad){
-          urlLoad.addEventListener('click', async () => {
-            let src = '';
-            if(pendingMapUrl){
-              src = pendingMapUrl;
-              pendingMapUrl = '';
-              urlLoad.textContent = 'Open copied link';
-            }else{
-              try{ src = (await navigator.clipboard.readText() || '').trim(); }catch(e){ console.error('Clipboard read error:', e); }
-            }
-            if(/\.(wz|zip|map|json)(\?|#|$)/i.test(src)){
-              urlFrame.src = '';
-              urlPopup.style.display = 'none';
-              fileListDiv.classList.add('hidden');
-              if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
-              window.UI.hideOverlay();
-              window.UI.showTopBar(true);
-              window.UI.setMapFilename(src.split('/').pop());
-              window.loadRemoteMap(src).catch(err => {
-                console.error('Map load error:', err);
-                window.UI.showOverlay();
-                window.UI.showTopBar(false);
-                window.UI.setMapFilename('');
-              });
-            }
-          });
-        }
         urlFrame.addEventListener('load', () => {
           const src = urlFrame.src;
           if(/\.(wz|zip|map|json)(\?|#|$)/i.test(src)){
@@ -327,18 +303,7 @@
             urlFrame.src = 'about:blank';
             // copy the URL to clipboard if possible
             try{ navigator.clipboard?.writeText(src); }catch(e){}
-            urlPopup.style.display = 'none';
-            fileListDiv.classList.add('hidden');
-            if(overlayEl){ overlayEl.style.left='0'; overlayEl.style.width='100vw'; }
-            window.UI.hideOverlay();
-            window.UI.showTopBar(true);
-            window.UI.setMapFilename(src.split('/').pop());
-            window.loadRemoteMap(src).catch(err => {
-              console.error('Map load error:', err);
-              window.UI.showOverlay();
-              window.UI.showTopBar(false);
-              window.UI.setMapFilename('');
-            });
+            handleMapUrl(src);
           }
         });
       }

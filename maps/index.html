@@ -20,7 +20,7 @@
   <p>
     <a href="index.php" target="_blank">Scan Folder (index.php)</a>
   </p>
-  <p style="font-size:0.9em;color:#90a4b8;">Use Download to save a map or Load to preview it in the browser.</p>
+  <p style="font-size:0.9em;color:#90a4b8;">Use Download to save a map or Load map to preview it in the browser.</p>
   <h2>File List</h2>
   <ul id="fileList">
     <li>Loading files...</li>
@@ -45,7 +45,7 @@
           downloadLink.className = 'btn';
 
           const loadBtn = document.createElement('button');
-          loadBtn.textContent = 'Load';
+          loadBtn.textContent = 'Load map';
           loadBtn.className = 'btn';
           loadBtn.addEventListener('click', () => {
             const url = downloadLink.href;
@@ -74,10 +74,7 @@
     </script>
   </body>
 </html>
-  }
-
-  loadFileList();
-</script>
+
 
 </body>
 </html>
