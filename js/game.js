@@ -1173,12 +1173,9 @@ function resolveMapUrl(url) {
       u.hostname === 'github.com' &&
       /^\/[^/]+\/[^/]+\/releases\/download\//.test(u.pathname)
     ) {
-      const parts = u.pathname.split('/');
-      const owner = parts[1];
-      const repo = parts[2];
-      const tag = parts[4];
-      const file = parts.slice(5).join('/');
-      return `https://raw.githubusercontent.com/${owner}/${repo}/${tag}/${file}`;
+      // Release assets aren't available on raw.githubusercontent.com.
+      // Use the original GitHub release URL so the file downloads correctly.
+      return u.href;
     }
   } catch (e) {
     console.error(e);
