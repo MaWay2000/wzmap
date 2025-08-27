@@ -155,7 +155,7 @@ const initDom = () => {
   const brushSlider = document.getElementById('brushSizeSlider');
   const setBrush = (v) => {
     const n = parseInt(v, 10);
-    brushSize = isNaN(n) || n < 1 ? 1 : n;
+    brushSize = isNaN(n) ? 1 : Math.min(Math.max(n, 1), 255);
     if (brushInput) brushInput.value = brushSize;
     if (brushSlider) brushSlider.value = String(brushSize);
     if (lastMouseEvent) updateHighlight(lastMouseEvent);
