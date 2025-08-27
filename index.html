@@ -215,8 +215,10 @@
       <label for="wzLoader" id="overlayBrowseBtn" class="overlay-btn">Browse map…</label>
       <button id="overlayServerBtn" class="overlay-btn" style="margin-left:10px;">Browse server maps</button>
       <button id="overlayUrlBtn" class="overlay-btn" style="margin-left:10px;">Open map URL</button>
+      <button id="overlayArenaBtn" class="overlay-btn" style="margin-left:10px;">Load 2p Arena</button>
       <input type="file" id="wzLoader" accept=".wz,.zip,.7z,.map,.gam,.json" style="position:absolute;left:-9999px;width:0.1px;height:0.1px;opacity:0;">
       <div style="margin-top:10px;font-size:14px;color:#aab;">Please wait, it can take some time…</div>
+      <div style="margin-top:6px;font-size:14px;color:#aab;">If a remote map fails to load, proxy the request.</div>
     </div>
   </div>
 
@@ -246,6 +248,7 @@
       const overlayEl = document.getElementById('overlayMsg');
       const serverBtn = document.getElementById('overlayServerBtn');
       const urlBtn = document.getElementById('overlayUrlBtn');
+      const arenaBtn = document.getElementById('overlayArenaBtn');
       const urlPopup = document.getElementById('urlPopup');
       const urlFrame = document.getElementById('urlPopupFrame');
       const urlClose = document.getElementById('urlPopupClose');
@@ -376,6 +379,11 @@
           } else {
             injectLoadButtons(urlFrame);
           }
+        });
+      }
+      if(arenaBtn){
+        arenaBtn.addEventListener('click', () => {
+          handleMapUrl('https://github.com/Warzone2100/maps-2p/releases/download/v1/2p-Arena_22.wz', '2p-Arena_22.wz');
         });
       }
       if (btn && input){
