@@ -343,12 +343,20 @@
         });
       }
       if(urlBtn && urlPopup && urlFrame){
-        urlBtn.addEventListener('click', () => {
+        urlBtn.addEventListener('click', async () => {
           urlPopup.style.display = 'block';
-          // Load the external map browser so users can preview maps with a Load button
-          urlFrame.src = 'https://maps.wz2100.net/#/';
+          try{
+            const resp = await fetch('https://maps.wz2100.net/');
+            if(!resp.ok) throw new Error('HTTP ' + resp.status);
+            let html = await resp.text();
+            html = html.replace(/(src|href)="\//g, '$1="https://maps.wz2100.net/');
+            urlFrame.srcdoc = html;
+          }catch(err){
+            // Fallback if fetching fails (e.g. CORS)
+            urlFrame.src = 'https://maps.wz2100.net/#/';
+          }
         });
-          if(urlClose){
+        if(urlClose){
           urlClose.addEventListener('click', closePopup);
         }
         urlFrame.addEventListener('load', () => {
@@ -356,11 +364,10 @@
           if(/\.(wz|zip|map|json)(\?|#|$)/i.test(src)){
             // prevent the browser from downloading the map
             urlFrame.src = 'about:blank';
-            // copy the URL to clipboard if possible
             try{ navigator.clipboard?.writeText(src); }catch(e){}
             handleMapUrl(src);
           } else {
-            if(src !== 'about:blank') injectLoadButtons(urlFrame);
+            injectLoadButtons(urlFrame);
           }
         });
       }
