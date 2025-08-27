@@ -271,6 +271,43 @@
           handleMapUrl(data.url, data.name);
         }
       });
+
+      // Inject "Load" buttons into the external map browser so maps can be
+      // previewed in this page without downloading.
+      const injectLoadButtons = (frame) => {
+        let doc;
+        try {
+          doc = frame.contentDocument;
+        } catch (err) {
+          return; // cross-origin, bail out
+        }
+        if (!doc || !doc.body) return;
+
+        const addButtons = () => {
+          doc.querySelectorAll('a[href]:not([data-load-btn])').forEach(link => {
+            const href = link.href;
+            if(!href || !/\.wz($|[?#])/i.test(href)) return;
+            if(!/download/i.test(link.textContent)) return;
+            link.setAttribute('data-load-btn', 'true');
+            const loadBtn = doc.createElement('a');
+            loadBtn.textContent = 'Load';
+            loadBtn.className = link.className || '';
+            loadBtn.style.marginLeft = '4px';
+            loadBtn.href = '#';
+            loadBtn.addEventListener('click', (ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+              try { navigator.clipboard?.writeText(href); } catch(e) {}
+              const name = link.getAttribute('download') || link.textContent.trim();
+              window.parent.postMessage({ type: 'map-select', url: href, name }, '*');
+            });
+            link.insertAdjacentElement('afterend', loadBtn);
+          });
+        };
+
+        addButtons();
+        new MutationObserver(addButtons).observe(doc.body, { childList: true, subtree: true });
+      };
       if(serverBtn){
         const fileListWidth = 360;
         serverBtn.addEventListener('click', () => {
@@ -305,6 +342,8 @@
             // copy the URL to clipboard if possible
             try{ navigator.clipboard?.writeText(src); }catch(e){}
             handleMapUrl(src);
+          } else {
+            if(src !== 'about:blank') injectLoadButtons(urlFrame);
           }
         });
       }
