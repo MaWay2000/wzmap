@@ -342,16 +342,22 @@
           }
         });
       }
-      if(urlBtn && urlPopup && urlFrame){
         urlBtn.addEventListener('click', async () => {
           urlPopup.style.display = 'block';
-          try{
+          try {
             const resp = await fetch('https://maps.wz2100.net/');
-            if(!resp.ok) throw new Error('HTTP ' + resp.status);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
             let html = await resp.text();
-            html = html.replace(/(src|href)="\//g, '$1="https://maps.wz2100.net/');
+            html = html.replace(
+              /<head>/i,
+              '<head><base href="https://maps.wz2100.net/"><meta name="referrer" content="no-referrer">'
+            );
+            html = html.replace(
+              /(src|href)="\//g,
+              '$1="https://maps.wz2100.net/'
+            );
             urlFrame.srcdoc = html;
-          }catch(err){
+          } catch (err) {
             // Fallback if fetching fails (e.g. CORS)
             urlFrame.src = 'https://maps.wz2100.net/#/';
           }
