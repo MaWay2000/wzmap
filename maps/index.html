@@ -11,6 +11,8 @@
     ul { list-style: none; padding: 0; }
     li { margin-bottom: 5px; }
     .file-type { font-size: 0.9em; color: #90a4b8; margin-left: 8px; }
+    .btn { margin-left: 8px; padding: 2px 6px; background:#283445; color:#dde; border:1px solid #435066; border-radius:4px; cursor:pointer; }
+    .btn:hover { background:#435066; }
   </style>
 </head>
 <body>
@@ -18,7 +20,7 @@
   <p>
     <a href="index.php" target="_blank">Scan Folder (index.php)</a>
   </p>
-  <p style="font-size:0.9em;color:#90a4b8;">Click a map to copy its link and view it in the browser.</p>
+  <p style="font-size:0.9em;color:#90a4b8;">Use Download to save a map or Open to preview it in the browser.</p>
   <h2>File List</h2>
   <ul id="fileList">
     <li>Loading files...</li>
@@ -34,23 +36,34 @@
         fileListContainer.innerHTML = '';
         files.forEach(file => {
           const li = document.createElement('li');
-          const link = document.createElement('a');
-          link.href = file;
-          link.textContent = file;
-          link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const url = link.href;
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = file;
+
+          const downloadLink = document.createElement('a');
+          downloadLink.href = file;
+          downloadLink.textContent = 'Download';
+          downloadLink.className = 'btn';
+
+          const openBtn = document.createElement('button');
+          openBtn.textContent = 'Open';
+          openBtn.className = 'btn';
+          openBtn.addEventListener('click', () => {
+            const url = downloadLink.href;
             if (navigator.clipboard) {
               navigator.clipboard.writeText(url).catch(err => console.error('Clipboard error:', err));
             }
             window.open('../index.html?url=' + encodeURIComponent(url), '_blank');
           });
+
           const ext = file.split('.').pop();
           const span = document.createElement('span');
           span.textContent = ext;
           span.className = 'file-type';
-          li.appendChild(link);
+
+          li.appendChild(nameSpan);
           li.appendChild(span);
+          li.appendChild(downloadLink);
+          li.appendChild(openBtn);
           fileListContainer.appendChild(li);
         });
       } catch (err) {
@@ -63,21 +76,6 @@
 </body>
 </html>
 
-      const files = text.split(/\r?\n/).filter(f => f.trim() !== '');
-      fileListContainer.innerHTML = '';
-      files.forEach(file => {
-        const li = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = file;
-        link.textContent = file;
-        link.target = "_blank";
-
-        const ext = file.split('.').pop();
-        const span = document.createElement('span');
-        span.textContent = ext;
-        span.className = 'file-type';
-
-        li.appendChild(link);
         li.appendChild(span);
         fileListContainer.appendChild(li);
       });
