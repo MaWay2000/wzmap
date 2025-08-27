@@ -1282,14 +1282,20 @@ function drawMap3D() {
   const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
   const showHeight = !!(typeof showHeightCheckbox !== "undefined" && showHeightCheckbox && showHeightCheckbox.checked);
   const tileCount = tileImages.length || getTileCount(tilesetIndex);
-  const uniqueTiles = new Set();
+  const uniqueTiles = new Map();
   for (let y = 0; y < mapH; ++y) {
     for (let x = 0; x < mapW; ++x) {
-      uniqueTiles.add(mapTiles[y][x] % tileCount);
+      const tileIdx = mapTiles[y][x] % tileCount;
+      const hVal = mapHeights[y][x];
+      const key = showHeight ? `${tileIdx}_${hVal}` : String(tileIdx);
+      if (!uniqueTiles.has(key)) {
+        uniqueTiles.set(key, { tileIdx, height: hVal, positions: [] });
+      }
+      uniqueTiles.get(key).positions.push({ x, y, h: hVal });
     }
   }
   const tileGeometry = new THREE.BoxGeometry(1, 1, 1);
-  uniqueTiles.forEach(tileIdx => {
+  uniqueTiles.forEach(({ tileIdx, height: heightVal, positions }) => {
     let img = tileImages[tileIdx];
     let tex;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -1321,6 +1327,16 @@ try {
         ctx.restore();
       }
       if (showHeight) {
+        ctx.save();
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.strokeText(heightVal, 16, 32);
+        ctx.fillStyle = "#FFF";
+        ctx.fillText(heightVal, 16, 32);
+        ctx.restore();
       }
       tex = new THREE.CanvasTexture(canvas);
       tex.magFilter = THREE.NearestFilter;
@@ -1333,29 +1349,17 @@ try {
     const material = tex ?
       new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide }) :
       new THREE.MeshLambertMaterial({ color: 0x393, side: THREE.DoubleSide });
-    let count = 0;
-    for (let y = 0; y < mapH; ++y) {
-      for (let x = 0; x < mapW; ++x) {
-        if ((mapTiles[y][x] % tileCount) === tileIdx) count++;
-      }
-    }
-    if (count === 0) return;
-    const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, count);
-    let i = 0;
-    for (let y = 0; y < mapH; ++y) {
-      for (let x = 0; x < mapW; ++x) {
-        if ((mapTiles[y][x] % tileCount) !== tileIdx) continue;
-        let height = Math.max(mapHeights[y][x] * HEIGHT_SCALE, 0.01);
-        const rotation = (mapRotations[y][x] % 4) * Math.PI / 2;
-const matrix = new THREE.Matrix4();
-const rotationMatrix = new THREE.Matrix4().makeRotationY(rotation);
-const scaleMatrix = new THREE.Matrix4().makeScale(1, height, 1);
-const translationMatrix = new THREE.Matrix4().makeTranslation(x + 0.5, height / 2, y + 0.5);
-matrix.multiply(translationMatrix).multiply(rotationMatrix).multiply(scaleMatrix);
-instancedMesh.setMatrixAt(i, matrix);
-        i++;
-      }
-    }
+    const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, positions.length);
+    positions.forEach((pos, i) => {
+      const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
+      const rotation = (mapRotations[pos.y][pos.x] % 4) * Math.PI / 2;
+      const matrix = new THREE.Matrix4();
+      const rotationMatrix = new THREE.Matrix4().makeRotationY(rotation);
+      const scaleMatrix = new THREE.Matrix4().makeScale(1, h, 1);
+      const translationMatrix = new THREE.Matrix4().makeTranslation(pos.x + 0.5, h / 2, pos.y + 0.5);
+      matrix.multiply(translationMatrix).multiply(rotationMatrix).multiply(scaleMatrix);
+      instancedMesh.setMatrixAt(i, matrix);
+    });
     instancedMesh.instanceMatrix.needsUpdate = true;
     scene.add(instancedMesh);
   });
