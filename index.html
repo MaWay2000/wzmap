@@ -272,6 +272,7 @@
         }
       });
 
+
       // Inject "Load" buttons into the external map browser so maps can be
       // previewed in this page without downloading.
       const injectLoadButtons = (frame) => {
@@ -284,19 +285,22 @@
         if (!doc || !doc.body) return;
 
         const addButtons = () => {
-          doc.querySelectorAll('a[href$=".wz"]:not([data-load-btn])').forEach(link => {
+          doc.querySelectorAll('a[href]:not([data-load-btn])').forEach(link => {
+            const href = link.href;
+            if(!href || !/\.wz($|[?#])/i.test(href)) return;
+            if(!/download/i.test(link.textContent)) return;
             link.setAttribute('data-load-btn', 'true');
-            const loadBtn = doc.createElement('button');
+            const loadBtn = doc.createElement('a');
             loadBtn.textContent = 'Load';
             loadBtn.className = link.className || '';
             loadBtn.style.marginLeft = '4px';
+            loadBtn.href = '#';
             loadBtn.addEventListener('click', (ev) => {
               ev.preventDefault();
               ev.stopPropagation();
-              const url = link.href;
-              try { navigator.clipboard?.writeText(url); } catch(e) {}
+              try { navigator.clipboard?.writeText(href); } catch(e) {}
               const name = link.getAttribute('download') || link.textContent.trim();
-              window.parent.postMessage({ type: 'map-select', url, name }, '*');
+              window.parent.postMessage({ type: 'map-select', url: href, name }, '*');
             });
             link.insertAdjacentElement('afterend', loadBtn);
           });
