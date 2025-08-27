@@ -1166,8 +1166,29 @@ async function loadServerMap(filename) {
 }
 window.loadServerMap = loadServerMap;
 
+function resolveMapUrl(url) {
+  try {
+    const u = new URL(url);
+    if (
+      u.hostname === 'github.com' &&
+      /^\/[^/]+\/[^/]+\/releases\/download\//.test(u.pathname)
+    ) {
+      const parts = u.pathname.split('/');
+      const owner = parts[1];
+      const repo = parts[2];
+      const tag = parts[4];
+      const file = parts.slice(5).join('/');
+      return `https://raw.githubusercontent.com/${owner}/${repo}/${tag}/${file}`;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return url;
+}
+
 async function loadRemoteMap(url) {
   try {
+    url = resolveMapUrl(url);
     const resp = await fetch(url, { mode: 'cors' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const blob = await resp.blob();
