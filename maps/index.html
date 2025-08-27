@@ -20,7 +20,7 @@
   <p>
     <a href="index.php" target="_blank">Scan Folder (index.php)</a>
   </p>
-  <p style="font-size:0.9em;color:#90a4b8;">Use Download to save a map or Open to preview it in the browser.</p>
+  <p style="font-size:0.9em;color:#90a4b8;">Use Download to save a map or Load to preview it in the browser.</p>
   <h2>File List</h2>
   <ul id="fileList">
     <li>Loading files...</li>
@@ -44,15 +44,14 @@
           downloadLink.textContent = 'Download';
           downloadLink.className = 'btn';
 
-          const openBtn = document.createElement('button');
-          openBtn.textContent = 'Open';
-          openBtn.className = 'btn';
-          openBtn.addEventListener('click', () => {
+          const loadBtn = document.createElement('button');
+          loadBtn.textContent = 'Load';
+          loadBtn.className = 'btn';
+          loadBtn.addEventListener('click', () => {
             const url = downloadLink.href;
-            if (navigator.clipboard) {
-              navigator.clipboard.writeText(url).catch(err => console.error('Clipboard error:', err));
+            if (window.parent) {
+              window.parent.postMessage({ type: 'map-select', url, name: file }, '*');
             }
-            window.open('../index.html?url=' + encodeURIComponent(url), '_blank');
           });
 
           const ext = file.split('.').pop();
@@ -63,7 +62,7 @@
           li.appendChild(nameSpan);
           li.appendChild(span);
           li.appendChild(downloadLink);
-          li.appendChild(openBtn);
+          li.appendChild(loadBtn);
           fileListContainer.appendChild(li);
         });
       } catch (err) {
@@ -71,18 +70,10 @@
         console.error(err);
       }
     }
-    loadFileList();
-  </script>
-</body>
+      loadFileList();
+    </script>
+  </body>
 </html>
-
-        li.appendChild(span);
-        fileListContainer.appendChild(li);
-      });
-    } catch (err) {
-      fileListContainer.innerHTML = '<li>Error loading file list.</li>';
-      console.error(err);
-    }
   }
 
   loadFileList();
