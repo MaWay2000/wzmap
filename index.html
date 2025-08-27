@@ -257,6 +257,17 @@
       const urlFrame = document.getElementById('urlPopupFrame');
       const urlClose = document.getElementById('urlPopupClose');
       const urlLoad = document.getElementById('urlPopupLoad');
+      let pendingMapUrl = '';
+      window.addEventListener('message', ev => {
+        const data = ev.data;
+        if(data && data.type === 'map-select' && data.url){
+          pendingMapUrl = data.url;
+          if(urlLoad){
+            const fname = data.name || data.url.split('/').pop();
+            urlLoad.textContent = 'Load ' + fname;
+          }
+        }
+      });
       if(serverBtn){
         const fileListWidth = 360;
         serverBtn.addEventListener('click', () => {
@@ -276,7 +287,7 @@
           urlPopup.style.display = 'block';
           urlFrame.src = 'https://maps.wz2100.net/#';
         });
-        if(urlClose){
+          if(urlClose){
           urlClose.addEventListener('click', () => {
             urlFrame.src = '';
             urlPopup.style.display = 'none';
@@ -285,7 +296,13 @@
         if(urlLoad){
           urlLoad.addEventListener('click', async () => {
             let src = '';
-            try{ src = (await navigator.clipboard.readText() || '').trim(); }catch(e){ console.error('Clipboard read error:', e); }
+            if(pendingMapUrl){
+              src = pendingMapUrl;
+              pendingMapUrl = '';
+              urlLoad.textContent = 'Open copied link';
+            }else{
+              try{ src = (await navigator.clipboard.readText() || '').trim(); }catch(e){ console.error('Clipboard read error:', e); }
+            }
             if(/\.(wz|zip|map|json)(\?|#|$)/i.test(src)){
               urlFrame.src = '';
               urlPopup.style.display = 'none';
