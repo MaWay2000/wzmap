@@ -1282,6 +1282,9 @@ function colorizeTileTypeOptions() {
     const color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[i]) ? TILE_TYPE_COLORS[i] : '#888';
     opt.textContent = '■ ' + baseName;
     opt.style.color = color;
+    opt.addEventListener('mouseenter', ev => showTileTooltip(ev, i, true));
+    opt.addEventListener('mousemove', moveTileTooltip);
+    opt.addEventListener('mouseleave', hideTileTooltip);
   }
   const idx = parseInt(sel.value, 10) || 0;
   sel.style.color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[idx]) ? TILE_TYPE_COLORS[idx] : '#888';
@@ -1342,9 +1345,15 @@ function ensureTileTooltip() {
   document.body.appendChild(tileTooltipDiv);
 }
 
-function showTileTooltip(ev, idx) {
-  if (!terrainSpeedModifiers || !tileTypesById.length) return;
-  const typeCode = tileTypesById[idx] ?? 0;
+function showTileTooltip(ev, idx, isTypeIndex = false) {
+  if (!terrainSpeedModifiers) return;
+  let typeCode;
+  if (isTypeIndex) {
+    typeCode = idx;
+  } else {
+    if (!tileTypesById.length) return;
+    typeCode = tileTypesById[idx] ?? 0;
+  }
   const terrainKey = TILE_TYPE_CODES[typeCode];
   if (!terrainKey) return;
   let html = `<b>${TILE_TYPE_NAMES[typeCode] || ''}</b><br>`;
