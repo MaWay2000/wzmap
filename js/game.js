@@ -936,25 +936,13 @@ function setActiveTab(tab) {
   panels.forEach(p => { p.style.display = 'none'; });
   const panel = document.getElementById(tab + 'Panel');
   if (panel) panel.style.display = 'block';
-  const tileToggle = document.getElementById('showTileId');
-  if (tileToggle && tileToggle.parentElement) {
-    tileToggle.parentElement.style.display = (tab === 'textures') ? 'flex' : 'none';
-  }
-  const panelIdsToggle = document.getElementById('showPanelIds');
-  if (panelIdsToggle && panelIdsToggle.parentElement) {
-    panelIdsToggle.parentElement.style.display = (tab === 'textures') ? 'flex' : 'none';
-  }
   const heightToggle = document.getElementById('showHeight');
   if (heightToggle && heightToggle.parentElement) {
     heightToggle.parentElement.style.display = (tab === 'height') ? 'flex' : 'none';
   }
   const showOptions = document.getElementById('showOptions');
   if (showOptions) {
-    if (tab === 'textures' || tab === 'height') {
-      showOptions.style.display = 'flex';
-    } else {
-      showOptions.style.display = 'none';
-    }
+    showOptions.style.display = (tab === 'height') ? 'flex' : 'none';
   }
   if (tab === 'objects') {
     updateStructurePreview();
