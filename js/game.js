@@ -45,6 +45,12 @@ function showOverlay(msg){
 window.showOverlay = showOverlay;
 function hideOverlay(){
   if (overlayMsg) overlayMsg.style.display = 'none';
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.remove('overlay-open');
+  }
+  if (typeof window !== 'undefined' && window.UI && typeof window.UI.showTopBar === 'function') {
+    window.UI.showTopBar(true);
+  }
 }
 // ensure single hideOverlay
 window.hideOverlay = hideOverlay;
@@ -294,6 +300,18 @@ const initDom = () => {
   if (undoBtn) undoBtn.addEventListener('click', undo);
   if (redoBtn) redoBtn.addEventListener('click', redo);
   updateUndoRedoButtons();
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+    const key = e.key.toLowerCase();
+    if (e.ctrlKey && key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    } else if (e.ctrlKey && ((e.shiftKey && key === 'z') || key === 'y')) {
+      e.preventDefault();
+      redo();
+    }
+  });
 
   const updateTileBrushControls = () => {
     const shouldEnable = tileBrushMode && !tileSelectionMode;
