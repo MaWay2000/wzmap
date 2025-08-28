@@ -433,14 +433,42 @@ const initDom = () => {
   }
   const sizeXInput = document.getElementById('sizeXInput');
   const sizeYInput = document.getElementById('sizeYInput');
+  const sizeXSlider = document.getElementById('sizeXSlider');
+  const sizeYSlider = document.getElementById('sizeYSlider');
   const applySizeBtn = document.getElementById('applySizeBtn');
-  if (applySizeBtn && sizeXInput && sizeYInput) {
-    sizeXInput.value = mapW;
-    sizeYInput.value = mapH;
+  if (applySizeBtn && sizeXInput && sizeYInput && sizeXSlider && sizeYSlider) {
+    const syncX = (val) => {
+      const clamped = Math.max(1, Math.min(255, val));
+      sizeXInput.value = clamped;
+      sizeXSlider.value = clamped;
+    };
+    const syncY = (val) => {
+      const clamped = Math.max(1, Math.min(255, val));
+      sizeYInput.value = clamped;
+      sizeYSlider.value = clamped;
+    };
+    syncX(mapW);
+    syncY(mapH);
+    sizeXInput.addEventListener('change', () => {
+      const val = parseInt(sizeXInput.value, 10);
+      if (!isNaN(val)) syncX(val);
+    });
+    sizeXSlider.addEventListener('input', () => {
+      const val = parseInt(sizeXSlider.value, 10);
+      syncX(val);
+    });
+    sizeYInput.addEventListener('change', () => {
+      const val = parseInt(sizeYInput.value, 10);
+      if (!isNaN(val)) syncY(val);
+    });
+    sizeYSlider.addEventListener('input', () => {
+      const val = parseInt(sizeYSlider.value, 10);
+      syncY(val);
+    });
     applySizeBtn.addEventListener('click', () => {
       const newW = parseInt(sizeXInput.value, 10);
       const newH = parseInt(sizeYInput.value, 10);
-      if (!isNaN(newW) && !isNaN(newH) && newW > 0 && newH > 0 && newW <= 256 && newH <= 256) {
+      if (!isNaN(newW) && !isNaN(newH) && newW > 0 && newH > 0 && newW <= 255 && newH <= 255) {
         resizeMap(newW, newH);
       }
     });
@@ -1318,8 +1346,12 @@ async function loadMapFile(file) {
         renderTexturePalette();
         const sizeXInputEl = document.getElementById('sizeXInput');
         const sizeYInputEl = document.getElementById('sizeYInput');
+        const sizeXSliderEl = document.getElementById('sizeXSlider');
+        const sizeYSliderEl = document.getElementById('sizeYSlider');
         if (sizeXInputEl) sizeXInputEl.value = mapW;
         if (sizeYInputEl) sizeYInputEl.value = mapH;
+        if (sizeXSliderEl) sizeXSliderEl.value = mapW;
+        if (sizeYSliderEl) sizeYSliderEl.value = mapH;
       }
     }
     if (!found) {
@@ -1663,8 +1695,12 @@ function resizeMap(newW, newH) {
   mapHeights = newHeightsArr;
   const sizeXInput = document.getElementById('sizeXInput');
   const sizeYInput = document.getElementById('sizeYInput');
+  const sizeXSlider = document.getElementById('sizeXSlider');
+  const sizeYSlider = document.getElementById('sizeYSlider');
   if (sizeXInput) sizeXInput.value = newW;
   if (sizeYInput) sizeYInput.value = newH;
+  if (sizeXSlider) sizeXSlider.value = newW;
+  if (sizeYSlider) sizeYSlider.value = newH;
   resetCameraTarget(mapW, mapH, threeContainer);
   drawMap3D();
   if (highlightMesh) {

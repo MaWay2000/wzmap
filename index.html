@@ -225,12 +225,18 @@
     <!-- SIZE TAB -->
     <div id="sizePanel" class="panel" style="display:none;">
       <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:4px;">
-        <label for="sizeXInput" style="margin:0;">Size X</label>
-        <input type="number" id="sizeXInput" min="1" max="256" step="1" value="1" style="width:80px;">
-        <label for="sizeYInput" style="margin:0;">Size Y</label>
-        <input type="number" id="sizeYInput" min="1" max="256" step="1" value="1" style="width:80px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label for="sizeXInput" style="margin:0;">Size X</label>
+          <input type="number" id="sizeXInput" min="1" max="255" step="1" value="1" style="width:60px;">
+          <input type="range" id="sizeXSlider" min="1" max="255" value="1" style="flex:1;">
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label for="sizeYInput" style="margin:0;">Size Y</label>
+          <input type="number" id="sizeYInput" min="1" max="255" step="1" value="1" style="width:60px;">
+          <input type="range" id="sizeYSlider" min="1" max="255" value="1" style="flex:1;">
+        </div>
       </div>
-      <button type="button" id="applySizeBtn" style="margin-top:4px;">Apply Size</button>
+      <button type="button" id="applySizeBtn" class="action-btn" style="margin-top:4px;">Apply</button>
     </div>
 
     <!-- OBJECTS TAB -->
