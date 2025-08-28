@@ -436,20 +436,28 @@ const initDom = () => {
   const sizeXSlider = document.getElementById('sizeXSlider');
   const sizeYSlider = document.getElementById('sizeYSlider');
   const applySizeBtn = document.getElementById('applySizeBtn');
-  if (applySizeBtn && sizeXInput && sizeYInput && sizeXSlider && sizeYSlider) {
+  const resetSizeBtn = document.getElementById('resetSizeBtn');
+  if (applySizeBtn && resetSizeBtn && sizeXInput && sizeYInput && sizeXSlider && sizeYSlider) {
+    const updateApplyBtn = () => {
+      const w = parseInt(sizeXInput.value, 10);
+      const h = parseInt(sizeYInput.value, 10);
+      applySizeBtn.disabled = (w === mapW && h === mapH);
+    };
     const syncX = (val) => {
       const clamped = Math.max(1, Math.min(255, val));
       sizeXInput.value = clamped;
       sizeXSlider.value = clamped;
+      updateApplyBtn();
     };
     const syncY = (val) => {
       const clamped = Math.max(1, Math.min(255, val));
       sizeYInput.value = clamped;
       sizeYSlider.value = clamped;
+      updateApplyBtn();
     };
     syncX(mapW);
     syncY(mapH);
-    sizeXInput.addEventListener('change', () => {
+    sizeXInput.addEventListener('input', () => {
       const val = parseInt(sizeXInput.value, 10);
       if (!isNaN(val)) syncX(val);
     });
@@ -457,7 +465,7 @@ const initDom = () => {
       const val = parseInt(sizeXSlider.value, 10);
       syncX(val);
     });
-    sizeYInput.addEventListener('change', () => {
+    sizeYInput.addEventListener('input', () => {
       const val = parseInt(sizeYInput.value, 10);
       if (!isNaN(val)) syncY(val);
     });
@@ -465,11 +473,16 @@ const initDom = () => {
       const val = parseInt(sizeYSlider.value, 10);
       syncY(val);
     });
+    resetSizeBtn.addEventListener('click', () => {
+      syncX(mapW);
+      syncY(mapH);
+    });
     applySizeBtn.addEventListener('click', () => {
       const newW = parseInt(sizeXInput.value, 10);
       const newH = parseInt(sizeYInput.value, 10);
       if (!isNaN(newW) && !isNaN(newH) && newW > 0 && newH > 0 && newW <= 255 && newH <= 255) {
         resizeMap(newW, newH);
+        updateApplyBtn();
       }
     });
   }
