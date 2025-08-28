@@ -465,40 +465,7 @@ function __old_updateHighlight(event) {
     scene.remove(previewGroup);
     previewGroup = null;
   }
-  if (activeTab === 'textures') {
-    previewGroup = new THREE.Group();
-    for (let dy = 0; dy < size; dy++) {
-      for (let dx = 0; dx < size; dx++) {
-        const tx = tileX + dx;
-        const ty = tileY + dy;
-        if (tx < 0 || tx >= mapW || ty < 0 || ty >= mapH) continue;
-        const img = tileImages.length ? tileImages[selectedTileId % tileImages.length] : null;
-        const canvas2 = document.createElement('canvas');
-        canvas2.width = 32;
-        canvas2.height = 32;
-        const ctx2 = canvas2.getContext('2d');
-        if (img && img.complete && img.naturalWidth > 0) {
-          ctx2.save();
-          ctx2.translate(16, 16);
-          ctx2.rotate((selectedRotation * Math.PI) / 2);
-          ctx2.translate(-16, -16);
-          ctx2.drawImage(img, 0, 0, 32, 32);
-          ctx2.restore();
-        }
-        const tex2 = new THREE.CanvasTexture(canvas2);
-        tex2.magFilter = THREE.NearestFilter;
-        tex2.minFilter = THREE.LinearMipMapLinearFilter;
-        const mat2 = new THREE.MeshBasicMaterial({ map: tex2, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
-        const geo2 = new THREE.PlaneGeometry(1, 1);
-        geo2.rotateX(-Math.PI / 2);
-        const mesh2 = new THREE.Mesh(geo2, mat2);
-        const baseHeight = mapHeights[ty][tx] * HEIGHT_SCALE;
-        mesh2.position.set(tx + 0.5, baseHeight + 0.03, ty + 0.5);
-        previewGroup.add(mesh2);
-      }
-    }
-    scene.add(previewGroup);
-  } else if (activeTab === 'height') {
+  if (activeTab === 'textures' || activeTab === 'height') {
     const geo = new THREE.PlaneGeometry(size, size);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
