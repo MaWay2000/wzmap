@@ -74,6 +74,7 @@
       padding: 2px 8px; cursor: pointer; font-size: 0.9rem;
     }
     .tab-btn.active { background: #6CF527; color: #000; }
+    .tab-btn:disabled { opacity: 0.5; }
     .rotate-btn {
       background: #283445; color: #dde; border: 1px solid #435066;
       padding: 2px 6px; cursor: pointer; font-size: 0.9rem;
@@ -145,8 +146,8 @@
     <button class="tab-btn" data-tab="objects">Structures</button>
   </div>
   <div id="uiBar" class="hidden">
-    <button type="button" id="undoBtn" class="tab-btn" disabled>Undo</button>
-    <button type="button" id="redoBtn" class="tab-btn" disabled>Redo</button>
+    <button type="button" id="undoBtn" class="tab-btn" disabled title="Undo (Ctrl+Z)">←</button>
+    <button type="button" id="redoBtn" class="tab-btn" disabled title="Redo (Ctrl+Y)">→</button>
     <span id="mapFilename"></span>
   </div>
 
