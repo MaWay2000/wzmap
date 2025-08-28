@@ -73,7 +73,7 @@
       background: #283445; color: #dde; border: 1px solid #435066;
       padding: 2px 8px; cursor: pointer; font-size: 0.9rem;
     }
-    .tab-btn.active { background: #6CF527; color: #000; }
+    .tab-btn.active:not(#undoBtn):not(#redoBtn) { background: #6CF527; color: #000; }
     .tab-btn:disabled { opacity: 0.5; }
     .rotate-btn {
       background: #283445; color: #dde; border: 1px solid #435066;
@@ -144,8 +144,8 @@
     <button class="tab-btn" data-tab="height">Height</button>
     <button class="tab-btn" data-tab="size">Resize</button>
     <button class="tab-btn" data-tab="objects">Structures</button>
-    <button type="button" id="undoBtn" class="tab-btn" disabled title="Undo (Ctrl+Z)">Ctrl+Z</button>
-    <button type="button" id="redoBtn" class="tab-btn" disabled title="Redo (Ctrl+Y)">Ctrl+Y</button>
+    <button type="button" id="undoBtn" class="tab-btn" disabled title="Undo (Ctrl+Z)">&#8630; Undo</button>
+    <button type="button" id="redoBtn" class="tab-btn" disabled title="Redo (Ctrl+Y)">&#8631; Redo</button>
   </div>
   <div id="uiBar" class="hidden">
     <span id="mapFilename"></span>

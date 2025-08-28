@@ -297,8 +297,16 @@ const initDom = () => {
   const heightBrushBtn = document.getElementById('heightBrushBtn');
   undoBtn = document.getElementById('undoBtn');
   redoBtn = document.getElementById('redoBtn');
-  if (undoBtn) undoBtn.addEventListener('click', undo);
-  if (redoBtn) redoBtn.addEventListener('click', redo);
+  if (undoBtn) undoBtn.addEventListener('click', () => {
+    undo();
+    undoBtn.blur();
+    undoBtn.classList.remove('active');
+  });
+  if (redoBtn) redoBtn.addEventListener('click', () => {
+    redo();
+    redoBtn.blur();
+    redoBtn.classList.remove('active');
+  });
   updateUndoRedoButtons();
 
   window.addEventListener('keydown', (e) => {
