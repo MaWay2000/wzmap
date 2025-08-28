@@ -172,6 +172,7 @@ function updateHeightApplyBtn() {
   }
 }
 const initDom = () => {
+  loadTerrainSpeedModifiers();
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.getAttribute('data-tab');
@@ -1220,6 +1221,9 @@ function renderTexturePalette() {
       imgElem.style.outline = '2px solid #8cf';
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
+    imgElem.addEventListener('mouseenter', ev => showTileTooltip(ev, idx));
+    imgElem.addEventListener('mousemove', moveTileTooltip);
+    imgElem.addEventListener('mouseleave', hideTileTooltip);
     palette.appendChild(imgElem);
   }
   const selectedImg = palette.querySelector("img[data-index='" + selectedTileId + "']");
@@ -1254,6 +1258,20 @@ const TILE_TYPE_NAMES = [
   "Sheet Ice",
   "Slush"
 ];
+const TILE_TYPE_CODES = [
+  "TER_SAND",
+  "TER_SANDYBRUSH",
+  "TER_RUBBLE",
+  "TER_GREENMUD",
+  "TER_REDBRUSH",
+  "TER_PINKROCK",
+  "TER_ROAD",
+  "TER_WATER",
+  "TER_CLIFFFACE",
+  "TER_BAKEDEARTH",
+  "TER_SHEETICE",
+  "TER_SLUSH"
+];
 // Adds a colored square before each tile type option in the dropdown.
 function colorizeTileTypeOptions() {
   const sel = document.getElementById('tileTypeSelect');
@@ -1283,6 +1301,8 @@ const TILE_TYPE_COLORS = [
   '#00ced1'
 ];
 const TILE_ICON_SIZE = 40;
+let terrainSpeedModifiers = null;
+let tileTooltipDiv = null;
 let tileTypesById = [];
 let selectedTileType = 0;
 let selectedHeight = 0;
@@ -1296,6 +1316,56 @@ function parseTileTypes(data) {
     arr.push(val);
   }
   return arr;
+}
+
+async function loadTerrainSpeedModifiers() {
+  try {
+    const resp = await fetch('terrain_speed_modifiers.json', { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    terrainSpeedModifiers = await resp.json();
+  } catch (err) {
+    console.error('Failed to load terrain speed modifiers:', err);
+  }
+}
+
+function ensureTileTooltip() {
+  if (tileTooltipDiv) return;
+  tileTooltipDiv = document.createElement('div');
+  tileTooltipDiv.style.position = 'fixed';
+  tileTooltipDiv.style.pointerEvents = 'none';
+  tileTooltipDiv.style.background = 'rgba(24,32,48,0.95)';
+  tileTooltipDiv.style.border = '1px solid #435066';
+  tileTooltipDiv.style.padding = '4px';
+  tileTooltipDiv.style.fontSize = '12px';
+  tileTooltipDiv.style.zIndex = '200';
+  tileTooltipDiv.style.display = 'none';
+  document.body.appendChild(tileTooltipDiv);
+}
+
+function showTileTooltip(ev, idx) {
+  if (!terrainSpeedModifiers || !tileTypesById.length) return;
+  const typeCode = tileTypesById[idx] ?? 0;
+  const terrainKey = TILE_TYPE_CODES[typeCode];
+  if (!terrainKey) return;
+  let html = `<b>${TILE_TYPE_NAMES[typeCode] || ''}</b><br>`;
+  for (const prop in terrainSpeedModifiers) {
+    const val = terrainSpeedModifiers[prop][terrainKey];
+    if (val != null) html += `${prop}: ${val}<br>`;
+  }
+  ensureTileTooltip();
+  tileTooltipDiv.innerHTML = html;
+  tileTooltipDiv.style.display = 'block';
+  moveTileTooltip(ev);
+}
+
+function moveTileTooltip(ev) {
+  if (!tileTooltipDiv) return;
+  tileTooltipDiv.style.left = (ev.clientX + 12) + 'px';
+  tileTooltipDiv.style.top = (ev.clientY + 12) + 'px';
+}
+
+function hideTileTooltip() {
+  if (tileTooltipDiv) tileTooltipDiv.style.display = 'none';
 }
 let animationId = null;
 TILESETS.forEach((ts, i) => {
