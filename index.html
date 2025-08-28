@@ -82,13 +82,17 @@
     .overlay-btn:hover{ filter:brightness(1.1); }
   
     /* Hide panel while overlay is shown */
-    body.overlay-open #editPanel {
-      display:none;
-    }
+      body.overlay-open #editPanel {
+        display:none;
+      }
 
-  </style>
-</head>
-<body class="overlay-open">
+      input[type="range"] {
+        min-width: 0;
+      }
+
+    </style>
+  </head>
+  <body class="overlay-open">
 <select id="structureSelect" title="Structures"></select>
   <div id="uiBar" class="hidden">
     <span id="mapFilename"></span>

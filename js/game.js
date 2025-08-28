@@ -151,15 +151,22 @@ const initDom = () => {
   });
   updateSelectedInfo();
   setActiveTab(activeTab);
-    const brushInput = document.getElementById('brushSizeInput');
+
+  const brushInput = document.getElementById('brushSizeInput');
   const brushSlider = document.getElementById('brushSizeSlider');
+  const heightBrushInput = document.getElementById('heightBrushSizeInput');
+  const heightBrushSlider = document.getElementById('heightBrushSizeSlider');
+
   const setBrush = (v) => {
     const n = parseInt(v, 10);
     brushSize = isNaN(n) ? 1 : Math.min(Math.max(n, 1), 255);
     if (brushInput) brushInput.value = brushSize;
     if (brushSlider) brushSlider.value = String(brushSize);
+    if (heightBrushInput) heightBrushInput.value = brushSize;
+    if (heightBrushSlider) heightBrushSlider.value = String(brushSize);
     if (lastMouseEvent) updateHighlight(lastMouseEvent);
   };
+
   if (brushInput) {
     brushSize = parseInt(brushInput.value, 10) || 1;
     brushInput.addEventListener('input', () => setBrush(brushInput.value));
@@ -169,19 +176,19 @@ const initDom = () => {
     brushSlider.value = String(brushSize);
     brushSlider.addEventListener('input', () => setBrush(brushSlider.value));
     brushSlider.addEventListener('change', () => setBrush(brushSlider.value));
-  }const heightBrushInput = document.getElementById('heightBrushSizeInput');
-const heightBrushSlider = document.getElementById('heightBrushSizeSlider');
-if (heightBrushInput) {
-  heightBrushInput.value = brushSize;
-  const syncHeight = (v) => setBrush(v);
-  heightBrushInput.addEventListener('input', () => syncHeight(heightBrushInput.value));
-  heightBrushInput.addEventListener('change', () => syncHeight(heightBrushInput.value));
-}
-if (heightBrushSlider) {
-  heightBrushSlider.value = String(brushSize);
-  heightBrushSlider.addEventListener('input', () => setBrush(heightBrushSlider.value));
-  heightBrushSlider.addEventListener('change', () => setBrush(heightBrushSlider.value));
-}const typeSelect = document.getElementById('tileTypeSelect');
+  }
+  if (heightBrushInput) {
+    heightBrushInput.value = brushSize;
+    heightBrushInput.addEventListener('input', () => setBrush(heightBrushInput.value));
+    heightBrushInput.addEventListener('change', () => setBrush(heightBrushInput.value));
+  }
+  if (heightBrushSlider) {
+    heightBrushSlider.value = String(brushSize);
+    heightBrushSlider.addEventListener('input', () => setBrush(heightBrushSlider.value));
+    heightBrushSlider.addEventListener('change', () => setBrush(heightBrushSlider.value));
+  }
+
+  const typeSelect = document.getElementById('tileTypeSelect');
   if (typeSelect) {
     typeSelect.addEventListener('change', () => {
       const val = parseInt(typeSelect.value, 10);
