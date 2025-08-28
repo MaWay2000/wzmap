@@ -453,6 +453,7 @@ const initDom = () => {
         tileTypesById[selectedTileId] = selectedTileType;
       }
       renderTexturePalette();
+      drawMap3D();
     });
   }
   const typeToggle = document.getElementById('displayTileTypes');
