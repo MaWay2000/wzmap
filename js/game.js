@@ -1357,9 +1357,10 @@ function showTileTooltip(ev, idx, isTypeIndex = false) {
   const terrainKey = TILE_TYPE_CODES[typeCode];
   if (!terrainKey) return;
   let html = `<b>${TILE_TYPE_NAMES[typeCode] || ''}</b><br>`;
+  html += 'Speed modifiers:<br>';
   for (const prop in terrainSpeedModifiers) {
     const val = terrainSpeedModifiers[prop][terrainKey];
-    if (val != null) html += `${prop}: ${val}<br>`;
+    if (val != null) html += `${prop}: ${Math.round(val * 100)}%<br>`;
   }
   ensureTileTooltip();
   tileTooltipDiv.innerHTML = html;
