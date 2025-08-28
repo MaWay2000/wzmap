@@ -169,6 +169,8 @@
         <button id="rotateLeft" class="rotate-btn">⟲</button>
         <button id="rotateRight" class="rotate-btn">⟳</button>
         <span>Selected Tile: <span id="selectedTileIdDisplay">0</span></span>
+        <span id="selectedTileTypeLabel" style="margin-left:10px; color:#cfe8ff;">Type:</span>
+        <select id="tileTypeSelect"></select>
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
       <div class="tile-options-box">
@@ -180,10 +182,6 @@
         <div style="display:flex; gap:8px;">
           <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
           <label class="toggle-label"><input type="checkbox" id="showTileTypesOnMap"> Tile type in map</label>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
-          <label for="tileTypeSelect" style="margin:0;">Change tile type</label>
-          <select id="tileTypeSelect" style="flex:1;"></select>
         </div>
       </div>
     </div>

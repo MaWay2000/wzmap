@@ -960,26 +960,9 @@ function updateSelectedInfo() {
     typeSelect.value = typeVal;
     selectedTileType = typeVal;
   }
-  // Inline selected tile type next to the ID
-  try {
-    const span = document.getElementById('selectedTileIdDisplay');
-    const parent = span ? span.parentElement : null;
-    let typeLabel = document.getElementById('selectedTileTypeLabel');
-    if (!typeLabel && parent) {
-      typeLabel = document.createElement('span');
-      typeLabel.id = 'selectedTileTypeLabel';
-      typeLabel.style.marginLeft = '10px';
-      typeLabel.style.color = '#cfe8ff';
-      parent.appendChild(typeLabel);
-    }
-    const code = (Array.isArray(tileTypesById) && tileTypesById.length > selectedTileId)
-      ? (tileTypesById[selectedTileId] ?? 0)
-      : 0;
-    const name = (Array.isArray(TILE_TYPE_NAMES) && TILE_TYPE_NAMES.length)
-      ? (TILE_TYPE_NAMES[code % TILE_TYPE_NAMES.length] || 'Unknown')
-      : String(code);
-    if (typeLabel) typeLabel.textContent = 'Type: ' + name;
-  } catch(e) {}
+  // Ensure the type label prefix is present
+  const typeLabel = document.getElementById('selectedTileTypeLabel');
+  if (typeLabel) typeLabel.textContent = 'Type:';
   // Ensure single-line + smaller font for type label
   try {
     const _lbl = document.getElementById('selectedTileTypeLabel');
