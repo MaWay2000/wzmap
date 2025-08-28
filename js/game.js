@@ -198,24 +198,24 @@ const initDom = () => {
 
   if (heightSelectBtn) {
     heightSelectBtn.addEventListener('click', () => {
-      heightSelectionMode = !heightSelectionMode;
-      heightSelectBtn.classList.toggle('active', heightSelectionMode);
-      if (heightBrushBtn) {
-        heightBrushBtn.disabled = heightSelectionMode;
-        if (heightSelectionMode) {
-          heightBrushMode = false;
-          heightBrushBtn.classList.remove('active');
-        }
-      }
-      if (heightBrushInput) heightBrushInput.disabled = heightSelectionMode;
-      if (heightBrushSlider) heightBrushSlider.disabled = heightSelectionMode;
-      if (!heightSelectionMode) {
+      if (heightSelectionMode) {
+        heightSelectionMode = false;
+        heightSelectBtn.classList.remove('active');
+        if (heightBrushInput) heightBrushInput.disabled = false;
+        if (heightBrushSlider) heightBrushSlider.disabled = false;
         heightSelectStart = null;
         heightSelectEnd = null;
         if (highlightMesh && scene) {
           scene.remove(highlightMesh);
           highlightMesh = null;
         }
+      } else {
+        heightSelectionMode = true;
+        heightSelectBtn.classList.add('active');
+        heightBrushMode = false;
+        if (heightBrushBtn) heightBrushBtn.classList.remove('active');
+        if (heightBrushInput) heightBrushInput.disabled = true;
+        if (heightBrushSlider) heightBrushSlider.disabled = true;
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
@@ -223,20 +223,22 @@ const initDom = () => {
 
   if (heightBrushBtn) {
     heightBrushBtn.addEventListener('click', () => {
-      heightBrushMode = !heightBrushMode;
-      heightBrushBtn.classList.toggle('active', heightBrushMode);
-      if (heightSelectBtn) {
-        heightSelectBtn.disabled = heightBrushMode;
-        if (heightBrushMode) {
-          heightSelectionMode = false;
-          heightSelectBtn.classList.remove('active');
-          heightSelectStart = null;
-          heightSelectEnd = null;
-          if (highlightMesh && scene) {
-            scene.remove(highlightMesh);
-            highlightMesh = null;
-          }
+      if (heightBrushMode) {
+        heightBrushMode = false;
+        heightBrushBtn.classList.remove('active');
+      } else {
+        heightBrushMode = true;
+        heightBrushBtn.classList.add('active');
+        heightSelectionMode = false;
+        if (heightSelectBtn) heightSelectBtn.classList.remove('active');
+        heightSelectStart = null;
+        heightSelectEnd = null;
+        if (highlightMesh && scene) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
         }
+        if (heightBrushInput) heightBrushInput.disabled = false;
+        if (heightBrushSlider) heightBrushSlider.disabled = false;
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
