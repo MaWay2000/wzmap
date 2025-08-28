@@ -130,6 +130,7 @@ let tileSelectionMode = false;
 let tileBrushMode = false;
 let tileSelectStart = null;
 let tileSelectEnd = null;
+let tileSelectionFixed = false;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let highlightCachedId = null;
@@ -254,6 +255,7 @@ const initDom = () => {
         updateTileBrushControls();
         tileSelectStart = null;
         tileSelectEnd = null;
+        tileSelectionFixed = false;
         if (highlightMesh && scene) {
           scene.remove(highlightMesh);
           highlightMesh = null;
@@ -282,6 +284,7 @@ const initDom = () => {
         if (tileSelectBtn) tileSelectBtn.classList.remove('active');
         tileSelectStart = null;
         tileSelectEnd = null;
+        tileSelectionFixed = false;
         if (highlightMesh && scene) {
           scene.remove(highlightMesh);
           highlightMesh = null;
@@ -313,6 +316,7 @@ const initDom = () => {
       if (needsRedraw) drawMap3D();
       tileSelectStart = null;
       tileSelectEnd = null;
+      tileSelectionFixed = false;
       if (highlightMesh && scene) {
         scene.remove(highlightMesh);
         highlightMesh = null;
@@ -596,11 +600,13 @@ function handleEditClick(event) {
   if (activeTab === 'textures') {
     if (tileSelectionMode) {
       lastMouseEvent = event;
-      if (!tileSelectStart || tileSelectEnd) {
+      if (!tileSelectStart || tileSelectionFixed) {
         tileSelectStart = { x: tileX, y: tileY };
-        tileSelectEnd = null;
+        tileSelectEnd = { x: tileX, y: tileY };
+        tileSelectionFixed = false;
       } else {
         tileSelectEnd = { x: tileX, y: tileY };
+        tileSelectionFixed = true;
       }
       updateHighlight(event);
       updateTileApplyBtn();
@@ -1822,11 +1828,36 @@ function updateHighlight(event) {
   if (activeTab === 'textures' && tileSelectionMode) {
     if (!threeContainer || !scene) return;
     let startX, startY, endX, endY;
-    if (tileSelectStart && tileSelectEnd) {
+    if (tileSelectStart) {
+      if (!tileSelectionFixed && event) {
+        const rect = threeContainer.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        if (!intersects.length) {
+          if (highlightMesh) {
+            scene.remove(highlightMesh);
+            highlightMesh = null;
+          }
+          return;
+        }
+        const p = intersects[0].point;
+        const tileX = Math.floor(p.x);
+        const tileY = Math.floor(p.z);
+        if (tileX < 0 || tileX >= mapW || tileY < 0 || tileY >= mapH) {
+          if (highlightMesh) {
+            scene.remove(highlightMesh);
+            highlightMesh = null;
+          }
+          return;
+        }
+        tileSelectEnd = { x: tileX, y: tileY };
+      }
       startX = tileSelectStart.x;
       startY = tileSelectStart.y;
-      endX = tileSelectEnd.x;
-      endY = tileSelectEnd.y;
+      endX = tileSelectEnd ? tileSelectEnd.x : tileSelectStart.x;
+      endY = tileSelectEnd ? tileSelectEnd.y : tileSelectStart.y;
     } else {
       if (!event) return;
       const rect = threeContainer.getBoundingClientRect();
@@ -1851,17 +1882,10 @@ function updateHighlight(event) {
         }
         return;
       }
-      if (tileSelectStart) {
-        startX = tileSelectStart.x;
-        startY = tileSelectStart.y;
-        endX = tileX;
-        endY = tileY;
-      } else {
-        startX = tileX;
-        startY = tileY;
-        endX = tileX;
-        endY = tileY;
-      }
+      startX = tileX;
+      startY = tileY;
+      endX = tileX;
+      endY = tileY;
     }
     const minX = Math.min(startX, endX);
     const maxX = Math.max(startX, endX);
@@ -1888,6 +1912,7 @@ function updateHighlight(event) {
     }
     highlightMesh.position.set(minX + width / 2, maxH + 0.02, minY + height / 2);
     scene.add(highlightMesh);
+    updateTileApplyBtn();
     return;
   }
   // For other textures/height/object behavior
