@@ -148,10 +148,6 @@
         <label for="tilesetSelect" style="margin:0;">Tileset:</label>
         <select id="tilesetSelect" style="flex:1;"></select>
       </div>
-      <div id="tileIdOptions" style="display:flex; gap:8px; margin-bottom:4px;">
-        <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Show IDs</label>
-        <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
-      </div>
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
         <button type="button" id="tileBrushBtn" class="action-btn">Use Brush</button>
         <label for="brushSizeInput" style="margin:0; white-space:nowrap;">Size:</label>
@@ -168,15 +164,16 @@
         <span>Selected Tile: <span id="selectedTileIdDisplay">0</span></span>
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
-      <div style="display:block; margin-top:6px; margin-bottom:4px;">
-        <label class="toggle-label" style="display:block;">
-          <input type="checkbox" id="displayTileTypes"> Show tile types
-        </label>
-      </div>
-      <div style="display:block; margin-top:2px; margin-bottom:6px;">
-        <label class="toggle-label" style="display:block;">
-          <input type="checkbox" id="showTileTypesOnMap"> Show tile types in map
-        </label>
+      <div style="display:block; margin-top:6px; margin-bottom:6px;">
+        <div style="text-align:center; margin-bottom:4px;">--- Show / Hide ---</div>
+        <div style="display:flex; gap:8px; margin-bottom:4px;">
+          <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Tile ID</label>
+          <label class="toggle-label"><input type="checkbox" id="showTileId"> Tile ID in map</label>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
+          <label class="toggle-label"><input type="checkbox" id="showTileTypesOnMap"> Tile type in map</label>
+        </div>
       </div>
 
       <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
