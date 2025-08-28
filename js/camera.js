@@ -25,7 +25,11 @@ export function resetCameraTarget(mapW, mapH, container) {
 export function setupKeyboard(resetCallback) {
   window.addEventListener('keydown', e => {
     cameraState.keys[e.key.toLowerCase()] = true;
+    if (e.key.startsWith('Arrow')) e.preventDefault();
     if (e.key.toLowerCase() === 'r') resetCallback();
   });
-  window.addEventListener('keyup', e => { cameraState.keys[e.key.toLowerCase()] = false; });
+  window.addEventListener('keyup', e => {
+    cameraState.keys[e.key.toLowerCase()] = false;
+    if (e.key.startsWith('Arrow')) e.preventDefault();
+  });
 }

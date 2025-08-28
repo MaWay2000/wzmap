@@ -1631,6 +1631,10 @@ function updateCulling() {
     if (cameraState.keys['s']) moveZ += cameraState.camMoveSpeed * cameraState.zoom;
     if (cameraState.keys['a']) moveX -= cameraState.camMoveSpeed * cameraState.zoom;
     if (cameraState.keys['d']) moveX += cameraState.camMoveSpeed * cameraState.zoom;
+    if (cameraState.keys['arrowup']) moveZ -= cameraState.camMoveSpeed * cameraState.zoom;
+    if (cameraState.keys['arrowdown']) moveZ += cameraState.camMoveSpeed * cameraState.zoom;
+    if (cameraState.keys['arrowleft']) moveX -= cameraState.camMoveSpeed * cameraState.zoom;
+    if (cameraState.keys['arrowright']) moveX += cameraState.camMoveSpeed * cameraState.zoom;
     if (moveX || moveZ) {
       const angle = cameraState.rotationY;
       const fx = Math.sin(angle);
