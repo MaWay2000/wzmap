@@ -25,10 +25,11 @@
     }
     /* Top bar (kept but minimal; can be toggled by the game) */
     #uiBar {
-      position: absolute; left: 0; top: 0; width: 100vw; z-index: 10;
+      position: absolute; left: 0; top: 280px; width: 100vw; z-index: 10;
       padding: 4px 8px; background: var(--bar); border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 10px;
     }
+    body.overlay-open #uiBar { top: 0; }
     #uiBar.hidden { display:none; }
     #mapFilename { color:#8cf; }
     #fileList {
@@ -50,10 +51,15 @@
       z-index:50;
     }
 
-    /* Left editor panel */
+    /* Top editor panel */
     #editPanel {
-      position:absolute; left:0; top:0; width:280px; height:100vh;
-      background: rgba(24,32,48,0.95); padding:6px; z-index:12; overflow-y:auto;
+      position:absolute; left:0; top:0; width:100vw; height:280px;
+      background: rgba(24,32,48,0.95); padding:6px; z-index:12;
+      display:flex; align-items:flex-start; gap:10px;
+      overflow-x:auto; overflow-y:hidden;
+    }
+    #editPanel .panel {
+      width:280px; flex-shrink:0; height:100%; overflow-y:auto;
     }
     .tab-btn {
       background: #283445; color: #dde; border: 1px solid #435066;
@@ -103,7 +109,7 @@
     <span id="mapFilename"></span>
   </div>
 
-  <!-- Left editor panel -->
+  <!-- Top editor panel -->
   <div id="editPanel">
     <div id="tabBar" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px; overflow-x:auto;">
       <button class="tab-btn" data-tab="view">View</button>
