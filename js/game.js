@@ -142,6 +142,7 @@ let highlightLoadingRot = null;
 let tileApplyBtn;
 let tileCancelBtn;
 let heightApplyBtn;
+let heightCancelBtn;
 
 function updateTileApplyBtn() {
   if (!tileApplyBtn) return;
@@ -162,10 +163,12 @@ function updateHeightApplyBtn() {
   if (!heightSelectionMode) {
     heightApplyBtn.disabled = true;
     heightApplyBtn.classList.remove('ready');
+    if (heightCancelBtn) heightCancelBtn.disabled = true;
   } else {
     heightApplyBtn.disabled = false;
     const hasSelection = heightSelectStart && heightSelectEnd;
     heightApplyBtn.classList.toggle('ready', !!hasSelection);
+    if (heightCancelBtn) heightCancelBtn.disabled = !hasSelection;
   }
 }
 const initDom = () => {
@@ -234,6 +237,7 @@ const initDom = () => {
   const tileBrushBtn = document.getElementById('tileBrushBtn');
   const heightSelectBtn = document.getElementById('heightSelectBtn');
   heightApplyBtn = document.getElementById('heightApplyBtn');
+  heightCancelBtn = document.getElementById('heightCancelBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
 
   const updateTileBrushControls = () => {
@@ -418,6 +422,18 @@ const initDom = () => {
         }
       }
       drawMap3D();
+      heightSelectStart = null;
+      heightSelectEnd = null;
+      if (highlightMesh && scene) {
+        scene.remove(highlightMesh);
+        highlightMesh = null;
+      }
+      updateHeightApplyBtn();
+    });
+  }
+
+  if (heightCancelBtn) {
+    heightCancelBtn.addEventListener('click', () => {
       heightSelectStart = null;
       heightSelectEnd = null;
       if (highlightMesh && scene) {
