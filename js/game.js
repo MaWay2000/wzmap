@@ -452,6 +452,7 @@ const initDom = () => {
       if (tileTypesById.length > selectedTileId) {
         tileTypesById[selectedTileId] = selectedTileType;
       }
+      typeSelect.style.color = TILE_TYPE_COLORS[selectedTileType % TILE_TYPE_COLORS.length] || '#888';
       renderTexturePalette();
       drawMap3D();
     });
@@ -1060,6 +1061,7 @@ function updateSelectedInfo() {
     const typeVal = tileTypesById[selectedTileId] ?? 0;
     typeSelect.value = typeVal;
     selectedTileType = typeVal;
+    typeSelect.style.color = TILE_TYPE_COLORS[typeVal % TILE_TYPE_COLORS.length] || '#888';
   }
   // Ensure the type label prefix is present
   const typeLabel = document.getElementById('selectedTileTypeLabel');
@@ -1263,6 +1265,8 @@ function colorizeTileTypeOptions() {
     opt.textContent = '■ ' + baseName;
     opt.style.color = color;
   }
+  const idx = parseInt(sel.value, 10) || 0;
+  sel.style.color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[idx]) ? TILE_TYPE_COLORS[idx] : '#888';
 }
 const TILE_TYPE_COLORS = [
   '#ff0',
@@ -1415,6 +1419,8 @@ async function loadMapFile(file) {
           } else {
             typeSelect.value = 0;
           }
+          const idx = parseInt(typeSelect.value, 10) || 0;
+          typeSelect.style.color = TILE_TYPE_COLORS[idx % TILE_TYPE_COLORS.length] || '#888';
         }
         renderTexturePalette();
         const sizeXInputEl = document.getElementById('sizeXInput');
