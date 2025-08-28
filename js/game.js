@@ -143,6 +143,55 @@ let tileApplyBtn;
 let tileCancelBtn;
 let heightApplyBtn;
 let heightCancelBtn;
+let undoBtn;
+let redoBtn;
+const undoStack = [];
+const redoStack = [];
+
+function updateUndoRedoButtons() {
+  if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+}
+
+function pushUndo(action) {
+  undoStack.push(action);
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+}
+
+function applyAction(action, mode) {
+  if (!action) return;
+  if (action.type === 'tiles') {
+    for (const c of action.changes) {
+      const tile = mode === 'undo' ? c.oldTile : c.newTile;
+      const rot = mode === 'undo' ? c.oldRot : c.newRot;
+      mapTiles[c.y][c.x] = tile;
+      mapRotations[c.y][c.x] = rot;
+    }
+  } else if (action.type === 'height') {
+    for (const c of action.changes) {
+      const h = mode === 'undo' ? c.oldHeight : c.newHeight;
+      mapHeights[c.y][c.x] = h;
+    }
+  }
+  drawMap3D();
+}
+
+function undo() {
+  const action = undoStack.pop();
+  if (!action) return;
+  applyAction(action, 'undo');
+  redoStack.push(action);
+  updateUndoRedoButtons();
+}
+
+function redo() {
+  const action = redoStack.pop();
+  if (!action) return;
+  applyAction(action, 'redo');
+  undoStack.push(action);
+  updateUndoRedoButtons();
+}
 
 function updateTileApplyBtn() {
   if (!tileApplyBtn) return;
@@ -240,6 +289,11 @@ const initDom = () => {
   heightApplyBtn = document.getElementById('heightApplyBtn');
   heightCancelBtn = document.getElementById('heightCancelBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
+  undoBtn = document.getElementById('undoBtn');
+  redoBtn = document.getElementById('redoBtn');
+  if (undoBtn) undoBtn.addEventListener('click', undo);
+  if (redoBtn) redoBtn.addEventListener('click', redo);
+  updateUndoRedoButtons();
 
   const updateTileBrushControls = () => {
     const shouldEnable = tileBrushMode && !tileSelectionMode;
@@ -325,15 +379,22 @@ const initDom = () => {
       const minY = Math.min(tileSelectStart.y, tileSelectEnd.y);
       const maxY = Math.max(tileSelectStart.y, tileSelectEnd.y);
       let needsRedraw = false;
+      const changes = [];
       for (let y = minY; y <= maxY; y++) {
         for (let x = minX; x <= maxX; x++) {
           if (x >= 0 && x < mapW && y >= 0 && y < mapH) {
-            mapTiles[y][x] = selectedTileId;
-            mapRotations[y][x] = selectedRotation;
-            needsRedraw = true;
+            const oldTile = mapTiles[y][x];
+            const oldRot = mapRotations[y][x];
+            if (oldTile !== selectedTileId || oldRot !== selectedRotation) {
+              changes.push({ x, y, oldTile, oldRot, newTile: selectedTileId, newRot: selectedRotation });
+              mapTiles[y][x] = selectedTileId;
+              mapRotations[y][x] = selectedRotation;
+              needsRedraw = true;
+            }
           }
         }
       }
+      if (changes.length) pushUndo({ type: 'tiles', changes });
       if (needsRedraw) drawMap3D();
       tileSelectStart = null;
       tileSelectEnd = null;
@@ -415,13 +476,20 @@ const initDom = () => {
       const maxX = Math.max(heightSelectStart.x, heightSelectEnd.x);
       const minY = Math.min(heightSelectStart.y, heightSelectEnd.y);
       const maxY = Math.max(heightSelectStart.y, heightSelectEnd.y);
+      const changes = [];
       for (let y = minY; y <= maxY; y++) {
         for (let x = minX; x <= maxX; x++) {
           if (x >= 0 && x < mapW && y >= 0 && y < mapH) {
-            mapHeights[y][x] = Math.max(0, Math.min(255, newHeight));
+            const oldHeight = mapHeights[y][x];
+            const nh = Math.max(0, Math.min(255, newHeight));
+            if (oldHeight !== nh) {
+              changes.push({ x, y, oldHeight, newHeight: nh });
+              mapHeights[y][x] = nh;
+            }
           }
         }
       }
+      if (changes.length) pushUndo({ type: 'height', changes });
       drawMap3D();
       heightSelectStart = null;
       heightSelectEnd = null;
@@ -664,17 +732,24 @@ function handleEditClick(event) {
     }
     if (!tileBrushMode) return;
     let __needsRedrawTex = false;
+    const changes = [];
     for (let dy = 0; dy < brushSize; dy++) {
       for (let dx = 0; dx < brushSize; dx++) {
         const tx = tileX + dx;
         const ty = tileY + dy;
         if (tx >= 0 && tx < mapW && ty >= 0 && ty < mapH) {
-          mapTiles[ty][tx] = selectedTileId;
-          __needsRedrawTex = true;
-          mapRotations[ty][tx] = selectedRotation;
+          const oldTile = mapTiles[ty][tx];
+          const oldRot = mapRotations[ty][tx];
+          if (oldTile !== selectedTileId || oldRot !== selectedRotation) {
+            changes.push({ x: tx, y: ty, oldTile, oldRot, newTile: selectedTileId, newRot: selectedRotation });
+            mapTiles[ty][tx] = selectedTileId;
+            mapRotations[ty][tx] = selectedRotation;
+            __needsRedrawTex = true;
+          }
         }
       }
     }
+    if (changes.length) pushUndo({ type: 'tiles', changes });
     if (__needsRedrawTex) drawMap3D();
   } else if (activeTab === 'height' && heightBrushMode) {
     let __needsRedrawHeight = false;
@@ -682,16 +757,23 @@ function handleEditClick(event) {
     if (event.shiftKey) {
       newHeight = 0;
     }
+    const changes = [];
     for (let dy = 0; dy < brushSize; dy++) {
       for (let dx = 0; dx < brushSize; dx++) {
         const tx = tileX + dx;
         const ty = tileY + dy;
         if (tx >= 0 && tx < mapW && ty >= 0 && ty < mapH) {
-          mapHeights[ty][tx] = Math.max(0, Math.min(255, newHeight));
-          __needsRedrawHeight = true;
+          const oldHeight = mapHeights[ty][tx];
+          const nh = Math.max(0, Math.min(255, newHeight));
+          if (oldHeight !== nh) {
+            changes.push({ x: tx, y: ty, oldHeight, newHeight: nh });
+            mapHeights[ty][tx] = nh;
+            __needsRedrawHeight = true;
+          }
         }
       }
     }
+    if (changes.length) pushUndo({ type: 'height', changes });
     if (__needsRedrawHeight) drawMap3D();
   } else if (activeTab === 'objects') {
     if (selectedStructureIndex < 0) return;
