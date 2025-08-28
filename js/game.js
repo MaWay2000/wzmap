@@ -122,6 +122,7 @@ let highlightMesh = null;
 let previewGroup = null;
 let lastMouseEvent = null;
 let heightSelectionMode = false;
+let heightBrushMode = false;
 let heightSelectStart = null;
 let heightSelectEnd = null;
 const raycaster = new THREE.Raycaster();
@@ -193,11 +194,19 @@ const initDom = () => {
 
   const heightSelectBtn = document.getElementById('heightSelectBtn');
   const heightApplyBtn = document.getElementById('heightApplyBtn');
+  const heightBrushBtn = document.getElementById('heightBrushBtn');
 
   if (heightSelectBtn) {
     heightSelectBtn.addEventListener('click', () => {
       heightSelectionMode = !heightSelectionMode;
       heightSelectBtn.classList.toggle('active', heightSelectionMode);
+      if (heightBrushBtn) {
+        heightBrushBtn.disabled = heightSelectionMode;
+        if (heightSelectionMode) {
+          heightBrushMode = false;
+          heightBrushBtn.classList.remove('active');
+        }
+      }
       if (heightBrushInput) heightBrushInput.disabled = heightSelectionMode;
       if (heightBrushSlider) heightBrushSlider.disabled = heightSelectionMode;
       if (!heightSelectionMode) {
@@ -206,6 +215,27 @@ const initDom = () => {
         if (highlightMesh && scene) {
           scene.remove(highlightMesh);
           highlightMesh = null;
+        }
+      }
+      if (lastMouseEvent) updateHighlight(lastMouseEvent);
+    });
+  }
+
+  if (heightBrushBtn) {
+    heightBrushBtn.addEventListener('click', () => {
+      heightBrushMode = !heightBrushMode;
+      heightBrushBtn.classList.toggle('active', heightBrushMode);
+      if (heightSelectBtn) {
+        heightSelectBtn.disabled = heightBrushMode;
+        if (heightBrushMode) {
+          heightSelectionMode = false;
+          heightSelectBtn.classList.remove('active');
+          heightSelectStart = null;
+          heightSelectEnd = null;
+          if (highlightMesh && scene) {
+            scene.remove(highlightMesh);
+            highlightMesh = null;
+          }
         }
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
@@ -409,7 +439,7 @@ function handleEditClick(event) {
       }
     }
     if (__needsRedrawTex) drawMap3D();
-  } else if (activeTab === 'height') {
+  } else if (activeTab === 'height' && heightBrushMode) {
     let __needsRedrawHeight = false;
     let newHeight = selectedHeight;
     if (event.shiftKey) {
@@ -485,6 +515,13 @@ function __old_updateHighlight(event) {
       });
       scene.remove(previewGroup);
       previewGroup = null;
+    }
+    return;
+  }
+  if (activeTab === 'height' && !heightBrushMode) {
+    if (highlightMesh) {
+      scene.remove(highlightMesh);
+      highlightMesh = null;
     }
     return;
   }
