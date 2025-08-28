@@ -121,6 +121,9 @@ let brushSize = 1;
 let highlightMesh = null;
 let previewGroup = null;
 let lastMouseEvent = null;
+let heightSelectionMode = false;
+let heightSelectStart = null;
+let heightSelectEnd = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let highlightCachedId = null;
@@ -186,6 +189,53 @@ const initDom = () => {
     heightBrushSlider.value = String(brushSize);
     heightBrushSlider.addEventListener('input', () => setBrush(heightBrushSlider.value));
     heightBrushSlider.addEventListener('change', () => setBrush(heightBrushSlider.value));
+  }
+
+  const heightSelectBtn = document.getElementById('heightSelectBtn');
+  const heightApplyBtn = document.getElementById('heightApplyBtn');
+
+  if (heightSelectBtn) {
+    heightSelectBtn.addEventListener('click', () => {
+      heightSelectionMode = !heightSelectionMode;
+      heightSelectBtn.classList.toggle('active', heightSelectionMode);
+      if (heightBrushInput) heightBrushInput.disabled = heightSelectionMode;
+      if (heightBrushSlider) heightBrushSlider.disabled = heightSelectionMode;
+      if (!heightSelectionMode) {
+        heightSelectStart = null;
+        heightSelectEnd = null;
+        if (highlightMesh && scene) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+      }
+      if (lastMouseEvent) updateHighlight(lastMouseEvent);
+    });
+  }
+
+  if (heightApplyBtn) {
+    heightApplyBtn.addEventListener('click', (ev) => {
+      if (!heightSelectStart || !heightSelectEnd) return;
+      let newHeight = selectedHeight;
+      if (ev.shiftKey) newHeight = 0;
+      const minX = Math.min(heightSelectStart.x, heightSelectEnd.x);
+      const maxX = Math.max(heightSelectStart.x, heightSelectEnd.x);
+      const minY = Math.min(heightSelectStart.y, heightSelectEnd.y);
+      const maxY = Math.max(heightSelectStart.y, heightSelectEnd.y);
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = minX; x <= maxX; x++) {
+          if (x >= 0 && x < mapW && y >= 0 && y < mapH) {
+            mapHeights[y][x] = Math.max(0, Math.min(255, newHeight));
+          }
+        }
+      }
+      drawMap3D();
+      heightSelectStart = null;
+      heightSelectEnd = null;
+      if (highlightMesh && scene) {
+        scene.remove(highlightMesh);
+        highlightMesh = null;
+      }
+    });
   }
 
   const typeSelect = document.getElementById('tileTypeSelect');
@@ -333,9 +383,20 @@ function handleEditClick(event) {
   const tileX = Math.floor(point.x);
   const tileY = Math.floor(point.z);
   if (tileX < 0 || tileX >= mapW || tileY < 0 || tileY >= mapH) return;
+  if (activeTab === 'height' && heightSelectionMode) {
+    lastMouseEvent = event;
+    if (!heightSelectStart || heightSelectEnd) {
+      heightSelectStart = { x: tileX, y: tileY };
+      heightSelectEnd = null;
+    } else {
+      heightSelectEnd = { x: tileX, y: tileY };
+    }
+    updateHighlight(event);
+    return;
+  }
   if (activeTab === 'textures') {
     let __needsRedrawTex = false;
-for (let dy = 0; dy < brushSize; dy++) {
+    for (let dy = 0; dy < brushSize; dy++) {
       for (let dx = 0; dx < brushSize; dx++) {
         const tx = tileX + dx;
         const ty = tileY + dy;
@@ -346,8 +407,9 @@ for (let dy = 0; dy < brushSize; dy++) {
         }
       }
     }
-if (__needsRedrawTex) drawMap3D();
-} else if (activeTab === 'height') {let __needsRedrawHeight = false;
+    if (__needsRedrawTex) drawMap3D();
+  } else if (activeTab === 'height') {
+    let __needsRedrawHeight = false;
     let newHeight = selectedHeight;
     if (event.shiftKey) {
       newHeight = 0;
@@ -362,8 +424,8 @@ if (__needsRedrawTex) drawMap3D();
         }
       }
     }
-if (__needsRedrawHeight) drawMap3D();
-} else if (activeTab === 'objects') {
+    if (__needsRedrawHeight) drawMap3D();
+  } else if (activeTab === 'objects') {
     if (selectedStructureIndex < 0) return;
     const def = STRUCTURE_DEFS[selectedStructureIndex];
     let sizeX = def.sizeX || 1;
@@ -1475,12 +1537,82 @@ function getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH) 
 }
 // --- Repatch: unified objects preview using buildStructureGroup (2025-08-19) ---
 function updateHighlight(event) {
-  // For textures & height we keep existing behavior
+  if (activeTab === 'height' && heightSelectionMode) {
+    if (!threeContainer || !scene) return;
+    let startX, startY, endX, endY;
+    if (heightSelectStart && heightSelectEnd) {
+      startX = heightSelectStart.x;
+      startY = heightSelectStart.y;
+      endX = heightSelectEnd.x;
+      endY = heightSelectEnd.y;
+    } else {
+      if (!event) return;
+      const rect = threeContainer.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      if (!intersects.length) {
+        if (highlightMesh) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+        return;
+      }
+      const p = intersects[0].point;
+      const tileX = Math.floor(p.x);
+      const tileY = Math.floor(p.z);
+      if (tileX < 0 || tileX >= mapW || tileY < 0 || tileY >= mapH) {
+        if (highlightMesh) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+        return;
+      }
+      if (heightSelectStart) {
+        startX = heightSelectStart.x;
+        startY = heightSelectStart.y;
+        endX = tileX;
+        endY = tileY;
+      } else {
+        startX = tileX;
+        startY = tileY;
+        endX = tileX;
+        endY = tileY;
+      }
+    }
+    const minX = Math.min(startX, endX);
+    const maxX = Math.max(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxY = Math.max(startY, endY);
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+    if (highlightMesh) {
+      scene.remove(highlightMesh);
+      if (highlightMesh.geometry) highlightMesh.geometry.dispose();
+      if (highlightMesh.material) highlightMesh.material.dispose();
+      highlightMesh = null;
+    }
+    const geo = new THREE.PlaneGeometry(width, height);
+    geo.rotateX(-Math.PI / 2);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+    highlightMesh = new THREE.Mesh(geo, mat);
+    let maxH = 0;
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const h = mapHeights[y][x] * HEIGHT_SCALE;
+        if (h > maxH) maxH = h;
+      }
+    }
+    highlightMesh.position.set(minX + width / 2, maxH + 0.02, minY + height / 2);
+    scene.add(highlightMesh);
+    return;
+  }
+  // For textures we keep existing behavior
   if (activeTab !== 'objects') {
     return __old_updateHighlight(event);
   }
   if (!threeContainer || !scene) return;
-  // If not in objects, original covers it, but double-check
   if (activeTab !== 'objects') return;
   // Read mouse
   let clientX, clientY;
