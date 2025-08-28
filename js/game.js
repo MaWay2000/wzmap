@@ -228,7 +228,7 @@ function updateHeightApplyBtn() {
 }
 const initDom = () => {
   loadTerrainSpeedModifiers();
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.getAttribute('data-tab');
       setActiveTab(tab);
@@ -1131,7 +1131,7 @@ function handleMouseMove(event) {
 function setActiveTab(tab) {
   activeTab = tab;
   window.activeTab = activeTab;
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
     const isActive = btn.getAttribute('data-tab') === tab;
     btn.classList.toggle('active', isActive);
   });
