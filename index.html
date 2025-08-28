@@ -86,6 +86,13 @@
     .action-btn.active { background: #6CF527; color: #000; }
     .action-btn.ready  { background: #FFD447; color: #000; }
     .action-btn:disabled { opacity: 0.5; cursor: default; }
+    .toggle-btn-input { display: none; }
+    .toggle-btn {
+      background: #283445; color: #dde; border: 1px solid #435066;
+      padding: 2px 8px; cursor: pointer; font-size: 0.9rem;
+      text-align: center;
+    }
+    .toggle-btn-input:checked + .toggle-btn { background: #6CF527; color: #000; }
     .toggle-label { color: #dde; user-select:none; font-size:1rem; display:flex; align-items:center; gap:4px; cursor:pointer; }
     .toggle-label input[type="checkbox"] { width:18px; height:18px; accent-color:#88f; }
     .tile-options-box {
@@ -207,10 +214,14 @@
         <div class="show-hide-title">Show / Hide</div>
         <hr style="margin:4px 0;">
         <div class="toggle-grid">
-          <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Tile ID</label>
-          <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
-          <label class="toggle-label"><input type="checkbox" id="showTileId"> Tile ID in map</label>
-          <label class="toggle-label"><input type="checkbox" id="showTileTypesOnMap"> Tile type in map</label>
+          <input type="checkbox" id="showPanelIds" class="toggle-btn-input" checked>
+          <label for="showPanelIds" class="toggle-btn">Tile ID</label>
+          <input type="checkbox" id="displayTileTypes" class="toggle-btn-input">
+          <label for="displayTileTypes" class="toggle-btn">Tile type</label>
+          <input type="checkbox" id="showTileId" class="toggle-btn-input">
+          <label for="showTileId" class="toggle-btn">Tile ID in map</label>
+          <input type="checkbox" id="showTileTypesOnMap" class="toggle-btn-input">
+          <label for="showTileTypesOnMap" class="toggle-btn">Tile type in map</label>
         </div>
       </div>
     </div>
