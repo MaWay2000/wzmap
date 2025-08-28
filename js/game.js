@@ -296,7 +296,8 @@ const initDom = () => {
   }
   threeContainer.addEventListener('mousemove', handleMouseMove);
   threeContainer.addEventListener('mouseleave', () => {
-    if (highlightMesh && scene) {
+    const hasHeightSelection = heightSelectionMode && heightSelectStart && heightSelectEnd;
+    if (highlightMesh && scene && !hasHeightSelection) {
       scene.remove(highlightMesh);
       highlightMesh = null;
     }
