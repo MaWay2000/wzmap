@@ -125,6 +125,10 @@ let heightSelectionMode = false;
 let heightBrushMode = false;
 let heightSelectStart = null;
 let heightSelectEnd = null;
+let tileSelectionMode = false;
+let tileBrushMode = false;
+let tileSelectStart = null;
+let tileSelectEnd = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let highlightCachedId = null;
@@ -192,9 +196,105 @@ const initDom = () => {
     heightBrushSlider.addEventListener('change', () => setBrush(heightBrushSlider.value));
   }
 
+  const tileSelectBtn = document.getElementById('tileSelectBtn');
+  const tileApplyBtn = document.getElementById('tileApplyBtn');
+  const tileBrushBtn = document.getElementById('tileBrushBtn');
   const heightSelectBtn = document.getElementById('heightSelectBtn');
   const heightApplyBtn = document.getElementById('heightApplyBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
+
+  if (tileSelectBtn) {
+    tileSelectBtn.addEventListener('click', () => {
+      if (tileSelectionMode) {
+        tileSelectionMode = false;
+        tileSelectBtn.classList.remove('active');
+        if (brushInput) {
+          brushInput.disabled = false;
+          brushInput.style.pointerEvents = 'auto';
+        }
+        if (brushSlider) {
+          brushSlider.disabled = false;
+          brushSlider.style.pointerEvents = 'auto';
+        }
+        tileSelectStart = null;
+        tileSelectEnd = null;
+        if (highlightMesh && scene) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+      } else {
+        tileSelectionMode = true;
+        tileSelectBtn.classList.add('active');
+        tileBrushMode = false;
+        if (tileBrushBtn) tileBrushBtn.classList.remove('active');
+        if (brushInput) {
+          brushInput.disabled = true;
+          brushInput.style.pointerEvents = 'none';
+        }
+        if (brushSlider) {
+          brushSlider.disabled = true;
+          brushSlider.style.pointerEvents = 'none';
+        }
+      }
+      if (lastMouseEvent) updateHighlight(lastMouseEvent);
+    });
+  }
+
+  if (tileBrushBtn) {
+    tileBrushBtn.addEventListener('click', () => {
+      if (tileBrushMode) {
+        tileBrushMode = false;
+        tileBrushBtn.classList.remove('active');
+      } else {
+        tileBrushMode = true;
+        tileBrushBtn.classList.add('active');
+        tileSelectionMode = false;
+        if (tileSelectBtn) tileSelectBtn.classList.remove('active');
+        tileSelectStart = null;
+        tileSelectEnd = null;
+        if (highlightMesh && scene) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+        if (brushInput) {
+          brushInput.disabled = false;
+          brushInput.style.pointerEvents = 'auto';
+        }
+        if (brushSlider) {
+          brushSlider.disabled = false;
+          brushSlider.style.pointerEvents = 'auto';
+        }
+      }
+      if (lastMouseEvent) updateHighlight(lastMouseEvent);
+    });
+  }
+
+  if (tileApplyBtn) {
+    tileApplyBtn.addEventListener('click', () => {
+      if (!tileSelectStart || !tileSelectEnd) return;
+      const minX = Math.min(tileSelectStart.x, tileSelectEnd.x);
+      const maxX = Math.max(tileSelectStart.x, tileSelectEnd.x);
+      const minY = Math.min(tileSelectStart.y, tileSelectEnd.y);
+      const maxY = Math.max(tileSelectStart.y, tileSelectEnd.y);
+      let needsRedraw = false;
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = minX; x <= maxX; x++) {
+          if (x >= 0 && x < mapW && y >= 0 && y < mapH) {
+            mapTiles[y][x] = selectedTileId;
+            mapRotations[y][x] = selectedRotation;
+            needsRedraw = true;
+          }
+        }
+      }
+      if (needsRedraw) drawMap3D();
+      tileSelectStart = null;
+      tileSelectEnd = null;
+      if (highlightMesh && scene) {
+        scene.remove(highlightMesh);
+        highlightMesh = null;
+      }
+    });
+  }
 
   if (heightSelectBtn) {
     heightSelectBtn.addEventListener('click', () => {
@@ -347,7 +447,8 @@ const initDom = () => {
   threeContainer.addEventListener('mousemove', handleMouseMove);
   threeContainer.addEventListener('mouseleave', () => {
     const hasHeightSelection = heightSelectionMode && heightSelectStart && heightSelectEnd;
-    if (highlightMesh && scene && !hasHeightSelection) {
+    const hasTileSelection = tileSelectionMode && tileSelectStart && tileSelectEnd;
+    if (highlightMesh && scene && !hasHeightSelection && !hasTileSelection) {
       scene.remove(highlightMesh);
       highlightMesh = null;
     }
@@ -446,6 +547,18 @@ function handleEditClick(event) {
     return;
   }
   if (activeTab === 'textures') {
+    if (tileSelectionMode) {
+      lastMouseEvent = event;
+      if (!tileSelectStart || tileSelectEnd) {
+        tileSelectStart = { x: tileX, y: tileY };
+        tileSelectEnd = null;
+      } else {
+        tileSelectEnd = { x: tileX, y: tileY };
+      }
+      updateHighlight(event);
+      return;
+    }
+    if (!tileBrushMode) return;
     let __needsRedrawTex = false;
     for (let dy = 0; dy < brushSize; dy++) {
       for (let dx = 0; dx < brushSize; dx++) {
@@ -539,6 +652,13 @@ function __old_updateHighlight(event) {
     return;
   }
   if (activeTab === 'height' && !heightBrushMode) {
+    if (highlightMesh) {
+      scene.remove(highlightMesh);
+      highlightMesh = null;
+    }
+    return;
+  }
+  if (activeTab === 'textures' && !tileBrushMode) {
     if (highlightMesh) {
       scene.remove(highlightMesh);
       highlightMesh = null;
@@ -1666,7 +1786,78 @@ function updateHighlight(event) {
     scene.add(highlightMesh);
     return;
   }
-  // For textures we keep existing behavior
+  if (activeTab === 'textures' && tileSelectionMode) {
+    if (!threeContainer || !scene) return;
+    let startX, startY, endX, endY;
+    if (tileSelectStart && tileSelectEnd) {
+      startX = tileSelectStart.x;
+      startY = tileSelectStart.y;
+      endX = tileSelectEnd.x;
+      endY = tileSelectEnd.y;
+    } else {
+      if (!event) return;
+      const rect = threeContainer.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      if (!intersects.length) {
+        if (highlightMesh) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+        return;
+      }
+      const p = intersects[0].point;
+      const tileX = Math.floor(p.x);
+      const tileY = Math.floor(p.z);
+      if (tileX < 0 || tileX >= mapW || tileY < 0 || tileY >= mapH) {
+        if (highlightMesh) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+        return;
+      }
+      if (tileSelectStart) {
+        startX = tileSelectStart.x;
+        startY = tileSelectStart.y;
+        endX = tileX;
+        endY = tileY;
+      } else {
+        startX = tileX;
+        startY = tileY;
+        endX = tileX;
+        endY = tileY;
+      }
+    }
+    const minX = Math.min(startX, endX);
+    const maxX = Math.max(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxY = Math.max(startY, endY);
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+    if (highlightMesh) {
+      scene.remove(highlightMesh);
+      if (highlightMesh.geometry) highlightMesh.geometry.dispose();
+      if (highlightMesh.material) highlightMesh.material.dispose();
+      highlightMesh = null;
+    }
+    const geo = new THREE.PlaneGeometry(width, height);
+    geo.rotateX(-Math.PI / 2);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+    highlightMesh = new THREE.Mesh(geo, mat);
+    let maxH = 0;
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const h = mapHeights[y][x] * HEIGHT_SCALE;
+        if (h > maxH) maxH = h;
+      }
+    }
+    highlightMesh.position.set(minX + width / 2, maxH + 0.02, minY + height / 2);
+    scene.add(highlightMesh);
+    return;
+  }
+  // For other textures/height/object behavior
   if (activeTab !== 'objects') {
     return __old_updateHighlight(event);
   }
