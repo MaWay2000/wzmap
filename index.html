@@ -92,6 +92,15 @@
       margin-bottom: 6px;
       border-radius: 4px;
     }
+    #tileTypeSelect {
+      width: 100px;
+    }
+    .show-hide-title {
+      text-align: center;
+      margin-bottom: 4px;
+      font-weight: bold;
+      color: var(--accent);
+    }
 
     /* Overlay (initial file chooser) */
     #overlayMsg {
@@ -173,14 +182,15 @@
         <select id="tileTypeSelect"></select>
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
-      <div class="tile-options-box">
-        <div style="text-align:center; margin-bottom:4px;">--- Show / Hide ---</div>
-        <div style="display:flex; gap:8px; margin-bottom:4px;">
-          <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Tile ID</label>
-          <label class="toggle-label"><input type="checkbox" id="showTileId"> Tile ID in map</label>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
+        <div class="tile-options-box">
+          <div class="show-hide-title">Show / Hide</div>
+          <hr style="margin:4px 0;">
+          <div style="display:flex; gap:8px; margin-bottom:4px;">
+            <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Tile ID</label>
+            <label class="toggle-label"><input type="checkbox" id="showTileId"> Tile ID in map</label>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
           <label class="toggle-label"><input type="checkbox" id="showTileTypesOnMap"> Tile type in map</label>
         </div>
       </div>
