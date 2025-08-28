@@ -201,8 +201,14 @@ const initDom = () => {
       if (heightSelectionMode) {
         heightSelectionMode = false;
         heightSelectBtn.classList.remove('active');
-        if (heightBrushInput) heightBrushInput.disabled = false;
-        if (heightBrushSlider) heightBrushSlider.disabled = false;
+        if (heightBrushInput) {
+          heightBrushInput.disabled = false;
+          heightBrushInput.style.pointerEvents = 'auto';
+        }
+        if (heightBrushSlider) {
+          heightBrushSlider.disabled = false;
+          heightBrushSlider.style.pointerEvents = 'auto';
+        }
         heightSelectStart = null;
         heightSelectEnd = null;
         if (highlightMesh && scene) {
@@ -214,8 +220,14 @@ const initDom = () => {
         heightSelectBtn.classList.add('active');
         heightBrushMode = false;
         if (heightBrushBtn) heightBrushBtn.classList.remove('active');
-        if (heightBrushInput) heightBrushInput.disabled = true;
-        if (heightBrushSlider) heightBrushSlider.disabled = true;
+        if (heightBrushInput) {
+          heightBrushInput.disabled = true;
+          heightBrushInput.style.pointerEvents = 'none';
+        }
+        if (heightBrushSlider) {
+          heightBrushSlider.disabled = true;
+          heightBrushSlider.style.pointerEvents = 'none';
+        }
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
@@ -237,8 +249,14 @@ const initDom = () => {
           scene.remove(highlightMesh);
           highlightMesh = null;
         }
-        if (heightBrushInput) heightBrushInput.disabled = false;
-        if (heightBrushSlider) heightBrushSlider.disabled = false;
+        if (heightBrushInput) {
+          heightBrushInput.disabled = false;
+          heightBrushInput.style.pointerEvents = 'auto';
+        }
+        if (heightBrushSlider) {
+          heightBrushSlider.disabled = false;
+          heightBrushSlider.style.pointerEvents = 'auto';
+        }
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
