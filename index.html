@@ -94,6 +94,13 @@
       margin-bottom: 6px;
       border-radius: 4px;
     }
+    .panel-box {
+      border: 1px solid var(--border);
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      border-radius: 4px;
+    }
     #tileTypeSelect {
       width: 100px;
     }
@@ -228,21 +235,24 @@
 
     <!-- SIZE TAB -->
     <div id="sizePanel" class="panel" style="display:none;">
-      <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:4px;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <label for="sizeXInput" style="margin:0;">Size X</label>
-          <input type="number" id="sizeXInput" min="1" max="255" step="1" value="1" style="width:60px;">
-          <input type="range" id="sizeXSlider" min="1" max="255" value="1" style="flex:1;">
+      <div class="panel-box">
+        <div class="show-hide-title">Map size</div>
+        <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:4px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <label for="sizeXInput" style="margin:0;">Size X</label>
+            <input type="number" id="sizeXInput" min="1" max="255" step="1" value="1" style="width:60px;">
+            <input type="range" id="sizeXSlider" min="1" max="255" value="1" style="flex:1;">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <label for="sizeYInput" style="margin:0;">Size Y</label>
+            <input type="number" id="sizeYInput" min="1" max="255" step="1" value="1" style="width:60px;">
+            <input type="range" id="sizeYSlider" min="1" max="255" value="1" style="flex:1;">
+          </div>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <label for="sizeYInput" style="margin:0;">Size Y</label>
-          <input type="number" id="sizeYInput" min="1" max="255" step="1" value="1" style="width:60px;">
-          <input type="range" id="sizeYSlider" min="1" max="255" value="1" style="flex:1;">
+        <div style="display:flex; gap:4px; margin-top:4px; justify-content:center;">
+          <button type="button" id="applySizeBtn" class="action-btn" disabled>Apply</button>
+          <button type="button" id="resetSizeBtn" class="action-btn">Reset</button>
         </div>
-      </div>
-      <div style="display:flex; gap:4px; margin-top:4px;">
-        <button type="button" id="applySizeBtn" class="action-btn" disabled>Apply</button>
-        <button type="button" id="resetSizeBtn" class="action-btn">Reset</button>
       </div>
     </div>
 
