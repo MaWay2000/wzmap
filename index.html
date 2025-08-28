@@ -39,6 +39,7 @@
       display:flex; align-items:center; gap:6px; padding:4px 8px;
       background: var(--bar); border-bottom:1px solid var(--border); z-index:80; box-sizing:border-box;
     }
+    body.overlay-open #menuBar { display:none; }
     #fileList {
       position: fixed; left:0; top:var(--menu-height); width:360px; height:calc(100vh - var(--menu-height));
       background: rgba(24,32,48,0.95);
