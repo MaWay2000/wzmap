@@ -127,8 +127,6 @@
   <div id="editPanel">
     <div id="showOptions" style="display:flex; gap:8px; margin-bottom:2px;">
       <label class="toggle-label"><input type="checkbox" id="showHeight"> Show Heights</label>
-      <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Show IDs</label>
-      <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
     </div>
 
     <!-- VIEW TAB -->
@@ -150,10 +148,9 @@
         <label for="tilesetSelect" style="margin:0;">Tileset:</label>
         <select id="tilesetSelect" style="flex:1;"></select>
       </div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <button id="rotateLeft" class="rotate-btn">⟲</button>
-        <button id="rotateRight" class="rotate-btn">⟳</button>
-        <span>Selected Tile: <span id="selectedTileIdDisplay">0</span></span>
+      <div id="tileIdOptions" style="display:flex; gap:8px; margin-bottom:4px;">
+        <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Show IDs</label>
+        <label class="toggle-label"><input type="checkbox" id="showTileId">Show IDs in map</label>
       </div>
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
         <button type="button" id="tileBrushBtn" class="action-btn">Use Brush</button>
@@ -164,6 +161,11 @@
       <div style="display:flex; align-items:center; gap:6px; margin-top:4px; margin-bottom:4px;">
         <button type="button" id="tileSelectBtn" class="action-btn">Draw on map</button>
         <button type="button" id="tileApplyBtn" class="action-btn">Apply</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <button id="rotateLeft" class="rotate-btn">⟲</button>
+        <button id="rotateRight" class="rotate-btn">⟳</button>
+        <span>Selected Tile: <span id="selectedTileIdDisplay">0</span></span>
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
       <div style="display:block; margin-top:6px; margin-bottom:4px;">
