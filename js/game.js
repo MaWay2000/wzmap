@@ -204,19 +204,37 @@ const initDom = () => {
   const heightApplyBtn = document.getElementById('heightApplyBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
 
+  const updateTileBrushControls = () => {
+    const shouldEnable = tileBrushMode && !tileSelectionMode;
+    if (brushInput) {
+      brushInput.disabled = !shouldEnable;
+      brushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+    }
+    if (brushSlider) {
+      brushSlider.disabled = !shouldEnable;
+      brushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+    }
+  };
+  const updateHeightBrushControls = () => {
+    const shouldEnable = heightBrushMode && !heightSelectionMode;
+    if (heightBrushInput) {
+      heightBrushInput.disabled = !shouldEnable;
+      heightBrushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+    }
+    if (heightBrushSlider) {
+      heightBrushSlider.disabled = !shouldEnable;
+      heightBrushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+    }
+  };
+  updateTileBrushControls();
+  updateHeightBrushControls();
+
   if (tileSelectBtn) {
     tileSelectBtn.addEventListener('click', () => {
       if (tileSelectionMode) {
         tileSelectionMode = false;
         tileSelectBtn.classList.remove('active');
-        if (brushInput) {
-          brushInput.disabled = false;
-          brushInput.style.pointerEvents = 'auto';
-        }
-        if (brushSlider) {
-          brushSlider.disabled = false;
-          brushSlider.style.pointerEvents = 'auto';
-        }
+        updateTileBrushControls();
         tileSelectStart = null;
         tileSelectEnd = null;
         if (highlightMesh && scene) {
@@ -228,14 +246,7 @@ const initDom = () => {
         tileSelectBtn.classList.add('active');
         tileBrushMode = false;
         if (tileBrushBtn) tileBrushBtn.classList.remove('active');
-        if (brushInput) {
-          brushInput.disabled = true;
-          brushInput.style.pointerEvents = 'none';
-        }
-        if (brushSlider) {
-          brushSlider.disabled = true;
-          brushSlider.style.pointerEvents = 'none';
-        }
+        updateTileBrushControls();
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
@@ -257,15 +268,8 @@ const initDom = () => {
           scene.remove(highlightMesh);
           highlightMesh = null;
         }
-        if (brushInput) {
-          brushInput.disabled = false;
-          brushInput.style.pointerEvents = 'auto';
-        }
-        if (brushSlider) {
-          brushSlider.disabled = false;
-          brushSlider.style.pointerEvents = 'auto';
-        }
       }
+      updateTileBrushControls();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
@@ -302,14 +306,7 @@ const initDom = () => {
       if (heightSelectionMode) {
         heightSelectionMode = false;
         heightSelectBtn.classList.remove('active');
-        if (heightBrushInput) {
-          heightBrushInput.disabled = false;
-          heightBrushInput.style.pointerEvents = 'auto';
-        }
-        if (heightBrushSlider) {
-          heightBrushSlider.disabled = false;
-          heightBrushSlider.style.pointerEvents = 'auto';
-        }
+        updateHeightBrushControls();
         heightSelectStart = null;
         heightSelectEnd = null;
         if (highlightMesh && scene) {
@@ -321,14 +318,7 @@ const initDom = () => {
         heightSelectBtn.classList.add('active');
         heightBrushMode = false;
         if (heightBrushBtn) heightBrushBtn.classList.remove('active');
-        if (heightBrushInput) {
-          heightBrushInput.disabled = true;
-          heightBrushInput.style.pointerEvents = 'none';
-        }
-        if (heightBrushSlider) {
-          heightBrushSlider.disabled = true;
-          heightBrushSlider.style.pointerEvents = 'none';
-        }
+        updateHeightBrushControls();
       }
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
@@ -350,15 +340,8 @@ const initDom = () => {
           scene.remove(highlightMesh);
           highlightMesh = null;
         }
-        if (heightBrushInput) {
-          heightBrushInput.disabled = false;
-          heightBrushInput.style.pointerEvents = 'auto';
-        }
-        if (heightBrushSlider) {
-          heightBrushSlider.disabled = false;
-          heightBrushSlider.style.pointerEvents = 'auto';
-        }
       }
+      updateHeightBrushControls();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
