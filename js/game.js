@@ -115,6 +115,7 @@ function populateStructureSelect() {
   selectedStructureIndex = -1;
 }
 let activeTab = 'view';
+window.activeTab = activeTab;
 let selectedTileId = 0;
 let selectedRotation = 0;
 let brushSize = 1;
@@ -926,6 +927,10 @@ function handleMouseMove(event) {
 }
 function setActiveTab(tab) {
   activeTab = tab;
+  window.activeTab = activeTab;
+  if (window.menuWindow && !window.menuWindow.closed) {
+    window.menuWindow.postMessage({ type: 'activeTab', tab: activeTab }, '*');
+  }
   document.querySelectorAll('.tab-btn').forEach(btn => {
     const isActive = btn.getAttribute('data-tab') === tab;
     btn.classList.toggle('active', isActive);
@@ -958,6 +963,14 @@ function setActiveTab(tab) {
     updateStructurePreview();
   }
 }
+window.setActiveTab = setActiveTab;
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'requestActiveTab') {
+    if (window.menuWindow && !window.menuWindow.closed) {
+      window.menuWindow.postMessage({ type: 'activeTab', tab: activeTab }, '*');
+    }
+  }
+});
 function updateSelectedInfo() {
   const span = document.getElementById('selectedTileIdDisplay');
   if (span) {

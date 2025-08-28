@@ -111,7 +111,7 @@
 
   <!-- Top editor panel -->
   <div id="editPanel">
-    <div id="tabBar" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px; overflow-x:auto;">
+    <div id="tabBar" style="display:none; flex-wrap:wrap; gap:6px; margin-bottom:4px; overflow-x:auto;">
       <button class="tab-btn" data-tab="view">View</button>
       <button class="tab-btn" data-tab="textures">Tiles</button>
       <button class="tab-btn" data-tab="height">Height</button>
@@ -350,6 +350,11 @@
         }
       });
     });
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    window.menuWindow = window.open('menu.html', 'wzmenu', 'width=' + window.screen.availWidth + ',height=60');
+  });
 </script>
 </body>
 </html>
