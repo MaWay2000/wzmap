@@ -149,7 +149,7 @@ function updateTileApplyBtn() {
     tileApplyBtn.classList.remove('ready');
   } else {
     tileApplyBtn.disabled = false;
-    const hasSelection = tileSelectStart && tileSelectEnd;
+    const hasSelection = tileSelectStart && tileSelectEnd && tileSelectionFixed;
     tileApplyBtn.classList.toggle('ready', !!hasSelection);
   }
 }
