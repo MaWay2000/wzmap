@@ -85,6 +85,13 @@
     .action-btn.active { background: #6CF527; color: #000; }
     .toggle-label { color: #dde; user-select:none; font-size:1rem; display:flex; align-items:center; gap:4px; cursor:pointer; }
     .toggle-label input[type="checkbox"] { width:18px; height:18px; accent-color:#88f; }
+    .tile-options-box {
+      border: 1px solid var(--border);
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      border-radius: 4px;
+    }
 
     /* Overlay (initial file chooser) */
     #overlayMsg {
@@ -164,7 +171,7 @@
         <span>Selected Tile: <span id="selectedTileIdDisplay">0</span></span>
       </div>
       <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
-      <div style="display:block; margin-top:6px; margin-bottom:6px;">
+      <div class="tile-options-box">
         <div style="text-align:center; margin-bottom:4px;">--- Show / Hide ---</div>
         <div style="display:flex; gap:8px; margin-bottom:4px;">
           <label class="toggle-label"><input type="checkbox" id="showPanelIds" checked> Tile ID</label>
@@ -174,12 +181,10 @@
           <label class="toggle-label"><input type="checkbox" id="displayTileTypes"> Tile type</label>
           <label class="toggle-label"><input type="checkbox" id="showTileTypesOnMap"> Tile type in map</label>
         </div>
-      </div>
-
-      <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
-      
-        <label for="tileTypeSelect" style="margin:0;">Change tile type</label>
-        <select id="tileTypeSelect" style="flex:1;"></select>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
+          <label for="tileTypeSelect" style="margin:0;">Change tile type</label>
+          <select id="tileTypeSelect" style="flex:1;"></select>
+        </div>
       </div>
     </div>
 
