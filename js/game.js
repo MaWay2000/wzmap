@@ -138,6 +138,33 @@ let highlightCachedRot = null;
 let highlightModelGroup = null;
 let highlightLoadingId = null;
 let highlightLoadingRot = null;
+// References to key DOM elements so helper functions can update them
+let tileApplyBtn;
+let heightApplyBtn;
+
+function updateTileApplyBtn() {
+  if (!tileApplyBtn) return;
+  if (!tileSelectionMode) {
+    tileApplyBtn.disabled = true;
+    tileApplyBtn.classList.remove('ready');
+  } else {
+    tileApplyBtn.disabled = false;
+    const hasSelection = tileSelectStart && tileSelectEnd;
+    tileApplyBtn.classList.toggle('ready', !!hasSelection);
+  }
+}
+
+function updateHeightApplyBtn() {
+  if (!heightApplyBtn) return;
+  if (!heightSelectionMode) {
+    heightApplyBtn.disabled = true;
+    heightApplyBtn.classList.remove('ready');
+  } else {
+    heightApplyBtn.disabled = false;
+    const hasSelection = heightSelectStart && heightSelectEnd;
+    heightApplyBtn.classList.toggle('ready', !!hasSelection);
+  }
+}
 const initDom = () => {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -199,26 +226,11 @@ const initDom = () => {
   }
 
   const tileSelectBtn = document.getElementById('tileSelectBtn');
-  const tileApplyBtn = document.getElementById('tileApplyBtn');
+  tileApplyBtn = document.getElementById('tileApplyBtn');
   const tileBrushBtn = document.getElementById('tileBrushBtn');
   const heightSelectBtn = document.getElementById('heightSelectBtn');
-  const heightApplyBtn = document.getElementById('heightApplyBtn');
+  heightApplyBtn = document.getElementById('heightApplyBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
-
-  const updateTileApplyBtn = () => {
-    if (!tileApplyBtn) return;
-    if (!tileSelectionMode) {
-      tileApplyBtn.disabled = true;
-      tileApplyBtn.classList.remove('ready');
-    } else {
-      tileApplyBtn.disabled = false;
-      const hasSelection = tileSelectStart && tileSelectEnd;
-      tileApplyBtn.classList.toggle('ready', !!hasSelection);
-    }
-  };
-  const updateHeightApplyBtn = () => {
-    if (heightApplyBtn) heightApplyBtn.disabled = !heightSelectionMode;
-  };
 
   const updateTileBrushControls = () => {
     const shouldEnable = tileBrushMode && !tileSelectionMode;
@@ -395,6 +407,7 @@ const initDom = () => {
         scene.remove(highlightMesh);
         highlightMesh = null;
       }
+      updateHeightApplyBtn();
     });
   }
 
@@ -595,6 +608,7 @@ function handleEditClick(event) {
       heightSelectEnd = { x: tileX, y: tileY };
     }
     updateHighlight(event);
+    updateHeightApplyBtn();
     return;
   }
   if (activeTab === 'textures') {
@@ -1823,6 +1837,7 @@ function updateHighlight(event) {
     }
     highlightMesh.position.set(minX + width / 2, maxH + 0.02, minY + height / 2);
     scene.add(highlightMesh);
+    updateHeightApplyBtn();
     return;
   }
   if (activeTab === 'textures' && tileSelectionMode) {
