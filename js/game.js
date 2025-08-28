@@ -1476,7 +1476,7 @@ function drawMap3D() {
       resetCameraTarget(mapW, mapH, threeContainer);
     });
     threeContainer.addEventListener('mousedown', e => {
-      if (activeTab === 'textures') return;
+      if (activeTab === 'textures' && (tileBrushMode || tileSelectionMode)) return;
       isDragging = true;
       lastX = e.clientX;
       lastY = e.clientY;
