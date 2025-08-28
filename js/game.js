@@ -204,6 +204,13 @@ const initDom = () => {
   const heightApplyBtn = document.getElementById('heightApplyBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
 
+  const updateTileApplyBtn = () => {
+    if (tileApplyBtn) tileApplyBtn.disabled = !tileSelectionMode;
+  };
+  const updateHeightApplyBtn = () => {
+    if (heightApplyBtn) heightApplyBtn.disabled = !heightSelectionMode;
+  };
+
   const updateTileBrushControls = () => {
     const shouldEnable = tileBrushMode && !tileSelectionMode;
     if (brushInput) {
@@ -228,6 +235,8 @@ const initDom = () => {
   };
   updateTileBrushControls();
   updateHeightBrushControls();
+  updateTileApplyBtn();
+  updateHeightApplyBtn();
 
   if (tileSelectBtn) {
     tileSelectBtn.addEventListener('click', () => {
@@ -248,6 +257,7 @@ const initDom = () => {
         if (tileBrushBtn) tileBrushBtn.classList.remove('active');
         updateTileBrushControls();
       }
+      updateTileApplyBtn();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
@@ -270,6 +280,7 @@ const initDom = () => {
         }
       }
       updateTileBrushControls();
+      updateTileApplyBtn();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
@@ -320,6 +331,7 @@ const initDom = () => {
         if (heightBrushBtn) heightBrushBtn.classList.remove('active');
         updateHeightBrushControls();
       }
+      updateHeightApplyBtn();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
@@ -342,6 +354,7 @@ const initDom = () => {
         }
       }
       updateHeightBrushControls();
+      updateHeightApplyBtn();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
