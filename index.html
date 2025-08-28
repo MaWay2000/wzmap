@@ -64,6 +64,11 @@
       background: #283445; color: #dde; border: 1px solid #435066;
       padding: 2px 6px; cursor: pointer; font-size: 0.9rem;
     }
+    .action-btn {
+      background: #283445; color: #dde; border: 1px solid #435066;
+      padding: 2px 8px; cursor: pointer; font-size: 0.9rem;
+    }
+    .action-btn.active { background: #435066; }
     .toggle-label { color: #dde; user-select:none; font-size:1rem; display:flex; align-items:center; gap:4px; cursor:pointer; }
     .toggle-label input[type="checkbox"] { width:18px; height:18px; accent-color:#88f; }
 
@@ -164,13 +169,14 @@
         <button type="button" class="height-preset" data-val="255">255</button>
       </div>
       <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
-        <label for="heightBrushSizeInput" style="margin:0; white-space:nowrap;">Brush size:</label>
+        <label for="heightBrushSizeInput" style="margin:0; white-space:nowrap;">Size:</label>
         <input type="number" id="heightBrushSizeInput" value="1" min="1" max="255" step="1" style="width:60px;">
         <input type="range" id="heightBrushSizeSlider" min="1" max="255" value="1" style="flex:1;">
       </div>
       <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
-        <button type="button" id="heightSelectBtn">Select on map</button>
-        <button type="button" id="heightApplyBtn">Apply</button>
+        <button type="button" id="heightBrushBtn" class="action-btn">Use Brush</button>
+        <button type="button" id="heightSelectBtn" class="action-btn">Draw on map</button>
+        <button type="button" id="heightApplyBtn" class="action-btn">Apply</button>
       </div>
     </div>
 
