@@ -205,7 +205,15 @@ const initDom = () => {
   const heightBrushBtn = document.getElementById('heightBrushBtn');
 
   const updateTileApplyBtn = () => {
-    if (tileApplyBtn) tileApplyBtn.disabled = !tileSelectionMode;
+    if (!tileApplyBtn) return;
+    if (!tileSelectionMode) {
+      tileApplyBtn.disabled = true;
+      tileApplyBtn.classList.remove('ready');
+    } else {
+      tileApplyBtn.disabled = false;
+      const hasSelection = tileSelectStart && tileSelectEnd;
+      tileApplyBtn.classList.toggle('ready', !!hasSelection);
+    }
   };
   const updateHeightApplyBtn = () => {
     if (heightApplyBtn) heightApplyBtn.disabled = !heightSelectionMode;
@@ -309,6 +317,7 @@ const initDom = () => {
         scene.remove(highlightMesh);
         highlightMesh = null;
       }
+      updateTileApplyBtn();
     });
   }
 
@@ -594,6 +603,7 @@ function handleEditClick(event) {
         tileSelectEnd = { x: tileX, y: tileY };
       }
       updateHighlight(event);
+      updateTileApplyBtn();
       return;
     }
     if (!tileBrushMode) return;
