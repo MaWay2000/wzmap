@@ -1282,9 +1282,22 @@ function colorizeTileTypeOptions() {
     const color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[i]) ? TILE_TYPE_COLORS[i] : '#888';
     opt.textContent = '■ ' + baseName;
     opt.style.color = color;
-    opt.addEventListener('mouseenter', ev => showTileTooltip(ev, i, true));
-    opt.addEventListener('mousemove', moveTileTooltip);
-    opt.addEventListener('mouseleave', hideTileTooltip);
+    // Attach a plain-text tooltip so the browser shows terrain info
+    // even when the native <select> drop-down is expanded. Native
+    // <option> elements do not reliably fire mouse events, so we set
+    // the `title` attribute instead of custom hover handlers.
+    if (terrainSpeedModifiers) {
+      const terrainKey = TILE_TYPE_CODES[i];
+      if (terrainKey) {
+        let tooltip = `${TILE_TYPE_NAMES[i] || ''}\n`;
+        tooltip += 'Speed modifiers:\n';
+        for (const prop in terrainSpeedModifiers) {
+          const val = terrainSpeedModifiers[prop][terrainKey];
+          if (val != null) tooltip += `${prop}: ${Math.round(val * 100)}%\n`;
+        }
+        opt.title = tooltip.trim();
+      }
+    }
   }
   const idx = parseInt(sel.value, 10) || 0;
   sel.style.color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[idx]) ? TILE_TYPE_COLORS[idx] : '#888';
