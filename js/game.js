@@ -140,6 +140,7 @@ let highlightLoadingId = null;
 let highlightLoadingRot = null;
 // References to key DOM elements so helper functions can update them
 let tileApplyBtn;
+let tileCancelBtn;
 let heightApplyBtn;
 
 function updateTileApplyBtn() {
@@ -147,10 +148,12 @@ function updateTileApplyBtn() {
   if (!tileSelectionMode) {
     tileApplyBtn.disabled = true;
     tileApplyBtn.classList.remove('ready');
+    if (tileCancelBtn) tileCancelBtn.disabled = true;
   } else {
     tileApplyBtn.disabled = false;
     const hasSelection = tileSelectStart && tileSelectEnd && tileSelectionFixed;
     tileApplyBtn.classList.toggle('ready', !!hasSelection);
+    if (tileCancelBtn) tileCancelBtn.disabled = !hasSelection;
   }
 }
 
@@ -227,6 +230,7 @@ const initDom = () => {
 
   const tileSelectBtn = document.getElementById('tileSelectBtn');
   tileApplyBtn = document.getElementById('tileApplyBtn');
+  tileCancelBtn = document.getElementById('tileCancelBtn');
   const tileBrushBtn = document.getElementById('tileBrushBtn');
   const heightSelectBtn = document.getElementById('heightSelectBtn');
   heightApplyBtn = document.getElementById('heightApplyBtn');
@@ -326,6 +330,19 @@ const initDom = () => {
         }
       }
       if (needsRedraw) drawMap3D();
+      tileSelectStart = null;
+      tileSelectEnd = null;
+      tileSelectionFixed = false;
+      if (highlightMesh && scene) {
+        scene.remove(highlightMesh);
+        highlightMesh = null;
+      }
+      updateTileApplyBtn();
+    });
+  }
+
+  if (tileCancelBtn) {
+    tileCancelBtn.addEventListener('click', () => {
       tileSelectStart = null;
       tileSelectEnd = null;
       tileSelectionFixed = false;
