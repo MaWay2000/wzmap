@@ -75,6 +75,7 @@ if (showPanelIdsCheckbox) {
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
   });
 }
+let scene, camera, renderer, mesh;
 // Ensure animationId is defined before any calls to drawMap3D during
 // initial script execution.
 let animationId = null;
@@ -84,8 +85,8 @@ if (showTileInfoCheckbox && tileInfoButtonsDiv) {
     if (!showTileInfoCheckbox.checked) {
       if (showTileIdCheckbox) showTileIdCheckbox.checked = false;
       if (showTileTypesOnMapCheckbox) showTileTypesOnMapCheckbox.checked = false;
-      if (typeof drawMap3D === 'function') drawMap3D();
-    }
+      if (scene && typeof drawMap3D === 'function') drawMap3D();
+      }
   };
   showTileInfoCheckbox.addEventListener('change', updateTileInfoVisibility);
   updateTileInfoVisibility();
@@ -1766,7 +1767,6 @@ loadAllTiles(tilesetIndex).then(images => {
   showOverlay("Please select map");
   resetCameraTarget(mapW, mapH, threeContainer);
 });
-let scene, camera, renderer, mesh;
 let isDragging = false, lastX = 0, lastY = 0;
 const HEIGHT_SCALE = 0.015;
 // Culling settings (added 2025-08-16)
