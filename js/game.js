@@ -60,8 +60,6 @@ if (typeof window !== 'undefined') {
   if (typeof window.PIES_BASE === 'undefined') window.PIES_BASE = 'pies/';
   if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/';
 }
-// ---------------------------------------------------------
-
 const showTileIdCheckbox = document.getElementById('showTileId');
 const showHeightCheckbox = document.getElementById('showHeight');
 // Tile types on 3D map toggle
