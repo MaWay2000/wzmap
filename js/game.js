@@ -75,6 +75,9 @@ if (showPanelIdsCheckbox) {
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
   });
 }
+// Ensure animationId is defined before any calls to drawMap3D during
+// initial script execution.
+let animationId = null;
 if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
     tileInfoButtonsDiv.style.display = showTileInfoCheckbox.checked ? 'grid' : 'none';
@@ -1559,7 +1562,6 @@ function moveTileTooltip(ev) {
 function hideTileTooltip() {
   if (tileTooltipDiv) tileTooltipDiv.style.display = 'none';
 }
-let animationId = null;
 TILESETS.forEach((ts, i) => {
   let opt = document.createElement("option");
   opt.value = i;
