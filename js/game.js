@@ -320,6 +320,20 @@ const initDom = () => {
     } else if (e.ctrlKey && ((e.shiftKey && key === 'z') || key === 'y')) {
       e.preventDefault();
       redo();
+    } else if (e.code === 'Space') {
+      e.preventDefault();
+      if (tileApplyBtn && !tileApplyBtn.disabled) {
+        tileApplyBtn.click();
+      } else if (heightApplyBtn && !heightApplyBtn.disabled) {
+        heightApplyBtn.click();
+      }
+    } else if (key === 'escape') {
+      e.preventDefault();
+      if (tileCancelBtn && !tileCancelBtn.disabled) {
+        tileCancelBtn.click();
+      } else if (heightCancelBtn && !heightCancelBtn.disabled) {
+        heightCancelBtn.click();
+      }
     }
   });
 
