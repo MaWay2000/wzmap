@@ -199,33 +199,39 @@ function redo() {
   updateUndoRedoButtons();
 }
 
-function updateTileApplyBtn() {
-  if (!tileApplyBtn) return;
-  if (!tileSelectionMode) {
-    tileApplyBtn.disabled = true;
-    tileApplyBtn.classList.remove('ready');
-    if (tileCancelBtn) tileCancelBtn.disabled = true;
-  } else {
-    tileApplyBtn.disabled = false;
-    const hasSelection = tileSelectStart && tileSelectEnd && tileSelectionFixed;
-    tileApplyBtn.classList.toggle('ready', !!hasSelection);
-    if (tileCancelBtn) tileCancelBtn.disabled = !hasSelection;
+  function updateTileApplyBtn() {
+    if (!tileApplyBtn) return;
+    if (tileSelectControls) {
+      tileSelectControls.style.display = tileSelectionMode ? 'flex' : 'none';
+    }
+    if (!tileSelectionMode) {
+      tileApplyBtn.disabled = true;
+      tileApplyBtn.classList.remove('ready');
+      if (tileCancelBtn) tileCancelBtn.disabled = true;
+    } else {
+      tileApplyBtn.disabled = false;
+      const hasSelection = tileSelectStart && tileSelectEnd && tileSelectionFixed;
+      tileApplyBtn.classList.toggle('ready', !!hasSelection);
+      if (tileCancelBtn) tileCancelBtn.disabled = !hasSelection;
+    }
   }
-}
 
-function updateHeightApplyBtn() {
-  if (!heightApplyBtn) return;
-  if (!heightSelectionMode) {
-    heightApplyBtn.disabled = true;
-    heightApplyBtn.classList.remove('ready');
-    if (heightCancelBtn) heightCancelBtn.disabled = true;
-  } else {
-    heightApplyBtn.disabled = false;
-    const hasSelection = heightSelectStart && heightSelectEnd;
-    heightApplyBtn.classList.toggle('ready', !!hasSelection);
-    if (heightCancelBtn) heightCancelBtn.disabled = !hasSelection;
+  function updateHeightApplyBtn() {
+    if (!heightApplyBtn) return;
+    if (heightSelectControls) {
+      heightSelectControls.style.display = heightSelectionMode ? 'flex' : 'none';
+    }
+    if (!heightSelectionMode) {
+      heightApplyBtn.disabled = true;
+      heightApplyBtn.classList.remove('ready');
+      if (heightCancelBtn) heightCancelBtn.disabled = true;
+    } else {
+      heightApplyBtn.disabled = false;
+      const hasSelection = heightSelectStart && heightSelectEnd;
+      heightApplyBtn.classList.toggle('ready', !!hasSelection);
+      if (heightCancelBtn) heightCancelBtn.disabled = !hasSelection;
+    }
   }
-}
 const initDom = () => {
   loadTerrainSpeedModifiers();
   document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
@@ -291,10 +297,14 @@ const initDom = () => {
   tileApplyBtn = document.getElementById('tileApplyBtn');
   tileCancelBtn = document.getElementById('tileCancelBtn');
   const tileBrushBtn = document.getElementById('tileBrushBtn');
+  const tileBrushControls = document.getElementById('tileBrushControls');
+  const tileSelectControls = document.getElementById('tileSelectControls');
   const heightSelectBtn = document.getElementById('heightSelectBtn');
   heightApplyBtn = document.getElementById('heightApplyBtn');
   heightCancelBtn = document.getElementById('heightCancelBtn');
   const heightBrushBtn = document.getElementById('heightBrushBtn');
+  const heightBrushControls = document.getElementById('heightBrushControls');
+  const heightSelectControls = document.getElementById('heightSelectControls');
   undoBtn = document.getElementById('undoBtn');
   redoBtn = document.getElementById('redoBtn');
   if (undoBtn) undoBtn.addEventListener('click', undo);
@@ -313,28 +323,34 @@ const initDom = () => {
     }
   });
 
-  const updateTileBrushControls = () => {
-    const shouldEnable = tileBrushMode && !tileSelectionMode;
-    if (brushInput) {
-      brushInput.disabled = !shouldEnable;
-      brushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
-    }
-    if (brushSlider) {
-      brushSlider.disabled = !shouldEnable;
-      brushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
-    }
-  };
-  const updateHeightBrushControls = () => {
-    const shouldEnable = heightBrushMode && !heightSelectionMode;
-    if (heightBrushInput) {
-      heightBrushInput.disabled = !shouldEnable;
-      heightBrushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
-    }
-    if (heightBrushSlider) {
-      heightBrushSlider.disabled = !shouldEnable;
-      heightBrushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
-    }
-  };
+    const updateTileBrushControls = () => {
+      const shouldEnable = tileBrushMode && !tileSelectionMode;
+      if (brushInput) {
+        brushInput.disabled = !shouldEnable;
+        brushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+      }
+      if (brushSlider) {
+        brushSlider.disabled = !shouldEnable;
+        brushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+      }
+      if (tileBrushControls) {
+        tileBrushControls.style.display = tileBrushMode ? 'flex' : 'none';
+      }
+    };
+    const updateHeightBrushControls = () => {
+      const shouldEnable = heightBrushMode && !heightSelectionMode;
+      if (heightBrushInput) {
+        heightBrushInput.disabled = !shouldEnable;
+        heightBrushInput.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+      }
+      if (heightBrushSlider) {
+        heightBrushSlider.disabled = !shouldEnable;
+        heightBrushSlider.style.pointerEvents = shouldEnable ? 'auto' : 'none';
+      }
+      if (heightBrushControls) {
+        heightBrushControls.style.display = heightBrushMode ? 'flex' : 'none';
+      }
+    };
   updateTileBrushControls();
   updateHeightBrushControls();
   updateTileApplyBtn();
