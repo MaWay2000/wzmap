@@ -321,6 +321,24 @@ const initDom = () => {
       e.preventDefault();
       redo();
     } else if (e.code === 'Space') {
+      if (activeTab === 'textures' && tileBrushMode && lastMouseEvent) {
+        e.preventDefault();
+        handleEditClick({
+          clientX: lastMouseEvent.clientX,
+          clientY: lastMouseEvent.clientY,
+          shiftKey: e.shiftKey,
+        });
+        return;
+      }
+      if (activeTab === 'height' && heightBrushMode && lastMouseEvent) {
+        e.preventDefault();
+        handleEditClick({
+          clientX: lastMouseEvent.clientX,
+          clientY: lastMouseEvent.clientY,
+          shiftKey: e.shiftKey,
+        });
+        return;
+      }
       e.preventDefault();
       if (activeTab === 'height') {
         if (heightApplyBtn && !heightApplyBtn.disabled) heightApplyBtn.click();
