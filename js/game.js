@@ -39,12 +39,24 @@ function showOverlay(msg){
   } else {
     if (overlayText) overlayText.style.display = 'none';
   }
-  if (overlayMsg) overlayMsg.style.display = 'flex';
+  if (overlayMsg) {
+    overlayMsg.style.display = 'flex';
+    overlayMsg.classList.remove('hidden');
+  }
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.add('overlay-open');
+  }
+  if (typeof window !== 'undefined' && window.UI && typeof window.UI.showTopBar === 'function') {
+    window.UI.showTopBar(false);
+  }
 }
 // ensure single showOverlay
 window.showOverlay = showOverlay;
 function hideOverlay(){
-  if (overlayMsg) overlayMsg.style.display = 'none';
+  if (overlayMsg) {
+    overlayMsg.style.display = 'none';
+    overlayMsg.classList.add('hidden');
+  }
   if (typeof document !== 'undefined' && document.body) {
     document.body.classList.remove('overlay-open');
   }
