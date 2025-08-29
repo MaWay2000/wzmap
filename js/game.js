@@ -322,14 +322,22 @@ const initDom = () => {
       redo();
     } else if (e.code === 'Space') {
       e.preventDefault();
-      if (tileApplyBtn && !tileApplyBtn.disabled) {
+      if (activeTab === 'height') {
+        if (heightApplyBtn && !heightApplyBtn.disabled) heightApplyBtn.click();
+      } else if (activeTab === 'textures') {
+        if (tileApplyBtn && !tileApplyBtn.disabled) tileApplyBtn.click();
+      } else if (tileApplyBtn && !tileApplyBtn.disabled) {
         tileApplyBtn.click();
       } else if (heightApplyBtn && !heightApplyBtn.disabled) {
         heightApplyBtn.click();
       }
     } else if (key === 'escape') {
       e.preventDefault();
-      if (tileCancelBtn && !tileCancelBtn.disabled) {
+      if (activeTab === 'height') {
+        if (heightCancelBtn && !heightCancelBtn.disabled) heightCancelBtn.click();
+      } else if (activeTab === 'textures') {
+        if (tileCancelBtn && !tileCancelBtn.disabled) tileCancelBtn.click();
+      } else if (tileCancelBtn && !tileCancelBtn.disabled) {
         tileCancelBtn.click();
       } else if (heightCancelBtn && !heightCancelBtn.disabled) {
         heightCancelBtn.click();
