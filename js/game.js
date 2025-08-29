@@ -2323,7 +2323,7 @@ function updateHighlight(event) {
       console.warn("Unified preview failed:", err);
     });
 }
-// Ensure "Selected Tile" row uses smaller font size and stays in one line
+// Ensure "Tile" row uses smaller font size and stays in one line
 (function(){
   try {
     const idSpan = document.getElementById('selectedTileIdDisplay');
