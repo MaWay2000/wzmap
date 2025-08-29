@@ -66,6 +66,9 @@ const showTileIdCheckbox = document.getElementById('showTileId');
 const showHeightCheckbox = document.getElementById('showHeight');
 // Tile types on 3D map toggle
 const showTileTypesOnMapCheckbox = document.getElementById('showTileTypesOnMap');
+// Toggle for displaying tile info buttons
+const showTileInfoCheckbox = document.getElementById('showTileInfo');
+const tileInfoButtonsDiv = document.getElementById('tileInfoButtons');
 // New: top-level map toggle for tile-type dots
 const showTileTypesCheckbox = document.getElementById('showTileTypes');
 showPanelIdsCheckbox = document.getElementById('showPanelIds');
@@ -73,6 +76,18 @@ if (showPanelIdsCheckbox) {
   showPanelIdsCheckbox.addEventListener('change', () => {
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
   });
+}
+if (showTileInfoCheckbox && tileInfoButtonsDiv) {
+  const updateTileInfoVisibility = () => {
+    tileInfoButtonsDiv.style.display = showTileInfoCheckbox.checked ? 'grid' : 'none';
+    if (!showTileInfoCheckbox.checked) {
+      if (showTileIdCheckbox) showTileIdCheckbox.checked = false;
+      if (showTileTypesOnMapCheckbox) showTileTypesOnMapCheckbox.checked = false;
+      if (typeof drawMap3D === 'function') drawMap3D();
+    }
+  };
+  showTileInfoCheckbox.addEventListener('change', updateTileInfoVisibility);
+  updateTileInfoVisibility();
 }
 let STRUCTURE_DEFS = [];
 // STRUCTURE_TURRETS moved to module
