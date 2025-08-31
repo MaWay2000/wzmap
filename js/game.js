@@ -79,6 +79,10 @@ let scene, camera, renderer, mesh;
 // Ensure tile-related globals are initialized before any calls that rely on them.
 let tileImages = [];
 let tileTypesById = [];
+// Selected tile info must be defined before any code that might render the palette
+// to avoid accessing it prior to initialization.
+let selectedTileId = 0;
+let selectedRotation = 0;
 const TILE_TYPE_COLORS = [
   '#ff0',
   '#0f0',
@@ -179,8 +183,6 @@ function populateStructureSelect() {
 }
 let activeTab = 'view';
 window.activeTab = activeTab;
-let selectedTileId = 0;
-let selectedRotation = 0;
 let brushSize = 1;
 let highlightMesh = null;
 let previewGroup = null;
