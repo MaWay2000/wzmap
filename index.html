@@ -217,6 +217,7 @@
         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
           <button type="button" id="tileBrushBtn" class="action-btn">Use Brush</button>
           <button type="button" id="tileSelectBtn" class="action-btn">Draw on map</button>
+          <button type="button" id="tileShowBtn" class="action-btn">Show tile</button>
         </div>
         <div id="tileBrushControls" style="display:none; align-items:center; gap:6px; margin-top:4px; margin-bottom:4px;">
           <label for="brushSizeInput" style="margin:0; white-space:nowrap;">Square size:</label>
@@ -236,10 +237,9 @@
         </div>
         <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
       </div>
-      <div class="tile-options-box">
+      <div id="tileOptions" class="tile-options-box" style="display:none;">
+        <input type="checkbox" id="showTileInfo" class="toggle-btn-input">
         <div class="toggle-grid">
-          <input type="checkbox" id="showTileInfo" class="toggle-btn-input">
-          <label for="showTileInfo" class="toggle-btn" style="grid-column: 1 / -1;">Show tile</label>
           <input type="checkbox" id="showPanelIds" class="toggle-btn-input" checked>
           <label for="showPanelIds" class="toggle-btn">ID</label>
           <input type="checkbox" id="displayTileTypes" class="toggle-btn-input">
