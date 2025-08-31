@@ -62,7 +62,15 @@ if (typeof window !== 'undefined') {
   if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/';
 }
 const showTileIdCheckbox = document.getElementById('showTileId');
-const showHeightCheckbox = document.getElementById('showHeight');
+const showHeightBtn = document.getElementById('showHeightBtn');
+let showHeight = false;
+if (showHeightBtn) {
+  showHeightBtn.addEventListener('click', () => {
+    showHeight = !showHeight;
+    showHeightBtn.classList.toggle('active', showHeight);
+    drawMap3D();
+  });
+}
 // Tile types on 3D map toggle
 const showTileTypesOnMapCheckbox = document.getElementById('showTileTypesOnMap');
 // Toggle for displaying tile info buttons
@@ -1278,14 +1286,6 @@ function setActiveTab(tab) {
   panels.forEach(p => { p.style.display = 'none'; });
   const panel = document.getElementById(tab + 'Panel');
   if (panel) panel.style.display = 'block';
-  const heightToggle = document.getElementById('showHeight');
-  if (heightToggle && heightToggle.parentElement) {
-    heightToggle.parentElement.style.display = (tab === 'height') ? 'flex' : 'none';
-  }
-  const showOptions = document.getElementById('showOptions');
-  if (showOptions) {
-    showOptions.style.display = (tab === 'height') ? 'flex' : 'none';
-  }
   if (tab === 'objects') {
     updateStructurePreview();
   }
@@ -1903,7 +1903,6 @@ function drawMap3D() {
   }
   renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
   const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
-  const showHeight = !!(typeof showHeightCheckbox !== "undefined" && showHeightCheckbox && showHeightCheckbox.checked);
   const tileCount = tileImages.length || getTileCount(tilesetIndex);
   const uniqueTiles = new Map();
   for (let y = 0; y < mapH; ++y) {
@@ -2069,7 +2068,6 @@ function updateCulling() {
   animate();
 }
 if (showTileIdCheckbox) showTileIdCheckbox.addEventListener('change', () => drawMap3D());
-if (showHeightCheckbox) showHeightCheckbox.addEventListener('change', () => drawMap3D());
 if (showTileTypesOnMapCheckbox) showTileTypesOnMapCheckbox.addEventListener('change', () => drawMap3D());
 if (showTileTypesCheckbox) showTileTypesCheckbox.addEventListener('change', () => {
   try {
