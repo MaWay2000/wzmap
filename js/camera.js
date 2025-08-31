@@ -3,7 +3,8 @@
 export const cameraState = {
   camTargetX: 0,
   camTargetZ: 0,
-  rotationY: Math.PI / 4,
+  // Do not rotate the map by default so it aligns with the screen axes
+  rotationY: 0,
   rotationX: -1.1,
   zoom: 0.8,
   camMoveSpeed: 5,
@@ -13,7 +14,8 @@ export const cameraState = {
 export function resetCameraTarget(mapW, mapH, container) {
   cameraState.camTargetX = (mapW / 2 - 0.5);
   cameraState.camTargetZ = (mapH / 2 - 0.5);
-  cameraState.rotationY = Math.PI / 4;
+  // Reset orientation without rotating the map around the vertical axis
+  cameraState.rotationY = 0;
   cameraState.rotationX = -1.1;
   // Position the camera so that the map roughly fits the viewport.
   // In `game.js` the camera distance is computed as:
