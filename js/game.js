@@ -1883,8 +1883,10 @@ function drawMap3D() {
       lastY = e.clientY;
     });
     window.addEventListener('mouseup', () => {
-      isDragging = false;
-      renderTexturePalette();
+      if (isDragging) {
+        isDragging = false;
+        renderTexturePalette();
+      }
     });
     window.addEventListener('mousemove', e => {
       if (!isDragging) return;
