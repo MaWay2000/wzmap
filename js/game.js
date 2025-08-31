@@ -76,6 +76,24 @@ if (showPanelIdsCheckbox) {
   });
 }
 let scene, camera, renderer, mesh;
+// Ensure tile-related globals are initialized before any calls that rely on them.
+let tileImages = [];
+let tileTypesById = [];
+const TILE_TYPE_COLORS = [
+  '#ff0',
+  '#0f0',
+  '#f00',
+  '#00f',
+  '#f0f',
+  '#0ff',
+  '#fff',
+  '#000',
+  '#888',
+  '#ffa500',
+  '#8a2be2',
+  '#00ced1'
+];
+const TILE_ICON_SIZE = 40;
 // Ensure animationId is defined before any calls to drawMap3D during
 // initial script execution.
 let animationId = null;
@@ -1438,7 +1456,6 @@ let mapW = DEFAULT_GRID, mapH = DEFAULT_GRID;
 let mapTiles = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapHeights = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapRotations = Array(mapH).fill().map(() => Array(mapW).fill(0));
-let tileImages = [];
 const TILE_TYPE_NAMES = [
   "Sand",
   "Sandy Brush",
@@ -1497,27 +1514,11 @@ function colorizeTileTypeOptions() {
   const idx = parseInt(sel.value, 10) || 0;
   sel.style.color = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[idx]) ? TILE_TYPE_COLORS[idx] : '#888';
 }
-const TILE_TYPE_COLORS = [
-  '#ff0',
-  '#0f0',
-  '#f00',
-  '#00f',
-  '#f0f',
-  '#0ff',
-  '#fff',
-  '#000',
-  '#888',
-  '#ffa500',
-  '#8a2be2',
-  '#00ced1'
-];
-const TILE_ICON_SIZE = 40;
-let terrainSpeedModifiers = null;
-let tileTooltipDiv = null;
-let tileTypesById = [];
-let selectedTileType = 0;
-let selectedHeight = 0;
-function parseTileTypes(data) {
+  let terrainSpeedModifiers = null;
+  let tileTooltipDiv = null;
+  let selectedTileType = 0;
+  let selectedHeight = 0;
+  function parseTileTypes(data) {
   if (!data || data.length < 12) return [];
   const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const entryCount = dv.getUint32(8, true);
