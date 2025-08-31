@@ -148,17 +148,17 @@ let previewMesh = null;
 let previewLoadToken = 0;
 let highlightLoadToken = 0;
 const STRUCTURE_CATEGORY_NAMES = [
-  'Base Structures',
-  'Sensor Structures',
-  'Walls and Gates',
+  'Base buildings',
+  'Sensor structures',
+  'Walls',
   'Towers',
   'Bunkers',
   'Hardpoints',
   'Fortresses',
-  'Artillery Emplacements',
-  'Anti-Air Batteries',
-  'Other Defenses',
-  'Unavailable or Campaign-Specific Buildings'
+  'Artillery emplacements',
+  'Anti-Air batteries',
+  'Other defenses',
+  'Unavailable buildings'
 ];
 
 
@@ -197,7 +197,11 @@ function categorizeStructure(def) {
     name.includes('*') ||
     type === 'demolish'
   ) {
-    return 'Unavailable or Campaign-Specific Buildings';
+    return 'Unavailable buildings';
+  }
+
+  if (type !== 'defense') {
+    return 'Base buildings';
   }
 
   if (
@@ -206,11 +210,15 @@ function categorizeStructure(def) {
     name.includes('radar') ||
     name.includes('cb tower')
   ) {
-    return 'Sensor Structures';
+    return 'Sensor structures';
   }
 
   if (type === 'wall' || type === 'gate' || name.includes('tank trap')) {
-    return 'Walls and Gates';
+    return 'Walls';
+  }
+
+  if (type === 'fortress') {
+    return 'Fortresses';
   }
 
   if (def.combinesWithWall) {
@@ -221,8 +229,13 @@ function categorizeStructure(def) {
     return 'Bunkers';
   }
 
-  if (type === 'fortress') {
-    return 'Fortresses';
+  if (
+    name.includes('aa') ||
+    name.includes('sam') ||
+    name.includes('stormbringer') ||
+    name.includes('vindicator')
+  ) {
+    return 'Anti-Air batteries';
   }
 
   if (
@@ -230,27 +243,14 @@ function categorizeStructure(def) {
     name.includes('pit') ||
     name.includes('emplacement')
   ) {
-    return 'Artillery Emplacements';
-  }
-
-  if (
-    name.includes('aa') ||
-    name.includes('sam') ||
-    name.includes('stormbringer') ||
-    name.includes('vindicator')
-  ) {
-    return 'Anti-Air Batteries';
+    return 'Artillery emplacements';
   }
 
   if (id.includes('tower') || name.includes('tower')) {
     return 'Towers';
   }
 
-  if (type !== 'defense') {
-    return 'Base Structures';
-  }
-
-  return 'Other Defenses';
+  return 'Other defenses';
 }
 
 function populateStructureSelect() {
