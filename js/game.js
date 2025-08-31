@@ -160,24 +160,126 @@ async function loadStructureDefs() {
       name: entry.name,
       sizeX: entry.width,
       sizeY: entry.breadth,
-      pies: entry.structureModel
+      pies: entry.structureModel,
+      type: entry.type || '',
+      strength: entry.strength || '',
+      combinesWithWall: !!entry.combinesWithWall
     }));
     populateStructureSelect();
   } catch (err) {
     console.error('Failed to load structure definitions:', err);
   }
 }
+
+function categorizeStructure(def) {
+  const id = def.id.toLowerCase();
+  const name = def.name.toLowerCase();
+  const type = (def.type || '').toLowerCase();
+  const strength = (def.strength || '').toLowerCase();
+
+  if (
+    name.includes('scavenger') ||
+    id.startsWith('nx-') ||
+    id.startsWith('co-') ||
+    name.includes('*') ||
+    type === 'demolish'
+  ) {
+    return 'Unavailable buildings';
+  }
+
+  if (
+    name.includes('sensor') ||
+    name.includes('satellite') ||
+    name.includes('radar') ||
+    name.includes('cb tower')
+  ) {
+    return 'Sensor structures';
+  }
+
+  if (type === 'wall' || type === 'gate' || name.includes('tank trap')) {
+    return 'Walls';
+  }
+
+  if (def.combinesWithWall) {
+    return 'Hardpoints';
+  }
+
+  if (strength === 'bunker' || name.includes('bunker')) {
+    return 'Bunkers';
+  }
+
+  if (type === 'fortress') {
+    return 'Fortresses';
+  }
+
+  if (
+    name.includes('battery') ||
+    name.includes('pit') ||
+    name.includes('emplacement')
+  ) {
+    return 'Artillery emplacements';
+  }
+
+  if (
+    name.includes('aa') ||
+    name.includes('sam') ||
+    name.includes('stormbringer') ||
+    name.includes('vindicator')
+  ) {
+    return 'Anti-Air batteries';
+  }
+
+  if (id.includes('tower') || name.includes('tower')) {
+    return 'Towers';
+  }
+
+  if (type !== 'defense') {
+    return 'Base buildings';
+  }
+
+  return 'Other defenses';
+}
+
 function populateStructureSelect() {
   const structureSelect = document.getElementById('structureSelect');
   if (!structureSelect) return;
   while (structureSelect.firstChild) {
     structureSelect.removeChild(structureSelect.firstChild);
   }
+  const categories = [
+    'Base buildings',
+    'Sensor structures',
+    'Walls',
+    'Towers',
+    'Bunkers',
+    'Hardpoints',
+    'Fortresses',
+    'Artillery emplacements',
+    'Anti-Air batteries',
+    'Other defenses',
+    'Unavailable buildings'
+  ];
+  const groups = Object.fromEntries(categories.map(c => [c, []]));
   STRUCTURE_DEFS.forEach((def, idx) => {
-    const opt = document.createElement('option');
-    opt.value = idx;
-    opt.textContent = def.name;
-    structureSelect.appendChild(opt);
+    const cat = categorizeStructure(def);
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push({ def, idx });
+  });
+  categories.forEach(cat => {
+    const items = groups[cat];
+    if (items && items.length) {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = cat;
+      items
+        .sort((a, b) => a.def.name.localeCompare(b.def.name))
+        .forEach(({ def, idx }) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = def.name;
+          optgroup.appendChild(opt);
+        });
+      structureSelect.appendChild(optgroup);
+    }
   });
   selectedStructureIndex = -1;
 }
