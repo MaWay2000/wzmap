@@ -103,52 +103,18 @@ const TILE_ICON_SIZE = 40;
 let animationId = null;
 if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
-    tileInfoButtonsDiv.style.display = showTileInfoCheckbox.checked ? 'grid' : 'none';
-    const typeToggle = document.getElementById('displayTileTypes');
-    const disabled = !showTileInfoCheckbox.checked;
+    const visible = showTileInfoCheckbox.checked;
+    tileInfoButtonsDiv.style.display = visible ? 'grid' : 'none';
 
-    if (showTileIdCheckbox) {
-      showTileIdCheckbox.disabled = disabled;
-      if (disabled) {
-        // Uncheck and trigger change so ID on map doesn't remain active
-        showTileIdCheckbox.checked = false;
-        showTileIdCheckbox.removeAttribute('checked');
-        showTileIdCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
-    if (showTileTypesOnMapCheckbox) {
-      showTileTypesOnMapCheckbox.disabled = disabled;
-      if (disabled) {
-        // Ensure Type on map is cleared when Show tile is off
-        showTileTypesOnMapCheckbox.checked = false;
-        showTileTypesOnMapCheckbox.removeAttribute('checked');
-        showTileTypesOnMapCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
+    const typeToggle = document.getElementById('displayTileTypes');
     const tileIdLabel = document.querySelector('label[for="showPanelIds"]');
-    if (showPanelIdsCheckbox) {
-      showPanelIdsCheckbox.disabled = disabled;
-      showPanelIdsCheckbox.style.display = disabled ? 'none' : '';
-      if (tileIdLabel) tileIdLabel.style.display = disabled ? 'none' : '';
-      if (disabled) {
-        // Reset panel ID toggle to prevent lingering state
-        showPanelIdsCheckbox.checked = false;
-        showPanelIdsCheckbox.removeAttribute('checked');
-        showPanelIdsCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
     const typeLabel = document.querySelector('label[for="displayTileTypes"]');
-    if (typeToggle) {
-      typeToggle.disabled = disabled;
-      typeToggle.style.display = disabled ? 'none' : '';
-      if (typeLabel) typeLabel.style.display = disabled ? 'none' : '';
-      if (disabled) {
-        // Clear Type toggle and notify listeners
-        typeToggle.checked = false;
-        typeToggle.removeAttribute('checked');
-        typeToggle.dispatchEvent(new Event('change'));
-      }
-    }
+
+    if (showPanelIdsCheckbox) showPanelIdsCheckbox.style.display = visible ? '' : 'none';
+    if (tileIdLabel) tileIdLabel.style.display = visible ? '' : 'none';
+    if (typeToggle) typeToggle.style.display = visible ? '' : 'none';
+    if (typeLabel) typeLabel.style.display = visible ? '' : 'none';
+
     if (scene && typeof drawMap3D === 'function') drawMap3D();
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
   };
@@ -1385,6 +1351,8 @@ function renderTexturePalette() {
   const palette = document.getElementById('texturePalette');
   if (!palette) return;
   palette.innerHTML = '';
+  const showTileInfo = !showTileInfoCheckbox || showTileInfoCheckbox.checked;
+  const typeToggle = document.getElementById('displayTileTypes');
   // Use the actual number of loaded tile images rather than the
   // expected count from the tileset definition. This ensures we
   // don't accidentally clip tiles when a tileset provides more (or
@@ -1406,8 +1374,7 @@ function renderTexturePalette() {
       ctx.drawImage(img, 0, 0, TILE_ICON_SIZE, TILE_ICON_SIZE);
       ctx.restore();
     }
-    const typeToggle = document.getElementById('displayTileTypes');
-    if (typeToggle && typeToggle.checked && tileTypesById.length) {
+    if (showTileInfo && typeToggle && typeToggle.checked && tileTypesById.length) {
       const typeCode = tileTypesById[idx] ?? 0;
       const colour = TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length];
       ctx.fillStyle = colour;
@@ -1422,7 +1389,7 @@ function renderTexturePalette() {
       const el = (typeof showPanelIdsCheckbox !== 'undefined' && showPanelIdsCheckbox)
         ? showPanelIdsCheckbox
         : document.getElementById('showPanelIds');
-      if (!el || el.checked) {
+      if (showTileInfo && (!el || el.checked)) {
         const label = String(idx);
         const cx = TILE_ICON_SIZE / 2;
         const cy = TILE_ICON_SIZE / 2;
@@ -1887,7 +1854,8 @@ function drawMap3D() {
     });
   }
   renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
-  const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
+  const showTileInfo = !!(typeof showTileInfoCheckbox !== "undefined" && showTileInfoCheckbox && showTileInfoCheckbox.checked);
+  const showTileId = showTileInfo && !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
   const showHeight = !!(typeof showHeightCheckbox !== "undefined" && showHeightCheckbox && showHeightCheckbox.checked);
   const tileCount = tileImages.length || getTileCount(tilesetIndex);
   const uniqueTiles = new Map();
@@ -1914,7 +1882,7 @@ function drawMap3D() {
       ctx.drawImage(img, 0, 0, 32, 32);
 // --- draw small type swatch on map when enabled ---
 try {
-  if (typeof showTileTypesOnMapCheckbox !== 'undefined' && showTileTypesOnMapCheckbox && showTileTypesOnMapCheckbox.checked) {
+  if (showTileInfo && typeof showTileTypesOnMapCheckbox !== 'undefined' && showTileTypesOnMapCheckbox && showTileTypesOnMapCheckbox.checked) {
     const typeCode = (typeof tileTypesById !== 'undefined' && tileTypesById.length) ? (tileTypesById[tileIdx] ?? 0) : 0;
     const col = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length]) ? TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length] : '#888';
     ctx.fillStyle = col;
