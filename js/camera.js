@@ -15,11 +15,15 @@ export function resetCameraTarget(mapW, mapH, container) {
   cameraState.camTargetZ = (mapH / 2 - 0.5);
   cameraState.rotationY = Math.PI / 4;
   cameraState.rotationX = -1.1;
-  const aspect = container.offsetWidth / container.offsetHeight;
-  const margin = 1.1;
-  let zoomX = (mapW / 64) * margin;
-  let zoomZ = (mapH / (64 * aspect)) * margin;
-  cameraState.zoom = Math.max(zoomX, zoomZ);
+  // Position the camera so that the map roughly fits the viewport.
+  // In `game.js` the camera distance is computed as:
+  //   dist = max(mapW, mapH) * 1.5 * cameraState.zoom
+  // and the horizontal distance from the camera to the target on the
+  // ground plane is `cos(rotationX) * dist`.  To have the map fill the
+  // view we choose a zoom that makes this horizontal distance about half
+  // the largest map dimension, leaving a small margin.
+  const margin = 1.05; // extra space around the edges
+  cameraState.zoom = margin / (3 * Math.cos(cameraState.rotationX));
 }
 
 export function setupKeyboard(resetCallback) {
