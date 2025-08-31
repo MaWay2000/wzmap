@@ -1005,7 +1005,6 @@ function handleEditClick(event) {
 buildStructureGroup(def, selectedStructureRotation, sizeX, sizeY, 1).then(group => {
   const cX = group.userData.centerX;
   const cZ = group.userData.centerZ;
-  const cY = group.userData.centerY;
   const minYVal = group.userData.minY;
   let minH = Infinity;
   for (let dy = 0; dy < sizeY; dy++) {
@@ -1016,7 +1015,7 @@ buildStructureGroup(def, selectedStructureRotation, sizeX, sizeY, 1).then(group 
   }
   const pX = tileX + sizeX / 2 - cX;
   const pZ = tileY + sizeY / 2 - cZ;
-  const pY = minH + cY - minYVal;
+  const pY = minH - minYVal;
   group.position.set(pX, pY, pZ);
   objectsGroup.add(group);
   if (!scene.children.includes(objectsGroup)) scene.add(objectsGroup);
@@ -1157,13 +1156,12 @@ function __old_updateHighlight(event) {
     const repositionPreview = () => {
       if (!highlightModelGroup) return;
       const cX = highlightModelGroup.userData.centerX;
-      const cY = highlightModelGroup.userData.centerY;
       const cZ = highlightModelGroup.userData.centerZ;
       const minYVal = highlightModelGroup.userData.minY;
       const pX = tileX + sizeX / 2 - cX;
       const pY = maxH2 + 0.02 - minYVal;
       const pZ = tileY + sizeY / 2 - cZ;
-      highlightModelGroup.position.set(pX + cX, pY + cY, pZ + cZ);
+      highlightModelGroup.position.set(pX + cX, pY, pZ + cZ);
     };
     if (!pieFile) {
       previewGroup = newGroup;
@@ -1287,7 +1285,7 @@ function __old_updateHighlight(event) {
           const pX = tileX + sizeX / 2 - cX;
           const pY = maxH2 + 0.02 - minYVal;
           const pZ = tileY + sizeY / 2 - cZ;
-          inner.position.set(pX + cX, pY + cY, pZ + cZ);
+          inner.position.set(pX + cX, pY, pZ + cZ);
           inner.rotation.y = selectedStructureRotation * Math.PI / 2;
           inner.userData.centerX = cX;
           inner.userData.centerY = cY;
