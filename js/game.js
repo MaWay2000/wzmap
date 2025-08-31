@@ -842,7 +842,9 @@ const initDom = () => {
     updateStructurePreview();
   }
   if (threeContainer) {
-    threeContainer.addEventListener('click', handleEditClick);
+    // Use pointerdown so tile edits respond immediately on press and
+    // work reliably across mouse and touch interactions.
+    threeContainer.addEventListener('pointerdown', handleEditClick);
   }
 };
 
