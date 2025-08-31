@@ -147,6 +147,19 @@ let previewRenderer = null;
 let previewMesh = null;
 let previewLoadToken = 0;
 let highlightLoadToken = 0;
+const STRUCTURE_CATEGORY_NAMES = [
+  'Base Structures',
+  'Sensor Structures',
+  'Walls and Gates',
+  'Towers',
+  'Bunkers',
+  'Hardpoints',
+  'Fortresses',
+  'Artillery Emplacements',
+  'Anti-Air Batteries',
+  'Other Defenses',
+  'Unavailable or Campaign-Specific Buildings'
+];
 
 
 async function loadStructureDefs() {
@@ -184,7 +197,7 @@ function categorizeStructure(def) {
     name.includes('*') ||
     type === 'demolish'
   ) {
-    return 'Unavailable buildings';
+    return 'Unavailable or Campaign-Specific Buildings';
   }
 
   if (
@@ -193,11 +206,11 @@ function categorizeStructure(def) {
     name.includes('radar') ||
     name.includes('cb tower')
   ) {
-    return 'Sensor structures';
+    return 'Sensor Structures';
   }
 
   if (type === 'wall' || type === 'gate' || name.includes('tank trap')) {
-    return 'Walls';
+    return 'Walls and Gates';
   }
 
   if (def.combinesWithWall) {
@@ -217,7 +230,7 @@ function categorizeStructure(def) {
     name.includes('pit') ||
     name.includes('emplacement')
   ) {
-    return 'Artillery emplacements';
+    return 'Artillery Emplacements';
   }
 
   if (
@@ -226,7 +239,7 @@ function categorizeStructure(def) {
     name.includes('stormbringer') ||
     name.includes('vindicator')
   ) {
-    return 'Anti-Air batteries';
+    return 'Anti-Air Batteries';
   }
 
   if (id.includes('tower') || name.includes('tower')) {
@@ -234,10 +247,10 @@ function categorizeStructure(def) {
   }
 
   if (type !== 'defense') {
-    return 'Base buildings';
+    return 'Base Structures';
   }
 
-  return 'Other defenses';
+  return 'Other Defenses';
 }
 
 function populateStructureSelect() {
@@ -246,42 +259,63 @@ function populateStructureSelect() {
   while (structureSelect.firstChild) {
     structureSelect.removeChild(structureSelect.firstChild);
   }
-  const categories = [
-    'Base buildings',
-    'Sensor structures',
-    'Walls',
-    'Towers',
-    'Bunkers',
-    'Hardpoints',
-    'Fortresses',
-    'Artillery emplacements',
-    'Anti-Air batteries',
-    'Other defenses',
-    'Unavailable buildings'
-  ];
-  const groups = Object.fromEntries(categories.map(c => [c, []]));
+  const filterSelect = document.getElementById('structureFilter');
+  const filter = filterSelect ? filterSelect.value : 'All types';
+  const groups = Object.fromEntries(STRUCTURE_CATEGORY_NAMES.map(c => [c, []]));
   STRUCTURE_DEFS.forEach((def, idx) => {
     const cat = categorizeStructure(def);
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
-  categories.forEach(cat => {
-    const items = groups[cat];
-    if (items && items.length) {
-      const optgroup = document.createElement('optgroup');
-      optgroup.label = cat;
-      items
-        .sort((a, b) => a.def.name.localeCompare(b.def.name))
-        .forEach(({ def, idx }) => {
-          const opt = document.createElement('option');
-          opt.value = idx;
-          opt.textContent = def.name;
-          optgroup.appendChild(opt);
-        });
-      structureSelect.appendChild(optgroup);
-    }
-  });
+  if (filter === 'All types') {
+    STRUCTURE_CATEGORY_NAMES.forEach(cat => {
+      const items = groups[cat];
+      if (items && items.length) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = cat;
+        items
+          .sort((a, b) => a.def.name.localeCompare(b.def.name))
+          .forEach(({ def, idx }) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = def.name;
+            optgroup.appendChild(opt);
+          });
+        structureSelect.appendChild(optgroup);
+      }
+    });
+  } else {
+    const items = groups[filter] || [];
+    items
+      .sort((a, b) => a.def.name.localeCompare(b.def.name))
+      .forEach(({ def, idx }) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = def.name;
+        structureSelect.appendChild(opt);
+      });
+  }
   selectedStructureIndex = -1;
+  updateStructurePreview();
+}
+
+function populateStructureFilter() {
+  const filterSelect = document.getElementById('structureFilter');
+  if (!filterSelect) return;
+  while (filterSelect.firstChild) {
+    filterSelect.removeChild(filterSelect.firstChild);
+  }
+  const allOpt = document.createElement('option');
+  allOpt.value = 'All types';
+  allOpt.textContent = 'All types';
+  filterSelect.appendChild(allOpt);
+  STRUCTURE_CATEGORY_NAMES.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    filterSelect.appendChild(opt);
+  });
+  filterSelect.value = 'All types';
 }
 let activeTab = 'view';
 window.activeTab = activeTab;
@@ -951,6 +985,7 @@ const initDom = () => {
   });
   setTileset(tilesetIndex);
   const structureSelect = document.getElementById('structureSelect');
+  const structureFilter = document.getElementById('structureFilter');
   if (structureSelect) {
     structureSelect.addEventListener('change', () => {
       const val = parseInt(structureSelect.value, 10);
@@ -959,6 +994,14 @@ const initDom = () => {
       selectedStructureRotation = 0;
       updateStructurePreview();
     });
+  }
+  if (structureFilter) {
+    populateStructureFilter();
+    structureFilter.addEventListener('change', () => {
+      populateStructureSelect();
+    });
+  }
+  if (structureSelect) {
     loadStructureDefs();
   }
   const sRotLeft = document.getElementById('structRotateLeft');
