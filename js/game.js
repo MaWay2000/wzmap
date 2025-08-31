@@ -1002,26 +1002,14 @@ function handleEditClick(event) {
         if (h < minH) minH = h;
       }
     }
-buildStructureGroup(def, selectedStructureRotation, sizeX, sizeY, 1).then(group => {
-  const cX = group.userData.centerX;
-  const cZ = group.userData.centerZ;
-  const minYVal = group.userData.minY;
-  let minH = Infinity;
-  for (let dy = 0; dy < sizeY; dy++) {
-    for (let dx = 0; dx < sizeX; dx++) {
-      const h = mapHeights[tileY + dy][tileX + dx] * HEIGHT_SCALE;
-      if (h < minH) minH = h;
-    }
+    buildStructureGroup(def, selectedStructureRotation, sizeX, sizeY).then(group => {
+      const pos = getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH);
+      group.position.copy(pos);
+      objectsGroup.add(group);
+      if (!scene.children.includes(objectsGroup)) scene.add(objectsGroup);
+      drawMap3D();
+    }).catch(() => {});
   }
-  const pX = tileX + sizeX / 2 - cX;
-  const pZ = tileY + sizeY / 2 - cZ;
-  const pY = minH - minYVal;
-  group.position.set(pX, pY, pZ);
-  objectsGroup.add(group);
-  if (!scene.children.includes(objectsGroup)) scene.add(objectsGroup);
-  drawMap3D();
-}).catch(() => {});
-}
 }
 function __old_updateHighlight(event) {
   if (!threeContainer || !scene) return;
