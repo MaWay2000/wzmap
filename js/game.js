@@ -161,6 +161,22 @@ const STRUCTURE_CATEGORY_NAMES = [
   'Unavailable buildings'
 ];
 
+const BASE_STRUCTURE_IDS = new Set([
+  'a0commandcentre',
+  'a0comdroidcontrol',
+  'a0powergenerator',
+  'a0powmod1',
+  'a0researchfacility',
+  'a0researchmodule1',
+  'a0lightfactory',
+  'a0cyborgfactory',
+  'a0facmod1',
+  'a0vtolfactory1',
+  'a0repaircentre3',
+  'a0vtolpad',
+  'a0resourceextractor'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -200,8 +216,12 @@ function categorizeStructure(def) {
     return 'Unavailable buildings';
   }
 
-  if (type !== 'defense') {
+  if (BASE_STRUCTURE_IDS.has(id)) {
     return 'Base buildings';
+  }
+
+  if (type !== 'defense') {
+    return 'Unavailable buildings';
   }
 
   if (
