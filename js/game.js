@@ -149,7 +149,6 @@ let previewLoadToken = 0;
 let highlightLoadToken = 0;
 const STRUCTURE_CATEGORY_NAMES = [
   'Base buildings',
-  'Sensor structures',
   'Walls',
   'Towers',
   'Bunkers',
@@ -177,6 +176,17 @@ const BASE_STRUCTURE_IDS = new Set([
   'a0resourceextractor'
 ]);
 
+const SENSOR_STRUCTURE_IDS = new Set([
+  'sys-sensotower01',
+  'sys-sensotower02',
+  'sys-radardetector01',
+  'sys-cb-tower01',
+  'sys-vtol-radartower01',
+  'sys-vtol-cb-tower01',
+  'sys-sensotowerws',
+  'a0sat-linkcentre'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -184,16 +194,18 @@ async function loadStructureDefs() {
     const resp = await fetch(url, { cache: 'no-cache' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    STRUCTURE_DEFS = Object.values(data).map(entry => ({
-      id: entry.id,
-      name: entry.name,
-      sizeX: entry.width,
-      sizeY: entry.breadth,
-      pies: entry.structureModel,
-      type: entry.type || '',
-      strength: entry.strength || '',
-      combinesWithWall: !!entry.combinesWithWall
-    }));
+    STRUCTURE_DEFS = Object.values(data)
+      .map(entry => ({
+        id: entry.id,
+        name: entry.name,
+        sizeX: entry.width,
+        sizeY: entry.breadth,
+        pies: entry.structureModel,
+        type: entry.type || '',
+        strength: entry.strength || '',
+        combinesWithWall: !!entry.combinesWithWall
+      }))
+      .filter(def => !SENSOR_STRUCTURE_IDS.has(def.id.toLowerCase()));
     populateStructureSelect();
   } catch (err) {
     console.error('Failed to load structure definitions:', err);
@@ -230,7 +242,7 @@ function categorizeStructure(def) {
     name.includes('radar') ||
     name.includes('cb tower')
   ) {
-    return 'Sensor structures';
+    return 'Unavailable buildings';
   }
 
   if (type === 'wall' || type === 'gate' || name.includes('tank trap')) {
