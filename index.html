@@ -20,13 +20,13 @@
     }
     /* 3D container */
     #threeContainer {
-      position: absolute; left: 300px; top: var(--menu-height); width: calc(100vw - 300px); height: calc(100vh - var(--menu-height));
+      position: absolute; left: 400px; top: var(--menu-height); width: calc(100vw - 400px); height: calc(100vh - var(--menu-height));
       background: var(--bg); z-index: 1;
     }
     body.overlay-open #threeContainer { left: 0; width: 100vw; }
     /* Top bar (kept but minimal; can be toggled by the game) */
     #uiBar {
-      position: absolute; left: 300px; top: var(--menu-height); width: calc(100vw - 300px); z-index: 10;
+      position: absolute; left: 400px; top: var(--menu-height); width: calc(100vw - 400px); z-index: 10;
       padding: 4px 8px; background: var(--bar); border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 10px;
     }
@@ -73,7 +73,7 @@
 
     /* Top editor panel */
     #editPanel {
-      position:absolute; left:0; top:var(--menu-height); width:300px; height:calc(100vh - var(--menu-height));
+      position:absolute; left:0; top:var(--menu-height); width:400px; height:calc(100vh - var(--menu-height));
       background: rgba(24,32,48,0.95); padding:6px; z-index:12;
       display:flex; flex-direction:column; align-items:flex-start; gap:10px;
       overflow-x:hidden;
