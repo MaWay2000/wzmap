@@ -22,6 +22,7 @@ import { buildStructureGroup } from "./structureGroup.js";
 const tilesetSelect = document.getElementById('tilesetSelect');
 const fileListDiv = document.getElementById('fileList');
 const infoDiv = document.getElementById('info');
+const compassNeedle = document.getElementById('compassNeedle');
 const mapFilenameSpan = document.getElementById('mapFilename');
 const uiBar = document.getElementById('uiBar');
 const threeContainer = document.getElementById('threeContainer');
@@ -2053,6 +2054,10 @@ function updateCulling() {
     camera.position.y = camY;
     camera.position.z = cameraState.camTargetZ + Math.cos(cameraState.rotationY) * Math.cos(cameraState.rotationX) * dist;
     camera.lookAt(cameraState.camTargetX, 0, cameraState.camTargetZ);
+    if (compassNeedle) {
+      const deg = -cameraState.rotationY * 180 / Math.PI;
+      compassNeedle.setAttribute('transform', `rotate(${deg} 50 50)`);
+    }
     updateCulling();
     renderer.render(scene, camera);
     animationId = requestAnimationFrame(animate);
