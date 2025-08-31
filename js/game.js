@@ -59,7 +59,7 @@ window.hideOverlay = hideOverlay;
 if (typeof window !== 'undefined') {
   if (typeof window.STRUCTURES_JSON === 'undefined') window.STRUCTURES_JSON = 'structure.json';
   if (typeof window.PIES_BASE === 'undefined') window.PIES_BASE = 'pies/';
-  if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/';
+  if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/texpages/';
 }
 const showTileIdCheckbox = document.getElementById('showTileId');
 const showHeightBtn = document.getElementById('showHeightBtn');
