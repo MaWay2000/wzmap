@@ -2469,9 +2469,14 @@ function updateHighlight(event) {
   buildStructureGroup(def, selectedStructureRotation, sizeX, sizeY, null, 0.55)
     .then(group => {
       if (thisToken !== highlightLoadToken) return; // stale
-      // Place it by tile center, sit on the minimum ground height
-      const baseY = (isFinite(minH2) ? minH2 : 0) + 0.02;
-      group.position.set(tileX + sizeX / 2, baseY, tileY + sizeY / 2);
+      // Use the same placement logic as for final structures to keep
+      // preview alignment consistent. Compute the base position using
+      // the structure's center and minY, then nudge it slightly upward
+      // to avoid z-fighting with the ground.
+      const baseH = isFinite(minH2) ? minH2 : 0;
+      const pos = getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, baseH);
+      pos.y += 0.02;
+      group.position.copy(pos);
       scene.add(group);
       highlightModelGroup = group;
       highlightCachedId = def.id;
