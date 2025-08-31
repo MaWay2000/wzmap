@@ -1288,16 +1288,20 @@ function setActiveTab(tab) {
   }
 }
 window.setActiveTab = setActiveTab;
-function updateSelectedInfo() {
-  const span = document.getElementById('selectedTileIdDisplay');
-  if (span) {
-    span.textContent = selectedTileId;
-  }
-  const typeSelect = document.getElementById('tileTypeSelect');
-  if (typeSelect && tileTypesById.length) {
-    const typeVal = tileTypesById[selectedTileId] ?? 0;
-    typeSelect.value = typeVal;
-    selectedTileType = typeVal;
+  function updateSelectedInfo() {
+    const span = document.getElementById('selectedTileIdDisplay');
+    if (span) {
+      span.textContent = selectedTileId;
+    }
+    const rotSpan = document.getElementById('selectedRotationDisplay');
+    if (rotSpan) {
+      rotSpan.textContent = String(selectedRotation * 90);
+    }
+    const typeSelect = document.getElementById('tileTypeSelect');
+    if (typeSelect && tileTypesById.length) {
+      const typeVal = tileTypesById[selectedTileId] ?? 0;
+      typeSelect.value = typeVal;
+      selectedTileType = typeVal;
     typeSelect.style.color = TILE_TYPE_COLORS[typeVal % TILE_TYPE_COLORS.length] || '#888';
   }
   // Ensure the type label prefix is present
