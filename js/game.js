@@ -246,7 +246,7 @@ function categorizeStructure(def) {
     return 'Unavailable buildings';
   }
 
-  if (type === 'wall' || type === 'gate' || name.includes('tank trap')) {
+  if (type === 'wall' || type === 'gate' || type === 'corner wall' || name.includes('tank trap')) {
     return 'Walls';
   }
 
