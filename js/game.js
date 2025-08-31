@@ -1295,7 +1295,7 @@ window.setActiveTab = setActiveTab;
     }
     const rotSpan = document.getElementById('selectedRotationDisplay');
     if (rotSpan) {
-      rotSpan.textContent = String(selectedRotation * 90);
+      rotSpan.textContent = `${selectedRotation * 90}°`;
     }
     const typeSelect = document.getElementById('tileTypeSelect');
     if (typeSelect && tileTypesById.length) {
