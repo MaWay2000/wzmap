@@ -1351,8 +1351,8 @@ function renderTexturePalette() {
   const palette = document.getElementById('texturePalette');
   if (!palette) return;
   palette.innerHTML = '';
-  const showTileInfo = !showTileInfoCheckbox || showTileInfoCheckbox.checked;
   const typeToggle = document.getElementById('displayTileTypes');
+  const showTypes = typeToggle && typeToggle.checked && tileTypesById.length;
   // Use the actual number of loaded tile images rather than the
   // expected count from the tileset definition. This ensures we
   // don't accidentally clip tiles when a tileset provides more (or
@@ -1374,7 +1374,7 @@ function renderTexturePalette() {
       ctx.drawImage(img, 0, 0, TILE_ICON_SIZE, TILE_ICON_SIZE);
       ctx.restore();
     }
-    if (showTileInfo && typeToggle && typeToggle.checked && tileTypesById.length) {
+    if (showTypes) {
       const typeCode = tileTypesById[idx] ?? 0;
       const colour = TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length];
       ctx.fillStyle = colour;
@@ -1389,7 +1389,7 @@ function renderTexturePalette() {
       const el = (typeof showPanelIdsCheckbox !== 'undefined' && showPanelIdsCheckbox)
         ? showPanelIdsCheckbox
         : document.getElementById('showPanelIds');
-      if (showTileInfo && (!el || el.checked)) {
+      if (!el || el.checked) {
         const label = String(idx);
         const cx = TILE_ICON_SIZE / 2;
         const cy = TILE_ICON_SIZE / 2;
@@ -1854,8 +1854,7 @@ function drawMap3D() {
     });
   }
   renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
-  const showTileInfo = !!(typeof showTileInfoCheckbox !== "undefined" && showTileInfoCheckbox && showTileInfoCheckbox.checked);
-  const showTileId = showTileInfo && !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
+  const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
   const showHeight = !!(typeof showHeightCheckbox !== "undefined" && showHeightCheckbox && showHeightCheckbox.checked);
   const tileCount = tileImages.length || getTileCount(tilesetIndex);
   const uniqueTiles = new Map();
@@ -1882,7 +1881,7 @@ function drawMap3D() {
       ctx.drawImage(img, 0, 0, 32, 32);
 // --- draw small type swatch on map when enabled ---
 try {
-  if (showTileInfo && typeof showTileTypesOnMapCheckbox !== 'undefined' && showTileTypesOnMapCheckbox && showTileTypesOnMapCheckbox.checked) {
+  if (typeof showTileTypesOnMapCheckbox !== 'undefined' && showTileTypesOnMapCheckbox && showTileTypesOnMapCheckbox.checked) {
     const typeCode = (typeof tileTypesById !== 'undefined' && tileTypesById.length) ? (tileTypesById[tileIdx] ?? 0) : 0;
     const col = (typeof TILE_TYPE_COLORS !== 'undefined' && TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length]) ? TILE_TYPE_COLORS[typeCode % TILE_TYPE_COLORS.length] : '#888';
     ctx.fillStyle = col;
