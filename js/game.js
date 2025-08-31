@@ -67,6 +67,8 @@ const showTileTypesOnMapCheckbox = document.getElementById('showTileTypesOnMap')
 // Toggle for displaying tile info buttons
 const showTileInfoCheckbox = document.getElementById('showTileInfo');
 const tileInfoButtonsDiv = document.getElementById('tileInfoButtons');
+const tileOptionsBox = document.getElementById('tileOptions');
+const tileShowBtn = document.getElementById('tileShowBtn');
 // New: top-level map toggle for tile-type dots
 const showTileTypesCheckbox = document.getElementById('showTileTypes');
 showPanelIdsCheckbox = document.getElementById('showPanelIds');
@@ -105,6 +107,7 @@ if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
     const visible = showTileInfoCheckbox.checked;
     tileInfoButtonsDiv.style.display = visible ? 'grid' : 'none';
+    if (tileOptionsBox) tileOptionsBox.style.display = visible ? 'block' : 'none';
 
     const typeToggle = document.getElementById('displayTileTypes');
     const tileIdLabel = document.querySelector('label[for="showPanelIds"]');
@@ -114,6 +117,8 @@ if (showTileInfoCheckbox && tileInfoButtonsDiv) {
     if (tileIdLabel) tileIdLabel.style.display = visible ? '' : 'none';
     if (typeToggle) typeToggle.style.display = visible ? '' : 'none';
     if (typeLabel) typeLabel.style.display = visible ? '' : 'none';
+
+    if (tileShowBtn) tileShowBtn.classList.toggle('active', visible);
 
     if (scene && typeof drawMap3D === 'function') drawMap3D();
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
@@ -446,7 +451,15 @@ const initDom = () => {
       if (tileSelectionMode) {
         tileSelectionMode = false;
         tileSelectBtn.classList.remove('active');
-        updateTileBrushControls();
+      } else {
+        tileSelectionMode = true;
+        tileSelectBtn.classList.add('active');
+        tileBrushMode = false;
+        if (tileBrushBtn) tileBrushBtn.classList.remove('active');
+        if (showTileInfoCheckbox) {
+          showTileInfoCheckbox.checked = false;
+          showTileInfoCheckbox.dispatchEvent(new Event('change'));
+        }
         tileSelectStart = null;
         tileSelectEnd = null;
         tileSelectionFixed = false;
@@ -454,13 +467,8 @@ const initDom = () => {
           scene.remove(highlightMesh);
           highlightMesh = null;
         }
-      } else {
-        tileSelectionMode = true;
-        tileSelectBtn.classList.add('active');
-        tileBrushMode = false;
-        if (tileBrushBtn) tileBrushBtn.classList.remove('active');
-        updateTileBrushControls();
       }
+      updateTileBrushControls();
       updateTileApplyBtn();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
@@ -476,6 +484,10 @@ const initDom = () => {
         tileBrushBtn.classList.add('active');
         tileSelectionMode = false;
         if (tileSelectBtn) tileSelectBtn.classList.remove('active');
+        if (showTileInfoCheckbox) {
+          showTileInfoCheckbox.checked = false;
+          showTileInfoCheckbox.dispatchEvent(new Event('change'));
+        }
         tileSelectStart = null;
         tileSelectEnd = null;
         tileSelectionFixed = false;
@@ -486,6 +498,29 @@ const initDom = () => {
       }
       updateTileBrushControls();
       updateTileApplyBtn();
+      if (lastMouseEvent) updateHighlight(lastMouseEvent);
+    });
+  }
+
+  if (tileShowBtn && showTileInfoCheckbox) {
+    tileShowBtn.addEventListener('click', () => {
+      showTileInfoCheckbox.checked = !showTileInfoCheckbox.checked;
+      if (showTileInfoCheckbox.checked) {
+        tileBrushMode = false;
+        tileSelectionMode = false;
+        if (tileBrushBtn) tileBrushBtn.classList.remove('active');
+        if (tileSelectBtn) tileSelectBtn.classList.remove('active');
+        tileSelectStart = null;
+        tileSelectEnd = null;
+        tileSelectionFixed = false;
+        if (highlightMesh && scene) {
+          scene.remove(highlightMesh);
+          highlightMesh = null;
+        }
+      }
+      updateTileBrushControls();
+      updateTileApplyBtn();
+      showTileInfoCheckbox.dispatchEvent(new Event('change'));
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
