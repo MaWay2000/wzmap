@@ -197,6 +197,7 @@ let tileSelectStart = null;
 let tileSelectEnd = null;
 let tileSelectionFixed = false;
 const raycaster = new THREE.Raycaster();
+raycaster.layers.set(0);
 const mouse = new THREE.Vector2();
 let highlightCachedId = null;
 let highlightCachedRot = null;
@@ -1898,6 +1899,7 @@ function drawMap3D() {
       0.1,
       4000
     );
+    camera.layers.enable(1);
     window.addEventListener('resize', () => {
       renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
       camera.aspect = threeContainer.offsetWidth / threeContainer.offsetHeight;
@@ -2439,6 +2441,7 @@ function updateHighlight(event) {
   planeMesh.position.set(tileX + sizeX / 2, maxH2 + 0.02, tileY + sizeY / 2);
   highlightMesh = planeMesh;
   previewGroup.add(planeMesh);
+  previewGroup.traverse(obj => obj.layers.set(1));
   scene.add(previewGroup);
   // Clear old model preview
   if (highlightModelGroup) {
@@ -2465,6 +2468,7 @@ function updateHighlight(event) {
       const pos = getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, baseH);
       pos.y += 0.02;
       group.position.copy(pos);
+      group.traverse(obj => obj.layers.set(1));
       scene.add(group);
       highlightModelGroup = group;
       highlightCachedId = def.id;
