@@ -99,7 +99,7 @@ const TILE_TYPE_COLORS = [
   '#8a2be2',
   '#00ced1'
 ];
-const TILE_ICON_SIZE = 42;
+const TILE_ICON_SIZE = 41;
 // Ensure animationId is defined before any calls to drawMap3D during
 // initial script execution.
 let animationId = null;
