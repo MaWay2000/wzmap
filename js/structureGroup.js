@@ -110,21 +110,25 @@ tMesh.position.set(
     group.add(tMesh);
   }
 group.updateMatrixWorld(true);
-const bbox = new THREE.Box3().setFromObject(group);
+let bbox = new THREE.Box3().setFromObject(group);
 const minY = bbox.min.y;
 group.userData.minY = minY;
 if (minY !== 0) {
   group.position.y -= minY;
+  group.updateMatrixWorld(true);
+  bbox = new THREE.Box3().setFromObject(group);
 }
-  // Expose base block center for placement calculations
-  group.userData.centerX = blockCenters[0].cX;
-  group.userData.centerY = blockCenters[0].cY;
-  group.userData.centerZ = blockCenters[0].cZ;
-  // Precompute bounding sphere for culling
-  const __sphere = new THREE.Sphere();
-  bbox.getBoundingSphere(__sphere);
-  group.userData.boundingSphere = __sphere;
-  group.userData.cullable = true;
-  group.userData.structureId = def.id;
-  return group;
+// Use the final bounding box center for placement so structures
+// align correctly regardless of their source geometry origin.
+const center = bbox.getCenter(new THREE.Vector3());
+group.userData.centerX = center.x;
+group.userData.centerY = center.y;
+group.userData.centerZ = center.z;
+// Precompute bounding sphere for culling
+const __sphere = new THREE.Sphere();
+bbox.getBoundingSphere(__sphere);
+group.userData.boundingSphere = __sphere;
+group.userData.cullable = true;
+group.userData.structureId = def.id;
+return group;
 }
