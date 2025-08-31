@@ -82,11 +82,33 @@ let animationId = null;
 if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
     tileInfoButtonsDiv.style.display = showTileInfoCheckbox.checked ? 'grid' : 'none';
-    if (!showTileInfoCheckbox.checked) {
-      if (showTileIdCheckbox) showTileIdCheckbox.checked = false;
-      if (showTileTypesOnMapCheckbox) showTileTypesOnMapCheckbox.checked = false;
-      if (scene && typeof drawMap3D === 'function') drawMap3D();
-      }
+    const typeToggle = document.getElementById('displayTileTypes');
+    const disabled = !showTileInfoCheckbox.checked;
+
+    if (showTileIdCheckbox) {
+      showTileIdCheckbox.disabled = disabled;
+      if (disabled) showTileIdCheckbox.checked = false;
+    }
+    if (showTileTypesOnMapCheckbox) {
+      showTileTypesOnMapCheckbox.disabled = disabled;
+      if (disabled) showTileTypesOnMapCheckbox.checked = false;
+    }
+    const tileIdLabel = document.querySelector('label[for="showPanelIds"]');
+    if (showPanelIdsCheckbox) {
+      showPanelIdsCheckbox.disabled = disabled;
+      showPanelIdsCheckbox.style.display = disabled ? 'none' : '';
+      if (tileIdLabel) tileIdLabel.style.display = disabled ? 'none' : '';
+      if (disabled) showPanelIdsCheckbox.checked = false;
+    }
+    const typeLabel = document.querySelector('label[for="displayTileTypes"]');
+    if (typeToggle) {
+      typeToggle.disabled = disabled;
+      typeToggle.style.display = disabled ? 'none' : '';
+      if (typeLabel) typeLabel.style.display = disabled ? 'none' : '';
+      if (disabled) typeToggle.checked = false;
+    }
+    if (scene && typeof drawMap3D === 'function') drawMap3D();
+    if (typeof renderTexturePalette === 'function') renderTexturePalette();
   };
   showTileInfoCheckbox.addEventListener('change', updateTileInfoVisibility);
   updateTileInfoVisibility();
