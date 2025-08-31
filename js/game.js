@@ -149,6 +149,7 @@ let previewLoadToken = 0;
 let highlightLoadToken = 0;
 const STRUCTURE_CATEGORY_NAMES = [
   'Base buildings',
+  'Sensors',
   'Walls',
   'Towers',
   'Bunkers',
@@ -204,8 +205,7 @@ async function loadStructureDefs() {
         type: entry.type || '',
         strength: entry.strength || '',
         combinesWithWall: !!entry.combinesWithWall
-      }))
-      .filter(def => !SENSOR_STRUCTURE_IDS.has(def.id.toLowerCase()));
+      }));
     populateStructureSelect();
   } catch (err) {
     console.error('Failed to load structure definitions:', err);
@@ -232,16 +232,17 @@ function categorizeStructure(def) {
     return 'Base buildings';
   }
 
-  if (type !== 'defense') {
-    return 'Unavailable buildings';
-  }
-
   if (
+    SENSOR_STRUCTURE_IDS.has(id) ||
     name.includes('sensor') ||
     name.includes('satellite') ||
     name.includes('radar') ||
     name.includes('cb tower')
   ) {
+    return 'Sensors';
+  }
+
+  if (type !== 'defense') {
     return 'Unavailable buildings';
   }
 
