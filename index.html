@@ -219,6 +219,21 @@
           <button type="button" id="tileSelectBtn" class="action-btn">Draw on map</button>
           <button type="button" id="tileShowBtn" class="action-btn">Show tile</button>
         </div>
+        <div id="tileOptions" class="tile-options-box" style="display:none;">
+          <input type="checkbox" id="showTileInfo" class="toggle-btn-input">
+          <div class="toggle-grid">
+            <input type="checkbox" id="showPanelIds" class="toggle-btn-input" checked>
+            <label for="showPanelIds" class="toggle-btn">ID</label>
+            <input type="checkbox" id="displayTileTypes" class="toggle-btn-input">
+            <label for="displayTileTypes" class="toggle-btn">Type</label>
+          </div>
+          <div id="tileInfoButtons" class="toggle-grid" style="display:none; margin-top:4px;">
+            <input type="checkbox" id="showTileId" class="toggle-btn-input">
+            <label for="showTileId" class="toggle-btn">ID on map</label>
+            <input type="checkbox" id="showTileTypesOnMap" class="toggle-btn-input">
+            <label for="showTileTypesOnMap" class="toggle-btn">Type on map</label>
+          </div>
+        </div>
         <div id="tileBrushControls" style="display:none; align-items:center; gap:6px; margin-top:4px; margin-bottom:4px;">
           <label for="brushSizeInput" style="margin:0; white-space:nowrap;">Square size:</label>
           <input type="number" id="brushSizeInput" value="1" min="1" max="255" step="1" style="width:50px;">
@@ -236,21 +251,6 @@
           <select id="tileTypeSelect"></select>
         </div>
         <div id="texturePalette" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
-      </div>
-      <div id="tileOptions" class="tile-options-box" style="display:none;">
-        <input type="checkbox" id="showTileInfo" class="toggle-btn-input">
-        <div class="toggle-grid">
-          <input type="checkbox" id="showPanelIds" class="toggle-btn-input" checked>
-          <label for="showPanelIds" class="toggle-btn">ID</label>
-          <input type="checkbox" id="displayTileTypes" class="toggle-btn-input">
-          <label for="displayTileTypes" class="toggle-btn">Type</label>
-        </div>
-        <div id="tileInfoButtons" class="toggle-grid" style="display:none; margin-top:4px;">
-          <input type="checkbox" id="showTileId" class="toggle-btn-input">
-          <label for="showTileId" class="toggle-btn">ID on map</label>
-          <input type="checkbox" id="showTileTypesOnMap" class="toggle-btn-input">
-          <label for="showTileTypesOnMap" class="toggle-btn">Type on map</label>
-        </div>
       </div>
     </div>
 
