@@ -224,6 +224,44 @@ function pushUndo(action) {
   updateUndoRedoButtons();
 }
 
+function setMapState(w, h, tiles, rotations, heights) {
+  mapW = w;
+  mapH = h;
+  mapTiles = tiles;
+  mapRotations = rotations;
+  mapHeights = heights;
+
+  const sizeXInput = document.getElementById('sizeXInput');
+  const sizeYInput = document.getElementById('sizeYInput');
+  const sizeXSlider = document.getElementById('sizeXSlider');
+  const sizeYSlider = document.getElementById('sizeYSlider');
+  if (sizeXInput) sizeXInput.value = w;
+  if (sizeYInput) sizeYInput.value = h;
+  if (sizeXSlider) sizeXSlider.value = w;
+  if (sizeYSlider) sizeYSlider.value = h;
+  const applySizeBtn = document.getElementById('applySizeBtn');
+  if (applySizeBtn) applySizeBtn.disabled = true;
+
+  resetCameraTarget(mapW, mapH, threeContainer);
+  drawMap3D();
+
+  if (highlightMesh) {
+    scene.remove(highlightMesh);
+    highlightMesh = null;
+  }
+  if (previewGroup) {
+    previewGroup.traverse(child => {
+      if (child.isMesh) {
+        if (child.material && child.material.map) child.material.map.dispose();
+        if (child.material) child.material.dispose();
+        if (child.geometry) child.geometry.dispose();
+      }
+    });
+    scene.remove(previewGroup);
+    previewGroup = null;
+  }
+}
+
 function applyAction(action, mode) {
   if (!action) return;
   if (action.type === 'tiles') {
@@ -233,13 +271,17 @@ function applyAction(action, mode) {
       mapTiles[c.y][c.x] = tile;
       mapRotations[c.y][c.x] = rot;
     }
+    drawMap3D();
   } else if (action.type === 'height') {
     for (const c of action.changes) {
       const h = mode === 'undo' ? c.oldHeight : c.newHeight;
       mapHeights[c.y][c.x] = h;
     }
+    drawMap3D();
+  } else if (action.type === 'resize') {
+    const state = mode === 'undo' ? action.oldState : action.newState;
+    setMapState(state.w, state.h, state.tiles, state.rotations, state.heights);
   }
-  drawMap3D();
 }
 
 function undo() {
@@ -2079,50 +2121,35 @@ if (showTileTypesCheckbox) showTileTypesCheckbox.addEventListener('change', () =
   drawMap3D();
 });
 function resizeMap(newW, newH) {
-  const oldW = mapW;
-  const oldH = mapH;
+  if (newW === mapW && newH === mapH) return;
+  const oldState = {
+    w: mapW,
+    h: mapH,
+    tiles: mapTiles,
+    rotations: mapRotations,
+    heights: mapHeights
+  };
   const newTiles = Array(newH).fill().map(() => Array(newW).fill(0));
   const newRotationsArr = Array(newH).fill().map(() => Array(newW).fill(0));
   const newHeightsArr = Array(newH).fill().map(() => Array(newW).fill(0));
   for (let y = 0; y < newH; y++) {
     for (let x = 0; x < newW; x++) {
-      if (y < oldH && x < oldW) {
+      if (y < oldState.h && x < oldState.w) {
         newTiles[y][x] = mapTiles[y][x];
         newRotationsArr[y][x] = mapRotations[y][x];
         newHeightsArr[y][x] = mapHeights[y][x];
       }
     }
   }
-  mapW = newW;
-  mapH = newH;
-  mapTiles = newTiles;
-  mapRotations = newRotationsArr;
-  mapHeights = newHeightsArr;
-  const sizeXInput = document.getElementById('sizeXInput');
-  const sizeYInput = document.getElementById('sizeYInput');
-  const sizeXSlider = document.getElementById('sizeXSlider');
-  const sizeYSlider = document.getElementById('sizeYSlider');
-  if (sizeXInput) sizeXInput.value = newW;
-  if (sizeYInput) sizeYInput.value = newH;
-  if (sizeXSlider) sizeXSlider.value = newW;
-  if (sizeYSlider) sizeYSlider.value = newH;
-  resetCameraTarget(mapW, mapH, threeContainer);
-  drawMap3D();
-  if (highlightMesh) {
-    scene.remove(highlightMesh);
-    highlightMesh = null;
-  }
-  if (previewGroup) {
-    previewGroup.traverse(child => {
-      if (child.isMesh) {
-        if (child.material && child.material.map) child.material.map.dispose();
-        if (child.material) child.material.dispose();
-        if (child.geometry) child.geometry.dispose();
-      }
-    });
-    scene.remove(previewGroup);
-    previewGroup = null;
-  }
+  const newState = {
+    w: newW,
+    h: newH,
+    tiles: newTiles,
+    rotations: newRotationsArr,
+    heights: newHeightsArr
+  };
+  setMapState(newW, newH, newTiles, newRotationsArr, newHeightsArr);
+  pushUndo({ type: 'resize', oldState, newState });
 }
 function getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH) {
   const centerX = group.userData.centerX;
