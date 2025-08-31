@@ -282,6 +282,15 @@ function applyAction(action, mode) {
   } else if (action.type === 'resize') {
     const state = mode === 'undo' ? action.oldState : action.newState;
     setMapState(state.w, state.h, state.tiles, state.rotations, state.heights);
+  } else if (action.type === 'structure') {
+    if (mode === 'undo') {
+      objectsGroup.remove(action.group);
+      drawMap3D();
+    } else {
+      objectsGroup.add(action.group);
+      if (!scene.children.includes(objectsGroup)) scene.add(objectsGroup);
+      drawMap3D();
+    }
   }
 }
 
@@ -1009,6 +1018,7 @@ function handleEditClick(event) {
       objectsGroup.add(group);
       if (!scene.children.includes(objectsGroup)) scene.add(objectsGroup);
       drawMap3D();
+      pushUndo({ type: 'structure', group });
     }).catch(() => {});
   }
 }
