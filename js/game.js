@@ -1408,7 +1408,8 @@ function renderTexturePalette() {
     if (img && img.complete && img.naturalWidth > 0) {
       ctx.save();
       ctx.translate(center, center);
-      ctx.rotate(cameraState.rotationY + (selectedRotation * Math.PI) / 2);
+      const snapped = Math.round(cameraState.rotationY / (Math.PI / 2)) * (Math.PI / 2);
+      ctx.rotate(snapped + (selectedRotation * Math.PI) / 2);
       ctx.translate(-center, -center);
       ctx.drawImage(img, 0, 0, TILE_ICON_SIZE, TILE_ICON_SIZE);
       ctx.restore();
@@ -1878,7 +1879,10 @@ function drawMap3D() {
       lastX = e.clientX;
       lastY = e.clientY;
     });
-    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      renderTexturePalette();
+    });
     window.addEventListener('mousemove', e => {
       if (!isDragging) return;
       let dx = e.clientX - lastX, dy = e.clientY - lastY;
@@ -1886,7 +1890,6 @@ function drawMap3D() {
       cameraState.rotationX -= dy * 0.008;
       cameraState.rotationX = Math.max(-1.1, Math.min(-0.08, cameraState.rotationX));
       lastX = e.clientX; lastY = e.clientY;
-      renderTexturePalette();
     });
     threeContainer.addEventListener('wheel', e => {
       cameraState.zoom *= (1 + e.deltaY * 0.0015);
