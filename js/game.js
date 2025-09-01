@@ -224,6 +224,7 @@ const ALLOWED_BUNKER_IDS = new Set([
 
 const ALLOWED_HARDPOINT_IDS = new Set([
   'wall-rotmg',
+  'wall-vulcancan',
   'walltower-doubleaagun',
   'walltower-hpvcannon',
   'walltower-hvatrocket',
