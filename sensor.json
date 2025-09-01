@@ -1,4 +1,19 @@
 {
+	"ScavSensor": {
+		"buildPoints": 100,
+		"buildPower": 20,
+		"droidType": "DROID_SENSOR",
+		"hitpoints": 200,
+		"id": "ScavSensor",
+		"location": "TURRET",
+		"mountModel": "trlrcktg.pie",
+		"name": "*BaBa Sensor*",
+		"power": 1000,
+		"range": 1536,
+		"sensorModel": "gnlsnsr1.pie",
+		"type": "STANDARD",
+		"weight": 100
+	},
 	"BaBaSensor": {
 		"buildPoints": 1,
 		"buildPower": 1,
@@ -20,39 +35,65 @@
 		"mountModel": "TRLSNSR1.PIE",
 		"name": "*CC Sensor*",
 		"power": 1000,
-		"range": 2048,
+		"range": 2304,
 		"sensorModel": "misensor.PIE",
 		"type": "STANDARD",
 		"weight": 1
 	},
 	"DefaultSensor1Mk1": {
 		"id": "DefaultSensor1Mk1",
+		"droidType": "DROID_SENSOR",
 		"location": "DEFAULT",
-		"name": "*Default Sensor1 Mk1*",
+		"name": "*Default Sensor*",
 		"power": 500,
 		"range": 1024,
+		"type": "STANDARD"
+	},
+	"FortressSensor": {
+		"id": "FortressSensor",
+		"location": "DEFAULT",
+		"name": "*Fortress Sensor*",
+		"power": 500,
+		"range": 1536,
 		"type": "STANDARD"
 	},
 	"NavGunSensor": {
 		"id": "NavGunSensor",
 		"location": "DEFAULT",
-		"name": "*NavGunSensor*",
+		"name": "*Nexus Sensor*",
 		"power": 500,
 		"range": 2048,
 		"type": "STANDARD"
 	},
-	"SensorTower1Mk1": {
-		"buildPoints": 25,
-		"buildPower": 5,
+	"RadarDetector": {
+		"buildPoints": 100,
+		"buildPower": 20,
+		"designable": 1,
 		"hitpoints": 200,
-		"id": "SensorTower1Mk1",
+		"id": "RadarDetector",
 		"location": "TURRET",
-		"mountModel": "TRLSNSR1.PIE",
-		"name": "Sensor Tower",
+		"mountModel": "TRMECM2.PIE",
+		"name": "Radar Detector",
+		"power": 500,
+		"range": 1024,
+		"sensorModel": "RADARSENSOR.PIE",
+		"type": "RADAR DETECTOR",
+		"weight": 100
+	},
+	"Sensor-WideSpec": {
+		"buildPoints": 1200,
+		"buildPower": 450,
+		"designable": 1,
+		"droidType": "DROID_SENSOR",
+		"hitpoints": 200,
+		"id": "Sensor-WideSpec",
+		"location": "TURRET",
+		"mountModel": "TRHSNSR3.PIE",
+		"name": "Wide Spectrum Sensor",
 		"power": 100,
-		"range": 2048,
-		"sensorModel": "GNLSNSR1.PIE",
-		"type": "STANDARD",
+		"range": 2260,
+		"sensorModel": "GNHSNSR4.PIE",
+		"type": "SUPER",
 		"weight": 100
 	},
 	"SensorTower2Mk1": {
@@ -174,6 +215,14 @@
 		"type": "VTOL INTERCEPT",
 		"weight": 100
 	},
+	"TowerSensor": {
+		"id": "TowerSensor",
+		"location": "DEFAULT",
+		"name": "*Tower Sensor*",
+		"power": 500,
+		"range": 1280,
+		"type": "STANDARD"
+	},
 	"UplinkSensor": {
 		"buildPoints": 1,
 		"buildPower": 1,
@@ -183,16 +232,16 @@
 		"mountModel": "TRLSNSR1.PIE",
 		"name": "Uplink Sensor",
 		"power": 1000,
-		"range": 2048,
+		"range": 2304,
 		"sensorModel": "miupdish.PIE",
-		"type": "STANDARD",
+		"type": "SUPER",
 		"weight": 1
 	},
 	"ZNULLSENSOR": {
 		"id": "ZNULLSENSOR",
 		"location": "DEFAULT",
 		"mountModel": "trlsnsr1.PIE",
-		"name": "Z NULL SENSOR",
+		"name": "ZNULLSENSOR",
 		"power": 500,
 		"range": 1024,
 		"sensorModel": "gnlsnsr1.PIE",
