@@ -195,6 +195,16 @@ const WALL_STRUCTURE_IDS = new Set([
   'a0hardcretemk1gate'
 ]);
 
+const ALLOWED_TOWER_IDS = new Set([
+  'guardtower1',
+  'guardtower6',
+  'guardtower5',
+  'guardtower-rail1',
+  'guardtower-atmiss',
+  'sys-spytower',
+  'guardtower-beamlas'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -303,6 +313,10 @@ function populateStructureSelect() {
   const filter = filterSelect ? filterSelect.value : 'All types';
   const groups = Object.fromEntries(STRUCTURE_CATEGORY_NAMES.map(c => [c, []]));
   STRUCTURE_DEFS.forEach((def, idx) => {
+    const idLower = def.id.toLowerCase();
+    const nameLower = def.name.toLowerCase();
+    const isTower = idLower.includes('tower') || nameLower.includes('tower');
+    if (isTower && !ALLOWED_TOWER_IDS.has(idLower)) return;
     const cat = categorizeStructure(def);
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
