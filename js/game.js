@@ -222,6 +222,26 @@ const ALLOWED_BUNKER_IDS = new Set([
   'plasmite-flamer-bunker'
 ]);
 
+const ALLOWED_HARDPOINT_IDS = new Set([
+  'wall-rotmg',
+  'walltower-doubleaagun',
+  'walltower-hpvcannon',
+  'walltower-hvatrocket',
+  'walltower-pulselas',
+  'walltower-quadrotaagun',
+  'walltower-rail2',
+  'walltower-rail3',
+  'walltower-samhvy',
+  'walltower-twinassaultgun',
+  'walltower-atmiss',
+  'walltower-emp',
+  'walltower01',
+  'walltower02',
+  'walltower03',
+  'walltower04',
+  'walltower06'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -335,9 +355,10 @@ function populateStructureSelect() {
     const idLower = def.id.toLowerCase();
     const nameLower = def.name.toLowerCase();
     const isTower = idLower.includes('tower') || nameLower.includes('tower');
-    if (isTower && !ALLOWED_TOWER_IDS.has(idLower) && !ALLOWED_BUNKER_IDS.has(idLower)) return;
+    if (isTower && !ALLOWED_TOWER_IDS.has(idLower) && !ALLOWED_BUNKER_IDS.has(idLower) && !ALLOWED_HARDPOINT_IDS.has(idLower)) return;
     const cat = categorizeStructure(def);
     if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
+    if (cat === 'Hardpoints' && !ALLOWED_HARDPOINT_IDS.has(idLower)) return;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
