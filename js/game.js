@@ -388,13 +388,23 @@ async function loadStructureDefs() {
       .map(entry => {
         const pies = [];
         if (entry.baseModel) pies.push(entry.baseModel);
-        const models = entry.structureModel || [];
-        if (models.some(m => /module/i.test(m))) {
-          const nonModules = models.filter(m => !/module/i.test(m));
-          if (nonModules.length) pies.push(nonModules[0]);
-        } else {
-          pies.push(...models);
+
+        // Some structures list multiple model files representing
+        // upgrade stages (e.g. factory modules).  The first model is
+        // the base building and subsequent entries include the whole
+        // structure again with added modules.  Previously we appended
+        // every model which resulted in several complete buildings
+        // being stacked vertically.  Instead, ignore files that look
+        // like module pieces and keep only the final non‑module model.
+        const models = Array.isArray(entry.structureModel)
+          ? entry.structureModel
+          : (entry.structureModel ? [entry.structureModel] : []);
+        const nonModules = models.filter(m => !/module/i.test(m));
+        if (nonModules.length) {
+          const last = nonModules[nonModules.length - 1];
+          if (!pies.includes(last)) pies.push(last);
         }
+
         return {
           id: entry.id,
           name: entry.name,
