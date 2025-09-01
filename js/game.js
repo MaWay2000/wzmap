@@ -205,6 +205,15 @@ const ALLOWED_TOWER_IDS = new Set([
   'guardtower-beamlas'
 ]);
 
+const ALLOWED_BUNKER_IDS = new Set([
+  'pillbox1',
+  'pillbox5',
+  'pillbox4',
+  'tower-projector',
+  'pillbox-rotmg',
+  'plasmite-flamer-bunker'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -316,8 +325,9 @@ function populateStructureSelect() {
     const idLower = def.id.toLowerCase();
     const nameLower = def.name.toLowerCase();
     const isTower = idLower.includes('tower') || nameLower.includes('tower');
-    if (isTower && !ALLOWED_TOWER_IDS.has(idLower)) return;
+    if (isTower && !ALLOWED_TOWER_IDS.has(idLower) && !ALLOWED_BUNKER_IDS.has(idLower)) return;
     const cat = categorizeStructure(def);
+    if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
