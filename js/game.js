@@ -1566,7 +1566,8 @@ function __old_updateHighlight(event) {
       const cZ = highlightModelGroup.userData.centerZ;
       const minYVal = highlightModelGroup.userData.minY;
       const pX = tileX + sizeX / 2 - cX;
-      const pY = maxH2 + 0.02 - minYVal;
+      // Raise preview by 1 to keep floor tiles above terrain
+      const pY = maxH2 + 1.02 - minYVal;
       const pZ = tileY + sizeY / 2 - cZ;
       highlightModelGroup.position.set(pX + cX, pY, pZ + cZ);
     };
@@ -1694,7 +1695,8 @@ function __old_updateHighlight(event) {
         Promise.resolve(loadAtts).then(() => {
             if (currentToken !== highlightLoadToken) return;
           const pX = tileX + sizeX / 2 - cX;
-          const pY = maxH2 + 0.02 - minYVal;
+          // Raise preview by 1 to keep floor tiles above terrain
+          const pY = maxH2 + 1.02 - minYVal;
           const pZ = tileY + sizeY / 2 - cZ;
           inner.position.set(pX + cX, pY, pZ + cZ);
           inner.rotation.y = selectedStructureRotation * Math.PI / 2;
@@ -2565,7 +2567,8 @@ function getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH) 
   const centerX = group.userData.centerX;
   const centerZ = group.userData.centerZ;
   const posX = tileX + sizeX / 2 - centerX;
-  const posY = minH - group.userData.minY;
+  // Offset by +1 so structure floors render above the terrain
+  const posY = minH + 1 - group.userData.minY;
   const posZ = tileY + sizeY / 2 - centerZ;
   return new THREE.Vector3(posX, posY, posZ);
 }
