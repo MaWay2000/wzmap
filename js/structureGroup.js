@@ -19,9 +19,21 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
   let yOffset = 0;
   let baseMeshes = [];
   {
-    let bbox = (baseGeos[0].computeBoundingBox(), baseGeos[0].boundingBox);
-    let width = bbox.max.x - bbox.min.x;
-    let depth = bbox.max.z - bbox.min.z;
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    for (const geo of baseGeos) {
+      geo.computeBoundingBox();
+      const bbox = geo.boundingBox;
+      if (bbox.min.x < minX) minX = bbox.min.x;
+      if (bbox.max.x > maxX) maxX = bbox.max.x;
+      if (bbox.min.y < minY) minY = bbox.min.y;
+      if (bbox.max.y > maxY) maxY = bbox.max.y;
+      if (bbox.min.z < minZ) minZ = bbox.min.z;
+      if (bbox.max.z > maxZ) maxZ = bbox.max.z;
+    }
+    let width = maxX - minX;
+    let depth = maxZ - minZ;
     if (scaleOverride !== null) {
       scale = scaleOverride;
     } else if (sizeX && sizeY) {
@@ -30,7 +42,7 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
       scale = Math.min(sX, sZ);
       if (!isFinite(scale) || scale <= 0) scale = 1;
     } else {
-      let maxDim = Math.max(width, bbox.max.y - bbox.min.y, depth);
+      let maxDim = Math.max(width, maxY - minY, depth);
       if (maxDim === 0) maxDim = 1;
       scale = 1.5 / maxDim;
     }
