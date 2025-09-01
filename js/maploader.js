@@ -17,10 +17,10 @@ export function parseMapGrid(fileData) {
         for (let x = 0; x < width; ++x) {
           let ofs = gridStart + 3 * (y * width + x);
           mapTiles[y][x] = fileData[ofs];
-          // rotation is stored in the high bits of the rotation byte
-          // (values jump in steps of 8 and may include flip flags).
-          // Extract a 0-3 rotation index by shifting and masking.
-          mapRotations[y][x] = (fileData[ofs + 1] >> 3) & 0x03;
+          // rotation is stored in bits 4-5 of the rotation byte.
+          // values may include additional high-bit flip flags (e.g. bit 7).
+          // Extract a 0-3 rotation index by shifting the upper nibble and masking.
+          mapRotations[y][x] = (fileData[ofs + 1] >> 4) & 0x03;
           mapHeights[y][x] = fileData[ofs + 2];
         }
       }
