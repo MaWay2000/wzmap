@@ -275,7 +275,7 @@ function categorizeStructure(def) {
     return 'Hardpoints';
   }
 
-  if (strength === 'bunker' || name.includes('bunker')) {
+  if (name.includes('bunker')) {
     return 'Bunkers';
   }
 
