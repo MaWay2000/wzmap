@@ -175,7 +175,8 @@ const BASE_STRUCTURE_IDS = new Set([
   'a0repaircentre3',
   'a0vtolpad',
   'a0resourceextractor',
-  'a0sat-linkcentre'
+  'a0sat-linkcentre',
+  'a0lassatcommand'
 ]);
 
 const SENSOR_STRUCTURE_IDS = new Set([
@@ -288,7 +289,6 @@ const ALLOWED_OTHER_DEFENSE_IDS = new Set([
   'emplacement-prislas',
   'emplacement-heavylaser',
   'emplacement-rail2',
-  'a0lassatcommand',
   'emplacement-rail3'
 ]);
 
@@ -412,13 +412,11 @@ function categorizeStructure(def) {
   }
 
   if (
-    id !== 'a0lassatcommand' && (
-      SENSOR_STRUCTURE_IDS.has(id) ||
-      name.includes('sensor') ||
-      name.includes('satellite') ||
-      name.includes('radar') ||
-      name.includes('cb tower')
-    )
+    SENSOR_STRUCTURE_IDS.has(id) ||
+    name.includes('sensor') ||
+    name.includes('satellite') ||
+    name.includes('radar') ||
+    name.includes('cb tower')
   ) {
     return 'Sensors';
   }
