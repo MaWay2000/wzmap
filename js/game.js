@@ -270,6 +270,17 @@ const ALLOWED_ARTILLERY_IDS = new Set([
   'emplacement-hvart-pit'
 ]);
 
+const ALLOWED_ANTI_AIR_IDS = new Set([
+  'aasite-quadmg1',
+  'p0-aasite-sunburst',
+  'aasite-quadbof',
+  'aasite-quadrotmg',
+  'aasite-quadbof02',
+  'p0-aasite-sam1',
+  'p0-aasite-laser',
+  'p0-aasite-sam2'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -389,13 +400,15 @@ function populateStructureSelect() {
       !ALLOWED_BUNKER_IDS.has(idLower) &&
       !ALLOWED_HARDPOINT_IDS.has(idLower) &&
       !ALLOWED_FORTRESS_IDS.has(idLower) &&
-      !ALLOWED_ARTILLERY_IDS.has(idLower)
+      !ALLOWED_ARTILLERY_IDS.has(idLower) &&
+      !ALLOWED_ANTI_AIR_IDS.has(idLower)
     ) return;
     const cat = categorizeStructure(def);
     if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
     if (cat === 'Hardpoints' && !ALLOWED_HARDPOINT_IDS.has(idLower)) return;
     if (cat === 'Fortresses' && !ALLOWED_FORTRESS_IDS.has(idLower)) return;
     if (cat === 'Artillery emplacements' && !ALLOWED_ARTILLERY_IDS.has(idLower)) return;
+    if (cat === 'Anti-Air batteries' && !ALLOWED_ANTI_AIR_IDS.has(idLower)) return;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
