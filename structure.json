@@ -2455,50 +2455,6 @@
 		],
 		"width": 1
 	},
-	"PillBox2": {
-		"armour": 20,
-		"breadth": 1,
-		"buildPoints": 400,
-		"buildPower": 100,
-		"height": 1,
-		"hitpoints": 700,
-		"id": "PillBox2",
-		"name": "Twin Machinegun Bunker",
-		"resistance": 150,
-		"sensorID": "DefaultSensor1Mk1",
-		"strength": "BUNKER",
-		"structureModel": [
-			"blpilbox.pie"
-		],
-		"thermal": 20,
-		"type": "DEFENSE",
-		"weapons": [
-			"MG2-Pillbox"
-		],
-		"width": 1
-	},
-	"PillBox3": {
-		"armour": 20,
-		"breadth": 1,
-		"buildPoints": 400,
-		"buildPower": 100,
-		"height": 1,
-		"hitpoints": 700,
-		"id": "PillBox3",
-		"name": "HMG Bunker",
-		"resistance": 150,
-		"sensorID": "DefaultSensor1Mk1",
-		"strength": "BUNKER",
-		"structureModel": [
-			"blpilbox.pie"
-		],
-		"thermal": 20,
-		"type": "DEFENSE",
-		"weapons": [
-			"MG3-Pillbox"
-		],
-		"width": 1
-	},
 	"PillBox4": {
 		"armour": 20,
 		"breadth": 1,
@@ -2540,28 +2496,6 @@
 		"type": "DEFENSE",
 		"weapons": [
 			"Flame1Mk1"
-		],
-		"width": 1
-	},
-	"PillBox6": {
-		"armour": 20,
-		"breadth": 1,
-		"buildPoints": 400,
-		"buildPower": 125,
-		"height": 1,
-		"hitpoints": 700,
-		"id": "PillBox6",
-		"name": "Lancer Bunker",
-		"resistance": 150,
-		"sensorID": "DefaultSensor1Mk1",
-		"strength": "BUNKER",
-		"structureModel": [
-			"Blcanpil.pie"
-		],
-		"thermal": 20,
-		"type": "DEFENSE",
-		"weapons": [
-			"Rocket-LtA-T"
 		],
 		"width": 1
 	},
