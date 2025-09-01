@@ -174,7 +174,8 @@ const BASE_STRUCTURE_IDS = new Set([
   'a0vtolfactory1',
   'a0repaircentre3',
   'a0vtolpad',
-  'a0resourceextractor'
+  'a0resourceextractor',
+  'a0sat-linkcentre'
 ]);
 
 const SENSOR_STRUCTURE_IDS = new Set([
@@ -184,8 +185,7 @@ const SENSOR_STRUCTURE_IDS = new Set([
   'sys-cb-tower01',
   'sys-vtol-radartower01',
   'sys-vtol-cb-tower01',
-  'sys-sensotowerws',
-  'a0sat-linkcentre'
+  'sys-sensotowerws'
 ]);
 
 const WALL_STRUCTURE_IDS = new Set([
