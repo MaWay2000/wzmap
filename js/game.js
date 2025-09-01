@@ -209,6 +209,7 @@ const ALLOWED_BUNKER_IDS = new Set([
   'pillbox1',
   'pillbox5',
   'pillbox4',
+  'pillbox-cannon6',
   'tower-projector',
   'pillbox-rotmg',
   'plasmite-flamer-bunker'
