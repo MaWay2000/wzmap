@@ -1609,7 +1609,7 @@ function __old_updateHighlight(event) {
         let baseMat;
         if (g.userData && g.userData.textureName) {
           const texLoader = new THREE.TextureLoader();
-          const texName = gnormalizeTexPath(g.userData.textureName);
+          const texName = normalizeTexPath(g.userData.textureName);
           const tex = texLoader.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName, undefined, undefined, () => {});
           tex.magFilter = THREE.NearestFilter;
           tex.minFilter = THREE.LinearMipMapLinearFilter;
@@ -1661,7 +1661,7 @@ function __old_updateHighlight(event) {
               let tMat;
               if (tg.userData && tg.userData.textureName) {
                 const texLoader2 = new THREE.TextureLoader();
-                const texName2 = tgnormalizeTexPath(g.userData.textureName);
+                const texName2 = normalizeTexPath(tg.userData.textureName);
                 const tex2 = texLoader2.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName2, undefined, undefined, () => {});
                 tex2.magFilter = THREE.NearestFilter;
                 tex2.minFilter = THREE.LinearMipMapLinearFilter;
