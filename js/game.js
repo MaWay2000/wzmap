@@ -234,6 +234,7 @@ const ALLOWED_HARDPOINT_IDS = new Set([
   'walltower-rail2',
   'walltower-rail3',
   'walltower-samhvy',
+  'walltower-samsite',
   'walltower-twinassaultgun',
   'walltower-atmiss',
   'walltower-emp',
