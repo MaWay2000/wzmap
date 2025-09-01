@@ -16,11 +16,15 @@ export function parseMapGrid(fileData) {
       for (let y = 0; y < height; ++y) {
         for (let x = 0; x < width; ++x) {
           let ofs = gridStart + 3 * (y * width + x);
-          mapTiles[y][x] = fileData[ofs];
-          // rotation is stored in bits 4-5 of the rotation byte.
-          // values may include additional high-bit flip flags (e.g. bit 7).
-          // Extract a 0-3 rotation index by shifting the upper nibble and masking.
-          mapRotations[y][x] = (fileData[ofs + 1] >> 4) & 0x03;
+          const rotByte = fileData[ofs + 1];
+          // Tile index uses the low byte plus the low nibble of the second byte
+          // (allowing up to 4096 tiles). This mirrors how tiles are stored inside
+          // .wz archives as well as standalone .map files.
+          mapTiles[y][x] = fileData[ofs] | ((rotByte & 0x0f) << 8);
+          // rotation is stored in bits 4-5 of the rotation byte. Values may
+          // include additional high-bit flip flags (e.g. bit 7). Extract a 0-3
+          // rotation index by shifting the upper nibble and masking.
+          mapRotations[y][x] = (rotByte >> 4) & 0x03;
           mapHeights[y][x] = fileData[ofs + 2];
         }
       }
