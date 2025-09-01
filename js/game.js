@@ -139,8 +139,6 @@ if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   updateTileInfoVisibility();
 }
 let STRUCTURE_DEFS = [];
-// STRUCTURE_TURRETS moved to module
-import { STRUCTURE_TURRETS } from "./structure_turrets.js";
 let selectedStructureIndex = -1;
 let objectsGroup = new THREE.Group();
 let selectedStructureRotation = 0;
