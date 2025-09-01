@@ -242,12 +242,12 @@ function categorizeStructure(def) {
     return 'Sensors';
   }
 
-  if (type !== 'defense') {
-    return 'Unavailable buildings';
-  }
-
   if (type === 'wall' || type === 'gate' || type === 'corner wall' || name.includes('tank trap')) {
     return 'Walls';
+  }
+
+  if (type !== 'defense') {
+    return 'Unavailable buildings';
   }
 
   if (type === 'fortress') {
