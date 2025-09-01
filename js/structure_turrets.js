@@ -66,7 +66,7 @@ export const STRUCTURE_TURRETS = {
   "P0-AASite-SAM2": ['gnhmslsa.pie', 'trhmslsa.pie'],
   "P0-AASite-Sunburst": ['gnmair3.pie', 'trmair3.pie'],
   "PillBox-Cannon6": ['gnhvcan2.pie', 'trhvcan2.pie'],
-  "PillBox1": [],
+  "PillBox1": ['gnmmg1.pie', 'trmmg.pie'],
   "PillBox4": ['gnlcan.pie', 'trlcan.pie'],
   "PillBox5": ['gnlflmr.pie', 'trlflmr.pie'],
   "Pillbox-RotMG": [],
