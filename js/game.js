@@ -400,6 +400,11 @@ async function loadStructureDefs() {
           : (entry.structureModel ? [entry.structureModel] : []);
         const nonModules = models.filter(m => !/module/i.test(m));
         if (nonModules.length) {
+          // Include the optional floor/base model first so the structure
+          // sits on top of it, then add the main building geometry.
+          if (entry.baseModel) {
+            pies.push(entry.baseModel);
+          }
           pies.push(nonModules[0]);
         } else if (entry.baseModel) {
           pies.push(entry.baseModel);
