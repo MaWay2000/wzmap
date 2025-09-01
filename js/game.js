@@ -281,6 +281,17 @@ const ALLOWED_ANTI_AIR_IDS = new Set([
   'p0-aasite-sam2'
 ]);
 
+const ALLOWED_OTHER_DEFENSE_IDS = new Set([
+  'emplacement-hpvcannon',
+  'emplacement-hvyatrocket',
+  'emplacement-plasmacannon',
+  'emplacement-prislas',
+  'emplacement-heavylaser',
+  'emplacement-rail2',
+  'a0lassatcommand',
+  'emplacement-rail3'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -345,6 +356,10 @@ function categorizeStructure(def) {
     return 'Fortresses';
   }
 
+  if (ALLOWED_OTHER_DEFENSE_IDS.has(id)) {
+    return 'Other defenses';
+  }
+
   if (type !== 'defense') {
     return 'Unavailable buildings';
   }
@@ -401,7 +416,8 @@ function populateStructureSelect() {
       !ALLOWED_HARDPOINT_IDS.has(idLower) &&
       !ALLOWED_FORTRESS_IDS.has(idLower) &&
       !ALLOWED_ARTILLERY_IDS.has(idLower) &&
-      !ALLOWED_ANTI_AIR_IDS.has(idLower)
+      !ALLOWED_ANTI_AIR_IDS.has(idLower) &&
+      !ALLOWED_OTHER_DEFENSE_IDS.has(idLower)
     ) return;
     const cat = categorizeStructure(def);
     if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
@@ -409,6 +425,7 @@ function populateStructureSelect() {
     if (cat === 'Fortresses' && !ALLOWED_FORTRESS_IDS.has(idLower)) return;
     if (cat === 'Artillery emplacements' && !ALLOWED_ARTILLERY_IDS.has(idLower)) return;
     if (cat === 'Anti-Air batteries' && !ALLOWED_ANTI_AIR_IDS.has(idLower)) return;
+    if (cat === 'Other defenses' && !ALLOWED_OTHER_DEFENSE_IDS.has(idLower)) return;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
