@@ -18,6 +18,8 @@ import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
 import { cameraState, resetCameraTarget, setupKeyboard } from './camera.js';
 import { parsePie, loadPieGeometry } from "./pie.js";
 import { buildStructureGroup } from "./structureGroup.js";
+import { STRUCTURE_TURRETS } from "./structure_turrets.js";
+import { loadSensorDefs, getSensorModels } from "./sensors.js";
 
 const tilesetSelect = document.getElementById('tilesetSelect');
 const fileListDiv = document.getElementById('fileList');
@@ -58,6 +60,7 @@ window.hideOverlay = hideOverlay;
 // ---- Configurable assets base paths (root defaults) ----
 if (typeof window !== 'undefined') {
   if (typeof window.STRUCTURES_JSON === 'undefined') window.STRUCTURES_JSON = 'structure.json';
+  if (typeof window.SENSORS_JSON === 'undefined') window.SENSORS_JSON = 'sensor.json';
   if (typeof window.PIES_BASE === 'undefined') window.PIES_BASE = 'pies/';
   if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/texpages/';
 }
@@ -382,7 +385,8 @@ async function loadStructureDefs() {
         pies: entry.structureModel,
         type: entry.type || '',
         strength: entry.strength || '',
-        combinesWithWall: !!entry.combinesWithWall
+        combinesWithWall: !!entry.combinesWithWall,
+        sensorID: entry.sensorID
       }));
     populateStructureSelect();
   } catch (err) {
@@ -412,7 +416,8 @@ function categorizeStructure(def) {
   }
 
   if (
-    SENSOR_STRUCTURE_IDS.has(id) ||
+    def.sensorID ||
+      SENSOR_STRUCTURE_IDS.has(id) ||
     name.includes('sensor') ||
     name.includes('satellite') ||
     name.includes('radar') ||
@@ -1238,7 +1243,9 @@ const initDom = () => {
     });
   }
   if (structureSelect) {
-    loadStructureDefs();
+    loadSensorDefs().then(() => loadStructureDefs());
+  } else {
+    loadSensorDefs();
   }
   const sRotLeft = document.getElementById('structRotateLeft');
   const sRotRight = document.getElementById('structRotateRight');
@@ -1569,7 +1576,7 @@ function __old_updateHighlight(event) {
         highlightModelGroup = null;
       }
       loadPieGeometry(pieFile).then(geo => {
-        if (currentToken !== highlightLoadToken) return;
+            if (currentToken !== highlightLoadToken) return;
         const g = geo.clone();
         g.computeBoundingBox();
         const bb = g.boundingBox;
@@ -1613,15 +1620,19 @@ function __old_updateHighlight(event) {
         const baseMesh = new THREE.Mesh(g, baseMat);
         baseMesh.position.set(-cX, -cY, -cZ);
         inner.add(baseMesh);
-            const attachments = STRUCTURE_TURRETS[def.id];
-            let loadAtts;
-            if (attachments && attachments.length) {
-              const sortedFiles = attachments.slice().sort((a, b) => {
+        let attachments = STRUCTURE_TURRETS[def.id];
+        const sensorModels = getSensorModels(def.sensorID);
+        if (sensorModels.length) {
+          attachments = sensorModels;
+        }
+        let loadAtts;
+        if (attachments && attachments.length) {
+          const sortedFiles = attachments.slice().sort((a, b) => {
                 const aTur = a.toLowerCase().startsWith('tr') ? 0 : 1;
                 const bTur = b.toLowerCase().startsWith('tr') ? 0 : 1;
                 return aTur - bTur;
               });
-              loadAtts = Promise.all(sortedFiles.map(file => loadPieGeometry(file))).then(attGeos => {
+          loadAtts = Promise.all(sortedFiles.map(file => loadPieGeometry(file))).then(attGeos => {
             if (currentToken !== highlightLoadToken) return;
             const gHeightVal = bb2.max.y - bb2.min.y;
             let offYVal = gHeightVal / 2;
@@ -1661,7 +1672,7 @@ function __old_updateHighlight(event) {
           loadAtts = Promise.resolve();
         }
         Promise.resolve(loadAtts).then(() => {
-          if (currentToken !== highlightLoadToken) return;
+            if (currentToken !== highlightLoadToken) return;
           const pX = tileX + sizeX / 2 - cX;
           const pY = maxH2 + 0.02 - minYVal;
           const pZ = tileY + sizeY / 2 - cZ;

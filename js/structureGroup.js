@@ -1,6 +1,7 @@
 import * as THREE from "./three.module.js";
 import { loadPieGeometry } from "./pie.js";
 import { STRUCTURE_TURRETS } from "./structure_turrets.js";
+import { getSensorModels } from "./sensors.js";
 export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOverride = null, opacityOverride = null) {
   if (!def.pies || !def.pies.length) {
     const fallback = new THREE.Group();
@@ -78,7 +79,11 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
       z: bc.z * scale - topC.cZ
     };
   }
-  const attachments = STRUCTURE_TURRETS[def.id];
+  let attachments = STRUCTURE_TURRETS[def.id];
+  const sensorModels = getSensorModels(def.sensorID);
+  if (sensorModels.length) {
+    attachments = sensorModels;
+  }
   if (attachments && attachments.length && connectorPos) {
     let gunYOffset = blockHeights.slice(0, topIdx).reduce((a, b) => a + b, 0);
     const attGeo = await loadPieGeometry(attachments[0]).then(g => g.clone());
