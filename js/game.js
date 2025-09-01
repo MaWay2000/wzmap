@@ -245,6 +245,13 @@ const ALLOWED_HARDPOINT_IDS = new Set([
   'walltower06'
 ]);
 
+const ALLOWED_FORTRESS_IDS = new Set([
+  'x-super-cannon',
+  'x-super-rocket',
+  'x-super-missile',
+  'x-super-massdriver'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -305,12 +312,12 @@ function categorizeStructure(def) {
     return 'Walls';
   }
 
-  if (type !== 'defense') {
-    return 'Unavailable buildings';
-  }
-
   if (type === 'fortress') {
     return 'Fortresses';
+  }
+
+  if (type !== 'defense') {
+    return 'Unavailable buildings';
   }
 
   if (def.combinesWithWall) {
@@ -358,10 +365,17 @@ function populateStructureSelect() {
     const idLower = def.id.toLowerCase();
     const nameLower = def.name.toLowerCase();
     const isTower = idLower.includes('tower') || nameLower.includes('tower');
-    if (isTower && !ALLOWED_TOWER_IDS.has(idLower) && !ALLOWED_BUNKER_IDS.has(idLower) && !ALLOWED_HARDPOINT_IDS.has(idLower)) return;
+    if (
+      isTower &&
+      !ALLOWED_TOWER_IDS.has(idLower) &&
+      !ALLOWED_BUNKER_IDS.has(idLower) &&
+      !ALLOWED_HARDPOINT_IDS.has(idLower) &&
+      !ALLOWED_FORTRESS_IDS.has(idLower)
+    ) return;
     const cat = categorizeStructure(def);
     if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
     if (cat === 'Hardpoints' && !ALLOWED_HARDPOINT_IDS.has(idLower)) return;
+    if (cat === 'Fortresses' && !ALLOWED_FORTRESS_IDS.has(idLower)) return;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ def, idx });
   });
