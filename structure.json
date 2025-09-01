@@ -602,7 +602,7 @@
 		"strength": "MEDIUM",
 		"structureModel": [
 			"blfact0.pie",
-			"factory_module1.pie",
+			"blfact0.pie",
 			"blfact1.pie",
 			"factory_module2.pie",
 			"blfact2.pie"
