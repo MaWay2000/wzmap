@@ -190,6 +190,16 @@ const SENSOR_STRUCTURE_IDS = new Set([
   'sys-sensotowerws'
 ]);
 
+const SENSOR_STRUCTURE_ORDER = [
+  'sys-sensotower01',
+  'sys-sensotower02',
+  'sys-radardetector01',
+  'sys-cb-tower01',
+  'sys-vtol-radartower01',
+  'sys-vtol-cb-tower01',
+  'sys-sensotowerws'
+];
+
 const WALL_STRUCTURE_IDS = new Set([
   'a0tanktrap',
   'a0hardcretemk1cwall',
@@ -413,14 +423,7 @@ function categorizeStructure(def) {
     return 'Base buildings';
   }
 
-  if (
-    def.sensorID ||
-      SENSOR_STRUCTURE_IDS.has(id) ||
-    name.includes('sensor') ||
-    name.includes('satellite') ||
-    name.includes('radar') ||
-    name.includes('cb tower')
-  ) {
+  if (SENSOR_STRUCTURE_IDS.has(id)) {
     return 'Sensors';
   }
 
@@ -507,33 +510,49 @@ function populateStructureSelect() {
     groups[cat].push({ def, idx });
   });
   if (filter === 'All types') {
-    STRUCTURE_CATEGORY_NAMES.forEach(cat => {
-      const items = groups[cat];
-      if (items && items.length) {
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = cat;
-        items
-          .sort((a, b) => a.def.name.localeCompare(b.def.name))
-          .forEach(({ def, idx }) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = def.name;
-            optgroup.appendChild(opt);
-          });
-        structureSelect.appendChild(optgroup);
-      }
-    });
-  } else {
-    const items = groups[filter] || [];
-    items
-      .sort((a, b) => a.def.name.localeCompare(b.def.name))
-      .forEach(({ def, idx }) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = def.name;
-        structureSelect.appendChild(opt);
+      STRUCTURE_CATEGORY_NAMES.forEach(cat => {
+        const items = groups[cat];
+        if (items && items.length) {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = cat;
+          items
+            .sort((a, b) => {
+              if (cat === 'Sensors') {
+                return (
+                  SENSOR_STRUCTURE_ORDER.indexOf(a.def.id.toLowerCase()) -
+                  SENSOR_STRUCTURE_ORDER.indexOf(b.def.id.toLowerCase())
+                );
+              }
+              return a.def.name.localeCompare(b.def.name);
+            })
+            .forEach(({ def, idx }) => {
+              const opt = document.createElement('option');
+              opt.value = idx;
+              opt.textContent = def.name;
+              optgroup.appendChild(opt);
+            });
+          structureSelect.appendChild(optgroup);
+        }
       });
-  }
+    } else {
+      const items = groups[filter] || [];
+      items
+        .sort((a, b) => {
+          if (filter === 'Sensors') {
+            return (
+              SENSOR_STRUCTURE_ORDER.indexOf(a.def.id.toLowerCase()) -
+              SENSOR_STRUCTURE_ORDER.indexOf(b.def.id.toLowerCase())
+            );
+          }
+          return a.def.name.localeCompare(b.def.name);
+        })
+        .forEach(({ def, idx }) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = def.name;
+          structureSelect.appendChild(opt);
+        });
+    }
   selectedStructureIndex = -1;
   updateStructurePreview();
 }
