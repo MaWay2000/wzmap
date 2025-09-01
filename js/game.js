@@ -202,7 +202,14 @@ const ALLOWED_TOWER_IDS = new Set([
   'guardtower-rail1',
   'guardtower-atmiss',
   'sys-spytower',
-  'guardtower-beamlas'
+  'guardtower-beamlas',
+  'sys-sensotower01',
+  'sys-sensotower02',
+  'sys-radardetector01',
+  'sys-cb-tower01',
+  'sys-vtol-radartower01',
+  'sys-vtol-cb-tower01',
+  'sys-sensotowerws'
 ]);
 
 const ALLOWED_BUNKER_IDS = new Set([
@@ -260,11 +267,13 @@ function categorizeStructure(def) {
   }
 
   if (
-    SENSOR_STRUCTURE_IDS.has(id) ||
-    name.includes('sensor') ||
-    name.includes('satellite') ||
-    name.includes('radar') ||
-    name.includes('cb tower')
+    id !== 'a0lassatcommand' && (
+      SENSOR_STRUCTURE_IDS.has(id) ||
+      name.includes('sensor') ||
+      name.includes('satellite') ||
+      name.includes('radar') ||
+      name.includes('cb tower')
+    )
   ) {
     return 'Sensors';
   }
