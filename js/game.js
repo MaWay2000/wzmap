@@ -390,7 +390,10 @@ async function loadStructureDefs() {
         name: entry.name,
         sizeX: entry.width,
         sizeY: entry.breadth,
-        pies: entry.structureModel,
+        pies: [
+          ...(entry.baseModel ? [entry.baseModel] : []),
+          ...(entry.structureModel || [])
+        ],
         type: entry.type || '',
         strength: entry.strength || '',
         combinesWithWall: !!entry.combinesWithWall,
