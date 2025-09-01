@@ -2126,6 +2126,55 @@ async function setTileset(idx) {
   drawMap3D();
 }
 
+async function loadStructuresFromZip(zip) {
+  if (objectsGroup) objectsGroup.clear();
+  const structName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('struct.json') && !zip.files[fn].dir);
+  if (!structName) return;
+  try {
+    const text = await zip.files[structName].async('string');
+    const data = JSON.parse(text);
+    if (!STRUCTURE_DEFS.length) {
+      try { await loadStructureDefs(); } catch (e) {}
+    }
+    const entries = Object.values(data);
+    const promises = entries.map(entry => {
+      const def = STRUCTURE_DEFS.find(d => d.id.toLowerCase() === entry.name.toLowerCase());
+      if (!def) return Promise.resolve();
+      let rot = 0;
+      if (Array.isArray(entry.rotation)) {
+        const yaw = entry.rotation[1] ?? entry.rotation[2] ?? entry.rotation[0] ?? 0;
+        rot = Math.round(((yaw % 360) + 360) / 90) % 4;
+      }
+      let sizeX = def.sizeX || 1;
+      let sizeY = def.sizeY || 1;
+      if (rot % 2 === 1) {
+        const tmp = sizeX; sizeX = sizeY; sizeY = tmp;
+      }
+      const centerX = (entry.position?.[0] || 0) / 128;
+      const centerY = (entry.position?.[1] || 0) / 128;
+      const tileX = Math.round(centerX - sizeX / 2);
+      const tileY = Math.round(centerY - sizeY / 2);
+      if (tileX < 0 || tileY < 0 || tileX >= mapW || tileY >= mapH) return Promise.resolve();
+      let minH = Infinity;
+      for (let dy = 0; dy < sizeY; dy++) {
+        for (let dx = 0; dx < sizeX; dx++) {
+          if (tileY + dy < 0 || tileY + dy >= mapH || tileX + dx < 0 || tileX + dx >= mapW) continue;
+          const h = mapHeights[tileY + dy][tileX + dx] * HEIGHT_SCALE;
+          if (h < minH) minH = h;
+        }
+      }
+      return buildStructureGroup(def, rot, sizeX, sizeY).then(group => {
+        const pos = getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH);
+        group.position.copy(pos);
+        objectsGroup.add(group);
+      }).catch(() => {});
+    });
+    await Promise.all(promises);
+  } catch (err) {
+    console.error('Failed to load structures from struct.json:', err);
+  }
+}
+
 async function loadMapFile(file) {
   fileListDiv.innerHTML = "";
   infoDiv.textContent = "";
@@ -2194,6 +2243,7 @@ async function loadMapFile(file) {
         } else {
           tileTypesById = new Array(tileImages.length).fill(0);
         }
+        await loadStructuresFromZip(zip);
         resetCameraTarget(mapW, mapH, threeContainer);
         infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + mapFileName + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
         drawMap3D();
