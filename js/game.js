@@ -2138,7 +2138,9 @@ async function loadStructuresFromZip(zip) {
     }
     const entries = Object.values(data);
     const promises = entries.map(entry => {
-      const def = STRUCTURE_DEFS.find(d => d.id.toLowerCase() === entry.name.toLowerCase());
+      const name = typeof entry.name === 'string' ? entry.name.toLowerCase() : null;
+      if (!name) return Promise.resolve();
+      const def = STRUCTURE_DEFS.find(d => d.id.toLowerCase() === name);
       if (!def) return Promise.resolve();
       let rot = 0;
       if (Array.isArray(entry.rotation)) {
