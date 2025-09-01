@@ -385,20 +385,28 @@ async function loadStructureDefs() {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     STRUCTURE_DEFS = Object.values(data)
-      .map(entry => ({
-        id: entry.id,
-        name: entry.name,
-        sizeX: entry.width,
-        sizeY: entry.breadth,
-        pies: [
-          ...(entry.baseModel ? [entry.baseModel] : []),
-          ...(entry.structureModel || [])
-        ],
-        type: entry.type || '',
-        strength: entry.strength || '',
-        combinesWithWall: !!entry.combinesWithWall,
-        sensorID: entry.sensorID
-      }));
+      .map(entry => {
+        const pies = [];
+        if (entry.baseModel) pies.push(entry.baseModel);
+        const models = entry.structureModel || [];
+        if (models.some(m => /module/i.test(m))) {
+          const nonModules = models.filter(m => !/module/i.test(m));
+          if (nonModules.length) pies.push(nonModules[0]);
+        } else {
+          pies.push(...models);
+        }
+        return {
+          id: entry.id,
+          name: entry.name,
+          sizeX: entry.width,
+          sizeY: entry.breadth,
+          pies,
+          type: entry.type || '',
+          strength: entry.strength || '',
+          combinesWithWall: !!entry.combinesWithWall,
+          sensorID: entry.sensorID
+        };
+      });
     populateStructureSelect();
   } catch (err) {
     console.error('Failed to load structure definitions:', err);
