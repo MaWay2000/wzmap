@@ -58,7 +58,10 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
       mat = new THREE.MeshLambertMaterial({ color: 0xc8c8c8, transparent: opacityOverride !== null, opacity: (opacityOverride != null ? opacityOverride : 1) });
     }
     let mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(-cX, yOffset - cY, -cZ);
+    // Position the block so its bottom sits on top of the previous block.
+    // Using the bounding box minimum ensures floor tiles start at ground
+    // level instead of being centered within the structure.
+    mesh.position.set(-cX, yOffset - bbox.min.y, -cZ);
     mesh.rotation.y = rotation * Math.PI / 2;
     baseMeshes.push(mesh);
     if (i < baseGeos.length - 1) {
