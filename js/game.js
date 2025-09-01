@@ -292,6 +292,80 @@ const ALLOWED_OTHER_DEFENSE_IDS = new Set([
   'emplacement-rail3'
 ]);
 
+const UNAVAILABLE_STRUCTURE_IDS = new Set([
+  'a0ademolishstructure',
+  'a0bababunker',
+  'a0babacornerwall',
+  'a0babafactory',
+  'a0babaflametower',
+  'a0babaguntower',
+  'a0babaguntowerend',
+  'a0babahorizontalwall',
+  'a0babamortarpit',
+  'a0babapowergenerator',
+  'a0babarocketpit',
+  'a0babarocketpitat',
+  'a0babavtolfactory',
+  'a0babavtolpad',
+  'a0cannontower',
+  'a0commandcentreco',
+  'a0commandcentrene',
+  'a0commandcentrenp',
+  'bbaatow',
+  'co-tower-hvatrkt',
+  'co-tower-hvcan',
+  'co-tower-hvflame',
+  'co-tower-ltatrkt',
+  'co-tower-mdcan',
+  'co-tower-mg3',
+  'co-tower-rotmg',
+  'co-walltower-hvcan',
+  'co-walltower-rotcan',
+  'collectivecwall',
+  'collectivewall',
+  'coolingtower',
+  'ecm1pylonmk1',
+  'guardtower-rotmg',
+  'guardtower2',
+  'guardtower3',
+  'guardtower4',
+  'lookouttower',
+  'nexuscwall',
+  'nexuswall',
+  'nuclearreactor',
+  'nx-anti-satsite',
+  'nx-cruisesite',
+  'nx-emp-medartmiss-pit',
+  'nx-emp-multiartmiss-pit',
+  'nx-emp-plasma-pit',
+  'nx-tower-atmiss',
+  'nx-tower-pulselas',
+  'nx-tower-rail1',
+  'nx-walltower-beamlas',
+  'nx-walltower-rail2',
+  'nx-walltower-rail3',
+  'pillbox-cannon6',
+  'pillbox-rotmg',
+  'pillbox1',
+  'pillbox4',
+  'pillbox5',
+  'plasmite-flamer-bunker',
+  'scavrepaircentre',
+  'sys-nexuslinktow',
+  'sys-nx-cbtower',
+  'sys-nx-sensortower',
+  'sys-nx-vtol-cb-tow',
+  'sys-nx-vtol-radtow',
+  'tanktrapc',
+  'tower-projector',
+  'tower-rotmg',
+  'tower-vulcancan',
+  'uplinkcentre',
+  'walltower-projector',
+  'walltower05',
+  'wreckedtransporter'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -323,6 +397,7 @@ function categorizeStructure(def) {
   const strength = (def.strength || '').toLowerCase();
 
   if (
+    UNAVAILABLE_STRUCTURE_IDS.has(id) ||
     name.includes('scavenger') ||
     id.startsWith('nx-') ||
     id.startsWith('co-') ||
@@ -417,7 +492,8 @@ function populateStructureSelect() {
       !ALLOWED_FORTRESS_IDS.has(idLower) &&
       !ALLOWED_ARTILLERY_IDS.has(idLower) &&
       !ALLOWED_ANTI_AIR_IDS.has(idLower) &&
-      !ALLOWED_OTHER_DEFENSE_IDS.has(idLower)
+      !ALLOWED_OTHER_DEFENSE_IDS.has(idLower) &&
+      !UNAVAILABLE_STRUCTURE_IDS.has(idLower)
     ) return;
     const cat = categorizeStructure(def);
     if (cat === 'Bunkers' && !ALLOWED_BUNKER_IDS.has(idLower)) return;
