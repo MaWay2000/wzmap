@@ -188,6 +188,13 @@ const SENSOR_STRUCTURE_IDS = new Set([
   'a0sat-linkcentre'
 ]);
 
+const WALL_STRUCTURE_IDS = new Set([
+  'a0tanktrap',
+  'a0hardcretemk1cwall',
+  'a0hardcretemk1wall',
+  'a0hardcretemk1gate'
+]);
+
 
 async function loadStructureDefs() {
   try {
@@ -242,7 +249,7 @@ function categorizeStructure(def) {
     return 'Sensors';
   }
 
-  if (type === 'wall' || type === 'gate' || type === 'corner wall' || name.includes('tank trap')) {
+  if (WALL_STRUCTURE_IDS.has(id)) {
     return 'Walls';
   }
 
