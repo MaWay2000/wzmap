@@ -76,9 +76,10 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
   let connectorPos = null;
   if (topGeo.userData && topGeo.userData.connectors && topGeo.userData.connectors.length) {
     let bc = topGeo.userData.connectors[0];
+    const minY = topGeo.boundingBox ? topGeo.boundingBox.min.y : 0;
     connectorPos = {
       x: bc.x * scale - topC.cX,
-      y: bc.y * scale - topC.cY,
+      y: bc.y * scale - minY,
       z: bc.z * scale - topC.cZ
     };
   }

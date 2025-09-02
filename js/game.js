@@ -1656,7 +1656,7 @@ function __old_updateHighlight(event) {
           const czScaled = bc.z * scl;
           connRel = {
             x: cxScaled - cX,
-            y: cyScaled - cY,
+            y: cyScaled - minYVal,
             z: czScaled - cZ
           };
         }
