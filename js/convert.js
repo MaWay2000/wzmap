@@ -46,15 +46,11 @@ export function convertGammaGameMapToClassic(gammaData) {
 
   for (let i = 0; i < tiles; i++) {
     const val = gridIn.getUint32(i * 4, true);
-    // Gamma stores per-tile data as: height (byte0), tile index (byte1),
-    // rotation/flags (byte2), extra height bits (byte3).
-    // Classic format expects: tile index, rotation, height (8-bit).
-    const height = val & 0xff;
-    const tile = (val >>> 8) & 0xff;
-    const rotation = (val >>> 16) & 0xff;
-    out[16 + 3 * i] = tile;
-    out[16 + 3 * i + 1] = rotation;
-    out[16 + 3 * i + 2] = height;
+    const height16 = val & 0xffff;
+    const tile16 = (val >>> 16) & 0xffff;
+    out[16 + 3 * i] = tile16 & 0xff;
+    out[16 + 3 * i + 1] = 0; // rotation unknown -> 0
+    out[16 + 3 * i + 2] = height16 & 0xff; // keep lowest 8 bits
   }
 
   return out;
