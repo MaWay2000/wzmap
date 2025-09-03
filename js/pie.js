@@ -9,7 +9,6 @@ export function parsePie(data) {
   let textureName = null;
   let texWidth = 256;
   let texHeight = 256;
-  const connectors = [];
   while (i < lines.length) {
     const line = lines[i].trim();
     if (line.startsWith('TEXTURE')) {
@@ -49,19 +48,6 @@ export function parsePie(data) {
           triUVs.push([uvA, uvB, uvC]);
         }
       }
-    } else if (line.startsWith('CONNECTORS')) {
-      const parts = line.split(/\s+/);
-      const count = parseInt(parts[1], 10) || 0;
-      for (let j = 0; j < count; j++) {
-        i++;
-        const vals = lines[i].trim().split(/\s+/).map(Number);
-        if (vals.length >= 3) {
-          const cx = vals[0] / 128;
-          const cy = vals[2] / 128;
-          const cz = vals[1] / 128;
-          connectors.push({ x: cx, y: cy, z: cz });
-        }
-      }
     }
     i++;
   }
@@ -83,9 +69,6 @@ export function parsePie(data) {
   if (uvs.length > 0) {
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     if (textureName) geo.userData.textureName = textureName;
-  }
-  if (connectors.length) {
-    geo.userData.connectors = connectors;
   }
   geo.computeVertexNormals();
   return geo;
