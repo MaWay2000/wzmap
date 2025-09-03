@@ -160,16 +160,52 @@ def convert_gamma_to_classic(input_wz: str, output_wz: str) -> None:
         shutil.rmtree(tempdir)
 
 
+def convert_all_gamma(input_dir: str, output_dir: str) -> None:
+    """Convert every ``.wz`` file in ``input_dir``.
+
+    Parameters
+    ----------
+    input_dir:
+        Directory containing Gamma style ``.wz`` maps.
+    output_dir:
+        Directory where converted maps should be written. It will be
+        created if it does not already exist.
+    """
+
+    os.makedirs(output_dir, exist_ok=True)
+    for name in os.listdir(input_dir):
+        if not name.lower().endswith(".wz"):
+            continue
+        src = os.path.join(input_dir, name)
+        dest = os.path.join(output_dir, name)
+        try:
+            convert_gamma_to_classic(src, dest)
+            print(f"Converted {src} -> {dest}")
+        except Exception as exc:  # pragma: no cover - defensive
+            print(f"Skipping {src}: {exc}")
+
+
 def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Convert Gamma style WZ map to classic format")
-    parser.add_argument("input_wz", help="Path to the input Gamma .wz map")
-    parser.add_argument("output_wz", help="Path to output classic .wz map")
+    parser = argparse.ArgumentParser(
+        description="Convert Gamma style WZ map to classic format"
+    )
+    parser.add_argument(
+        "input",
+        help="Path to input Gamma .wz map or directory containing maps",
+    )
+    parser.add_argument(
+        "output",
+        help="Path to output classic .wz map or directory",
+    )
     args = parser.parse_args()
 
-    convert_gamma_to_classic(args.input_wz, args.output_wz)
-    print(f"Converted map written to {args.output_wz}")
+    if os.path.isdir(args.input):
+        convert_all_gamma(args.input, args.output)
+    else:
+        convert_gamma_to_classic(args.input, args.output)
+        print(f"Converted map written to {args.output}")
 
 
 if __name__ == "__main__":
