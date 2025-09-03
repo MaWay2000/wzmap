@@ -1,7 +1,23 @@
 // Convert Gamma-style game.map data to classic 3-byte-per-tile map format.
 // Based on gamma_to_classic.py
 
-export function convertGammaGameMapToClassic(gammaData) {
+export function parseTTypes(text) {
+  if (!text) return null;
+  const lines = text.split(/\r?\n/);
+  const mapping = [];
+  for (const line of lines) {
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      const idx = parseInt(parts[0]);
+      if (!isNaN(idx)) {
+        mapping[idx] = idx; // currently 1:1 mapping
+      }
+    }
+  }
+  return mapping;
+}
+
+export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
   if (!gammaData || gammaData.length < 12) return null;
   if (
     gammaData[0] !== 0x6d || // m
@@ -48,7 +64,9 @@ export function convertGammaGameMapToClassic(gammaData) {
     const val = gridIn.getUint32(i * 4, true);
     const height16 = val & 0xffff;
     const tile16 = (val >>> 16) & 0xffff;
-    out[16 + 3 * i] = tile16 & 0xff;
+    const mappedTile =
+      ttypesMap && ttypesMap[tile16] !== undefined ? ttypesMap[tile16] : tile16;
+    out[16 + 3 * i] = mappedTile & 0xff;
     out[16 + 3 * i + 1] = 0; // rotation unknown -> 0
     out[16 + 3 * i + 2] = height16 & 0xff; // keep lowest 8 bits
   }
