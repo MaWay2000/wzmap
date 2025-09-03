@@ -2231,8 +2231,8 @@ async function loadMapFile(file) {
     const ttypesName = names.find(n => n.toLowerCase().endsWith('ttypes.ttp'));
     let ttypesMap = null;
     if (ttypesName) {
-      const ttypesText = await zip.files[ttypesName].async('string');
-      ttypesMap = parseTTypes(ttypesText);
+      const ttypesData = await zip.files[ttypesName].async('uint8array');
+      ttypesMap = parseTTypes(ttypesData);
     }
     autoTs = await getTilesetIndexFromTtp(zip, TTP_TILESET_MAP);
     let allMapNames = Object.keys(zip.files)
