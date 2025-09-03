@@ -15,6 +15,7 @@ function normalizeTexPath(name){
 let showPanelIdsCheckbox;
 import { TILESETS, getTileCount, loadAllTiles, clearTileCache } from './tileset.js';
 import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
+import { convertGammaGameMapToClassic } from './convert.js';
 import { cameraState, resetCameraTarget, setupKeyboard } from './camera.js';
 import { parsePie, loadPieGeometry } from "./pie.js";
 import { buildStructureGroup } from "./structureGroup.js";
@@ -2202,7 +2203,9 @@ async function loadMapFile(file) {
   let autoTs = 0;
   if (fileExt === 'map') {
     const buf = await file.arrayBuffer();
-    const fileData = new Uint8Array(buf);
+    let fileData = new Uint8Array(buf);
+    const converted = convertGammaGameMapToClassic(fileData);
+    if (converted) fileData = converted;
     await setTileset(autoTs);
     const result = parseMapGrid(fileData);
     if (result) {
@@ -2231,6 +2234,8 @@ async function loadMapFile(file) {
     let mapFileName = allMapNames.find(f => f.toLowerCase().endsWith("game.map")) || allMapNames[0];
     if (mapFileName) {
       let fileData = await zip.files[mapFileName].async("uint8array");
+      const converted = convertGammaGameMapToClassic(fileData);
+      if (converted) fileData = converted;
       await setTileset(autoTs);
       const result = parseMapGrid(fileData);
       if (result) {
