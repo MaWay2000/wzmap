@@ -1659,24 +1659,11 @@ function __old_updateHighlight(event) {
         const cY = (bb2.min.y + bb2.max.y) / 2;
         const cZ = (bb2.min.z + bb2.max.z) / 2;
         const minYVal = bb2.min.y;
-        let connRel = null;
-        if (g.userData && g.userData.connectors && g.userData.connectors.length) {
-          const bc = g.userData.connectors[0];
-          const cxScaled = bc.x * scl;
-          const cyScaled = bc.y * scl;
-          const czScaled = bc.z * scl;
-          connRel = {
-            x: cxScaled - cX,
-            y: cyScaled - minYVal,
-            z: czScaled - cZ
-          };
-        } else {
-          connRel = {
-            x: 0,
-            y: bb2.max.y - minYVal,
-            z: 0
-          };
-        }
+        const connRel = {
+          x: 0,
+          y: bb2.max.y - minYVal,
+          z: 0
+        };
         const inner = new THREE.Group();
         const baseMesh = new THREE.Mesh(g, baseMat);
         baseMesh.position.set(-cX, -cY, -cZ);
