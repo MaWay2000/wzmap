@@ -15,7 +15,7 @@ function normalizeTexPath(name){
 let showPanelIdsCheckbox;
 import { TILESETS, getTileCount, loadAllTiles, clearTileCache } from './tileset.js';
 import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
-import { convertGammaGameMapToClassic } from './convert.js';
+import { convertGammaGameMapToClassic, parseTTypes } from './convert.js';
 import { cameraState, resetCameraTarget, setupKeyboard } from './camera.js';
 import { parsePie, loadPieGeometry } from "./pie.js";
 import { buildStructureGroup } from "./structureGroup.js";
@@ -2228,13 +2228,19 @@ async function loadMapFile(file) {
     const buf = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(buf);
     let names = Object.keys(zip.files).map(n => n.replace(/\\/g, '/'));
+    const ttypesName = names.find(n => n.toLowerCase().endsWith('ttypes.ttp'));
+    let ttypesMap = null;
+    if (ttypesName) {
+      const ttypesText = await zip.files[ttypesName].async('string');
+      ttypesMap = parseTTypes(ttypesText);
+    }
     autoTs = await getTilesetIndexFromTtp(zip, TTP_TILESET_MAP);
     let allMapNames = Object.keys(zip.files)
       .filter(fname => fname.toLowerCase().endsWith(".map") && !zip.files[fname].dir);
     let mapFileName = allMapNames.find(f => f.toLowerCase().endsWith("game.map")) || allMapNames[0];
     if (mapFileName) {
       let fileData = await zip.files[mapFileName].async("uint8array");
-      const converted = convertGammaGameMapToClassic(fileData);
+      const converted = convertGammaGameMapToClassic(fileData, ttypesMap);
       if (converted) fileData = converted;
       await setTileset(autoTs);
       const result = parseMapGrid(fileData);
