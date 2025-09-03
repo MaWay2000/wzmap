@@ -18,13 +18,19 @@ export function convertGammaGameMapToClassic(gammaData) {
     gammaData.byteOffset,
     gammaData.byteLength
   );
-  const width = dv.getInt32(4, true);
-  const height = dv.getInt32(8, true);
+  // Gamma maps include 4 extra bytes after the "map (" header
+  // before the width/height pair. The original implementation
+  // read width/height starting at offset 4 which produced
+  // incorrect dimensions and misaligned tile data. Read them
+  // from the correct offsets and skip the extra 4-byte field.
+  const width = dv.getInt32(8, true);
+  const height = dv.getInt32(12, true);
   if (width <= 0 || height <= 0) return null;
   const tiles = width * height;
   const gridIn = new DataView(
     gammaData.buffer,
-    gammaData.byteOffset + 12,
+    // Tile data starts after the 16-byte header
+    gammaData.byteOffset + 16,
     tiles * 4
   );
 
