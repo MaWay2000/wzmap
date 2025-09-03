@@ -90,17 +90,18 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
   }
   if (attachments && attachments.length && connectorPos) {
     let gunYOffset = blockHeights.slice(0, topIdx).reduce((a, b) => a + b, 0);
-    const attGeo = await loadPieGeometry(attachments[0]).then(g => g.clone());
-    attGeo.scale(scale, scale, scale);
-    attGeo.computeBoundingBox();
-    let tb = attGeo.boundingBox;
+    const turretIdx = attachments.length > 1 ? 1 : 0;
+    const turretGeo = await loadPieGeometry(attachments[turretIdx]).then(g => g.clone());
+    turretGeo.scale(scale, scale, scale);
+    turretGeo.computeBoundingBox();
+    let tb = turretGeo.boundingBox;
     let tcX = (tb.min.x + tb.max.x) / 2;
     let tcY = (tb.min.y + tb.max.y) / 2;
     let tcZ = (tb.min.z + tb.max.z) / 2;
     let tMat;
-    if (attGeo.userData && attGeo.userData.textureName) {
+    if (turretGeo.userData && turretGeo.userData.textureName) {
       const texLoader2 = new THREE.TextureLoader();
-      const texName2 = attGeo.userData.textureName.toLowerCase();
+      const texName2 = turretGeo.userData.textureName.toLowerCase();
       const tex2 = texLoader2.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName2, undefined, undefined, () => {});
       tex2.magFilter = THREE.NearestFilter;
       tex2.minFilter = THREE.LinearMipMapLinearFilter;
@@ -108,15 +109,43 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
     } else {
       tMat = new THREE.MeshLambertMaterial({ color: 0xff0000, transparent: opacityOverride !== null, opacity: (opacityOverride != null ? opacityOverride : 1) });
     }
-    let tMesh = new THREE.Mesh(attGeo, tMat);
+    let tMesh = new THREE.Mesh(turretGeo, tMat);
     tMesh.rotation.y = rotation * Math.PI / 2;
-const turretBottomOffset = tb.min.y;
-tMesh.position.set(
-  connectorPos.x - tcX,
-  gunYOffset + connectorPos.y - turretBottomOffset,
-  connectorPos.z - tcZ
-);
+    const turretBottomOffset = tb.min.y;
+    tMesh.position.set(
+      connectorPos.x - tcX,
+      gunYOffset + connectorPos.y - turretBottomOffset,
+      connectorPos.z - tcZ
+    );
     group.add(tMesh);
+    if (attachments.length > 1) {
+      const gunGeo = await loadPieGeometry(attachments[0]).then(g => g.clone());
+      gunGeo.scale(scale, scale, scale);
+      gunGeo.computeBoundingBox();
+      let gMat;
+      if (gunGeo.userData && gunGeo.userData.textureName) {
+        const texLoader3 = new THREE.TextureLoader();
+        const texName3 = gunGeo.userData.textureName.toLowerCase();
+        const tex3 = texLoader3.load(((typeof window!=='undefined'&&window.TEX_BASE)?window.TEX_BASE:TEX_BASE) +  texName3, undefined, undefined, () => {});
+        tex3.magFilter = THREE.NearestFilter;
+        tex3.minFilter = THREE.LinearMipMapLinearFilter;
+        gMat = new THREE.MeshLambertMaterial({ map: tex3, transparent: opacityOverride !== null, opacity: (opacityOverride != null ? opacityOverride : 1) });
+      } else {
+        gMat = new THREE.MeshLambertMaterial({ color: 0xff0000, transparent: opacityOverride !== null, opacity: (opacityOverride != null ? opacityOverride : 1) });
+      }
+      let gMesh = new THREE.Mesh(gunGeo, gMat);
+      if (gunGeo.userData && gunGeo.userData.connectors && gunGeo.userData.connectors.length) {
+        const gc = gunGeo.userData.connectors[0];
+        gMesh.position.set(-gc.x * scale, -gc.y * scale, -gc.z * scale);
+      } else {
+        const gb = gunGeo.boundingBox;
+        const gcX = (gb.min.x + gb.max.x) / 2;
+        const gcZ = (gb.min.z + gb.max.z) / 2;
+        const gunBottom = gb.min.y;
+        gMesh.position.set(-gcX, -gunBottom, -gcZ);
+      }
+      tMesh.add(gMesh);
+    }
   }
 group.updateMatrixWorld(true);
 let bbox = new THREE.Box3().setFromObject(group);

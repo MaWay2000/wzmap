@@ -2,8 +2,8 @@ export const STRUCTURE_TURRETS = {
 
   "A0BaBaBunker": ['gnmmg1.pie', 'trmmg.pie'],
   "A0BaBaFlameTower": ['gnlflmr.pie', 'trlflmr.pie'],
-  "A0BaBaGunTower": [],
-  "A0BaBaGunTowerEND": [],
+  "A0BaBaGunTower": ['gnmmg1.pie', 'trmmg.pie'],
+  "A0BaBaGunTowerEND": ['gnmmg1.pie', 'trmmg.pie'],
   "A0BaBaMortarPit": ['gnmmort.pie', 'trmmort.pie'],
   "A0BaBaRocketPit": ['gnlrcktp.pie', 'trlrcktp.pie'],
   "A0BaBaRocketPitAT": ['gnlmsl.pie', 'trlrckt.pie'],
