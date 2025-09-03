@@ -406,6 +406,17 @@ async function loadStructureDefs() {
             pies.push(entry.baseModel);
           }
           pies.push(nonModules[0]);
+
+          // Some defensive structures, such as guard towers, list an
+          // additional piece after the main building for the weapon mount
+          // (e.g. "trl" turret boxes). Previously we discarded these,
+          // which caused weapons to float above the tower. Append any
+          // subsequent non-module models that look like turret pieces so
+          // the weapon sits on the intended extra box.
+          const turretPieces = nonModules
+            .slice(1)
+            .filter(m => /^tr/i.test(m));
+          pies.push(...turretPieces);
         } else if (entry.baseModel) {
           pies.push(entry.baseModel);
         }
