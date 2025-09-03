@@ -83,9 +83,9 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
       gMesh.position.set(-gcX, -gunBottom, -gcZ);
       tMesh.add(gMesh);
     }
-  }
-  group.rotation.y = rotation * Math.PI / 2;
-  group.updateMatrixWorld(true);
+    }
+    group.rotation.y = -rotation * Math.PI / 2;
+    group.updateMatrixWorld(true);
   let bbox = new THREE.Box3().setFromObject(group);
   const minY = bbox.min.y;
   group.userData.minY = minY;

@@ -1726,7 +1726,7 @@ function __old_updateHighlight(event) {
           const pY = maxH2 + 0.02 - minYVal;
           const pZ = tileY + sizeY / 2 - cZ;
           inner.position.set(pX + cX, pY, pZ + cZ);
-          inner.rotation.y = selectedStructureRotation * Math.PI / 2;
+          inner.rotation.y = -selectedStructureRotation * Math.PI / 2;
           inner.userData.centerX = cX;
           inner.userData.centerY = cY;
           inner.userData.centerZ = cZ;
@@ -1891,8 +1891,8 @@ function renderTexturePalette() {
     if (img && img.complete && img.naturalWidth > 0) {
       ctx.save();
       ctx.translate(center, center);
-      const snapped = Math.round(cameraState.rotationY / (Math.PI / 2)) * (Math.PI / 2);
-      ctx.rotate(snapped + (selectedRotation * Math.PI) / 2);
+        const snapped = Math.round(cameraState.rotationY / (Math.PI / 2)) * (Math.PI / 2);
+        ctx.rotate(snapped - (selectedRotation * Math.PI) / 2);
       ctx.translate(-center, -center);
       ctx.drawImage(img, 0, 0, TILE_ICON_SIZE, TILE_ICON_SIZE);
       ctx.restore();
@@ -2506,9 +2506,9 @@ try {
       new THREE.MeshLambertMaterial({ color: 0x393, side: THREE.DoubleSide });
     const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, positions.length);
     positions.forEach((pos, i) => {
-      const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
-      const rotation = (mapRotations[pos.y][pos.x] % 4) * Math.PI / 2;
-      const matrix = new THREE.Matrix4();
+        const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
+        const rotation = -(mapRotations[pos.y][pos.x] % 4) * Math.PI / 2;
+        const matrix = new THREE.Matrix4();
       const rotationMatrix = new THREE.Matrix4().makeRotationY(rotation);
       const scaleMatrix = new THREE.Matrix4().makeScale(1, h, 1);
       const translationMatrix = new THREE.Matrix4().makeTranslation(pos.x + 0.5, h / 2, pos.y + 0.5);
