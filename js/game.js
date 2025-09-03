@@ -786,13 +786,13 @@ const initDom = () => {
   const rotLeft = document.getElementById('rotateLeft');
   const rotRight = document.getElementById('rotateRight');
   rotLeft && rotLeft.addEventListener('click', () => {
-    selectedRotation = (selectedRotation + 3) % 4;
+    selectedRotation = (selectedRotation + 1) % 4;
     updateSelectedInfo();
     renderTexturePalette();
     if (lastMouseEvent) updateHighlight(lastMouseEvent);
   });
   rotRight && rotRight.addEventListener('click', () => {
-    selectedRotation = (selectedRotation + 1) % 4;
+    selectedRotation = (selectedRotation + 3) % 4;
     updateSelectedInfo();
     renderTexturePalette();
     if (lastMouseEvent) updateHighlight(lastMouseEvent);
@@ -1306,14 +1306,14 @@ const initDom = () => {
   const sRotRight = document.getElementById('structRotateRight');
   if (sRotLeft) {
     sRotLeft.addEventListener('click', () => {
-      selectedStructureRotation = (selectedStructureRotation + 3) % 4;
+      selectedStructureRotation = (selectedStructureRotation + 1) % 4;
       updateStructurePreview();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
   }
   if (sRotRight) {
     sRotRight.addEventListener('click', () => {
-      selectedStructureRotation = (selectedStructureRotation + 1) % 4;
+      selectedStructureRotation = (selectedStructureRotation + 3) % 4;
       updateStructurePreview();
       if (lastMouseEvent) updateHighlight(lastMouseEvent);
     });
