@@ -74,13 +74,21 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
   const topGeo = baseGeos[topIdx];
   const topC = blockCenters[topIdx];
   let connectorPos = null;
+  const topBBox = topGeo.boundingBox;
   if (topGeo.userData && topGeo.userData.connectors && topGeo.userData.connectors.length) {
     let bc = topGeo.userData.connectors[0];
-    const minY = topGeo.boundingBox ? topGeo.boundingBox.min.y : 0;
+    const minY = topBBox ? topBBox.min.y : 0;
     connectorPos = {
       x: bc.x * scale - topC.cX,
       y: bc.y * scale - minY,
       z: bc.z * scale - topC.cZ
+    };
+  } else if (topBBox) {
+    const minY = topBBox.min.y;
+    connectorPos = {
+      x: 0,
+      y: topBBox.max.y - minY,
+      z: 0
     };
   }
   let attachments = STRUCTURE_TURRETS[def.id];

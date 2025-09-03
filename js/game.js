@@ -1670,6 +1670,12 @@ function __old_updateHighlight(event) {
             y: cyScaled - minYVal,
             z: czScaled - cZ
           };
+        } else {
+          connRel = {
+            x: 0,
+            y: bb2.max.y - minYVal,
+            z: 0
+          };
         }
         const inner = new THREE.Group();
         const baseMesh = new THREE.Mesh(g, baseMat);
