@@ -50,7 +50,7 @@ export function convertGammaGameMapToClassic(gammaData) {
     const tile16 = (val >>> 16) & 0xffff;
     out[16 + 3 * i] = tile16 & 0xff;
     out[16 + 3 * i + 1] = 0; // rotation unknown -> 0
-    out[16 + 3 * i + 2] = height16 >>> 8; // keep top 8 bits
+    out[16 + 3 * i + 2] = height16 & 0xff; // keep lowest 8 bits
   }
 
   return out;
