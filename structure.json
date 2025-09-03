@@ -1051,9 +1051,10 @@
 		"resistance": 150,
 		"sensorID": "DefaultSensor1Mk1",
 		"strength": "MEDIUM",
-		"structureModel": [
-			"blguardn.PIE"
-		],
+                "structureModel": [
+                        "blguardn.PIE",
+                        "trlmg1.pie"
+                ],
 		"thermal": 12,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1097,11 +1098,12 @@
 		"name": "*CO-Tower-RotMG*",
 		"resistance": 150,
 		"sensorID": "DefaultSensor1Mk1",
-		"strength": "MEDIUM",
-		"structureModel": [
-			"blguardn.PIE"
-		],
-		"thermal": 12,
+                "strength": "MEDIUM",
+                "structureModel": [
+                        "blguardn.PIE",
+                        "trlmg2.pie"
+                ],
+                "thermal": 12,
 		"type": "DEFENSE",
 		"weapons": [
 			"MG4ROTARYMk1"
@@ -1793,9 +1795,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlmsl.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1815,9 +1818,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlgss.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1837,9 +1841,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlgss.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1859,9 +1864,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"blguardr.pie"
-		],
+                "structureModel": [
+                        "blguardr.pie",
+                        "trlmg2.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1925,9 +1931,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlmg1.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1947,9 +1954,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "MEDIUM",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlflmr.pie"
+                ],
 		"thermal": 15,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1969,9 +1977,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlrckt.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
@@ -1991,9 +2000,10 @@
 		"resistance": 150,
 		"sensorID": "TowerSensor",
 		"strength": "HARD",
-		"structureModel": [
-			"BLGUARDR.pie"
-		],
+                "structureModel": [
+                        "BLGUARDR.pie",
+                        "trlrckt.pie"
+                ],
 		"thermal": 20,
 		"type": "DEFENSE",
 		"weapons": [
