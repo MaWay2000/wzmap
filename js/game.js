@@ -2442,15 +2442,19 @@ function drawMap3D() {
     for (let x = 0; x < mapW; ++x) {
       const tileIdx = mapTiles[y][x] % tileCount;
       const hVal = mapHeights[y][x];
-      const key = showHeight ? `${tileIdx}_${hVal}` : String(tileIdx);
+      const rot = mapRotations[y][x] % 4;
+      let key;
+      if (showHeight) key = `${tileIdx}_${hVal}_${rot}`;
+      else if (showTileId) key = `${tileIdx}_${rot}`;
+      else key = String(tileIdx);
       if (!uniqueTiles.has(key)) {
-        uniqueTiles.set(key, { tileIdx, height: hVal, positions: [] });
+        uniqueTiles.set(key, { tileIdx, height: hVal, rot, positions: [] });
       }
       uniqueTiles.get(key).positions.push({ x, y, h: hVal });
     }
   }
   const tileGeometry = new THREE.BoxGeometry(1, 1, 1);
-  uniqueTiles.forEach(({ tileIdx, height: heightVal, positions }) => {
+  uniqueTiles.forEach(({ tileIdx, height: heightVal, rot, positions }) => {
     let img = tileImages[tileIdx];
     let tex;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -2469,28 +2473,31 @@ try {
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.strokeRect(2, 2, d, d);
   }
 } catch(e) {}
-      if (showTileId) {
+      if (showTileId || showHeight) {
         ctx.save();
-        ctx.font = "bold 14px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.strokeText(tileIdx, 16, 0);
-        ctx.fillStyle = "#FFF";
-        ctx.fillText(tileIdx, 16, 0);
-        ctx.restore();
-      }
-      if (showHeight) {
-        ctx.save();
-        ctx.font = "bold 14px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.strokeText(heightVal, 16, 32);
-        ctx.fillStyle = "#FFF";
-        ctx.fillText(heightVal, 16, 32);
+        ctx.translate(16, 16);
+        ctx.rotate(-rot * Math.PI / 2);
+        ctx.translate(-16, -16);
+        if (showTileId) {
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 2;
+          ctx.strokeText(tileIdx, 16, 0);
+          ctx.fillStyle = "#FFF";
+          ctx.fillText(tileIdx, 16, 0);
+        }
+        if (showHeight) {
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 2;
+          ctx.strokeText(heightVal, 16, 32);
+          ctx.fillStyle = "#FFF";
+          ctx.fillText(heightVal, 16, 32);
+        }
         ctx.restore();
       }
       tex = new THREE.CanvasTexture(canvas);
