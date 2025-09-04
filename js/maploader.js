@@ -33,38 +33,53 @@ export function parseBinaryMap(fileData) {
   const mapTiles     = Array.from({ length: height }, () => Array(width).fill(0));
   const mapRotations = Array.from({ length: height }, () => Array(width).fill(0));
   const mapHeights   = Array.from({ length: height }, () => Array(width).fill(0));
+  const mapXFlip     = Array.from({ length: height }, () => Array(width).fill(false));
+  const mapYFlip     = Array.from({ length: height }, () => Array(width).fill(false));
+  const mapTriFlip   = Array.from({ length: height }, () => Array(width).fill(false));
 
   let ofs = gridStart;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
+      const tilenum = dv.getUint16(ofs, true); ofs += 2;
+
+      let h;
       if (mapVersion >= 40) {
-        // --- v40+ format: 2 bytes texture + 2 bytes full-range height ---
-        const tilenum = dv.getUint16(ofs, true); ofs += 2;
-        const height16 = dv.getUint16(ofs, true); ofs += 2;
-
-        const tileIndex = tilenum & TILE_NUMMASK;
-        const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT;
-
-        mapTiles[y][x]     = tileIndex;
-        mapRotations[y][x] = rotation;
-        mapHeights[y][x]   = height16;
+        // v40+: 16-bit full-range height
+        h = dv.getUint16(ofs, true);
+        ofs += 2;
       } else {
-        // --- v39 format: 2 bytes texture + 1 byte height (scaled ×2) ---
-        const tilenum = dv.getUint16(ofs, true); ofs += 2;
-        const hByte   = dv.getUint8(ofs); ofs += 1;
-
-        const tileIndex = tilenum & TILE_NUMMASK;
-        const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT;
-        const height8   = hByte * ELEVATION_SCALE;
-
-        mapTiles[y][x]     = tileIndex;
-        mapRotations[y][x] = rotation;
-        mapHeights[y][x]   = height8;
+        // v39: 8-bit height stored as height / ELEVATION_SCALE
+        const hByte = dv.getUint8(ofs); ofs += 1;
+        h = hByte * ELEVATION_SCALE;
       }
+
+      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
+      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0–3
+      const xFlip     = !!(tilenum & TILE_XFLIP);
+      const yFlip     = !!(tilenum & TILE_YFLIP);
+      const triFlip   = !!(tilenum & TILE_TRIFLIP);
+
+      mapTiles[y][x]     = tileIndex;
+      mapRotations[y][x] = rotation;
+      mapHeights[y][x]   = h;
+      mapXFlip[y][x]     = xFlip;
+      mapYFlip[y][x]     = yFlip;
+      mapTriFlip[y][x]   = triFlip;
     }
   }
 
-  return { mapW: width, mapH: height, mapTiles, mapRotations, mapHeights, format: "binary", mapVersion };
+  return { 
+    mapW: width, 
+    mapH: height, 
+    mapTiles, 
+    mapRotations, 
+    mapHeights, 
+    mapXFlip, 
+    mapYFlip, 
+    mapTriFlip,
+    format: "binary", 
+    mapVersion 
+  };
 }
 
 // ------------------------
@@ -80,6 +95,9 @@ export function parseJSONMap(text) {
         mapTiles: json.tiles,
         mapRotations: json.rotations ?? [],
         mapHeights: json.heights ?? [],
+        mapXFlip: json.xflip ?? [],
+        mapYFlip: json.yflip ?? [],
+        mapTriFlip: json.triflip ?? [],
         format: "json"
       };
     }
@@ -101,7 +119,17 @@ export function parseLevMap(fileData) {
           mapTiles[y][x] = fileData[2 + y * width + x];
         }
       }
-      return { mapW: width, mapH: height, mapTiles, mapRotations: [], mapHeights: [], format: "lev" };
+      return { 
+        mapW: width, 
+        mapH: height, 
+        mapTiles, 
+        mapRotations: [], 
+        mapHeights: [], 
+        mapXFlip: [], 
+        mapYFlip: [], 
+        mapTriFlip: [], 
+        format: "lev" 
+      };
     }
   }
   return null;
