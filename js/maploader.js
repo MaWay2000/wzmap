@@ -1,7 +1,7 @@
 // maploader.js
 
 // --- Constants from WZ sources ---
-const ELEVATION_SCALE = 2;             // v39 stores height/2 in a byte
+// Classic v39 maps store terrain height directly as an 8-bit value.
 const TILE_XFLIP   = 0x8000;
 const TILE_YFLIP   = 0x4000;
 const TILE_ROTMASK = 0x3000;
@@ -48,9 +48,8 @@ export function parseBinaryMap(fileData) {
         h = dv.getUint16(ofs, true);
         ofs += 2;
       } else {
-        // v39: 8-bit height stored as height / ELEVATION_SCALE
-        const hByte = dv.getUint8(ofs); ofs += 1;
-        h = hByte * ELEVATION_SCALE;
+        // v39: 8-bit height value
+        h = dv.getUint8(ofs); ofs += 1;
       }
 
       const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
