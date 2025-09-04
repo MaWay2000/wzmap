@@ -1,4 +1,5 @@
 // maploader.js
+import { convertGammaGameMapToClassic } from './convert.js';
 
 // ------------------------
 // Binary .map grid parsing
@@ -26,7 +27,6 @@ export function parseBinaryMap(fileData) {
         for (let x = 0; x < width; ++x) {
           let ofs = gridStart + 3 * (y * width + x);
           mapTiles[y][x] = fileData[ofs];
-          // rotation is stored in bits 4-5 of the rotation byte.
           mapRotations[y][x] = (fileData[ofs + 1] >> 4) & 0x03;
           mapHeights[y][x] = fileData[ofs + 2];
         }
@@ -53,19 +53,14 @@ export function parseJSONMap(text) {
         format: "json"
       };
     }
-  } catch (e) {
-    // not valid JSON
-  }
+  } catch (e) {}
   return null;
 }
 
 // ------------------------
-// .lev map parsing (oldest format)
-// NOTE: This is just a placeholder example.
+// .lev map parsing (very old)
 // ------------------------
 export function parseLevMap(fileData) {
-  // Very old format - just a stub example
-  // You should expand this according to lev spec
   if (fileData.length > 32) {
     let width = fileData[0];
     let height = fileData[1];
@@ -98,16 +93,28 @@ export async function loadMapUnified(input) {
 
   const bytes = new Uint8Array(buffer);
 
-  // Try JSON
+  // 1. Try JSON
   const text = new TextDecoder().decode(bytes);
   const jsonMap = parseJSONMap(text);
   if (jsonMap) return jsonMap;
 
-  // Try binary .map
+  // 2. Try Gamma -> convert -> Binary
+  if (bytes[0] === 0x6d && bytes[1] === 0x61 && bytes[2] === 0x70 && bytes[3] === 0x20 && bytes[4] === 0x28) {
+    const converted = convertGammaGameMapToClassic(bytes, null);
+    if (converted) {
+      const gammaAsBinary = parseBinaryMap(converted);
+      if (gammaAsBinary) {
+        gammaAsBinary.format = "gamma";
+        return gammaAsBinary;
+      }
+    }
+  }
+
+  // 3. Try Binary .map
   const binMap = parseBinaryMap(bytes);
   if (binMap) return binMap;
 
-  // Try .lev
+  // 4. Try .lev
   const levMap = parseLevMap(bytes);
   if (levMap) return levMap;
 
