@@ -15,9 +15,9 @@ export function parseTTypes(data) {
           mapping[idx] = idx; // identity mapping
         }
       }
-    }
-    return mapping;
   }
+  return mapping;
+}
 
   const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const entryCount = dv.getUint32(8, true);
