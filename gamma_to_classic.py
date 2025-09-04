@@ -64,12 +64,21 @@ def convert_gamma_to_classic(input_wz: str, output_wz: str) -> None:
         height = struct.unpack("<i", data[8:12])[0]
         tiles = width * height
 
-        # --- Step 3: split 32-bit values into heights + tiles
+        # --- Step 3: split 32-bit values into tiles + heights
+        # In Gamma maps the lower 16 bits store the tile index and the upper
+        # 16 bits store the height.  The previous implementation interpreted
+        # these the other way around which resulted in wildly incorrect
+        # height data when converting maps such as ``3p-Gamma.wz``.  Swap the
+        # extraction order so tiles and heights are decoded properly.
         raw = struct.unpack("<" + "I" * tiles, data[12:12 + tiles * 4])
-        heights16: List[int] = [(val & 0xFFFF) for val in raw]
-        tiles16: List[int] = [(val >> 16) & 0xFFFF for val in raw]
+        tiles16: List[int] = [(val & 0xFFFF) for val in raw]
+        heights16: List[int] = [(val >> 16) & 0xFFFF for val in raw]
 
-        heights8 = bytes([h // 256 for h in heights16])
+        # Heights in Gamma maps appear to be stored at twice the resolution of
+        # the classic format (0-510). Reduce them back to 8-bit values by
+        # dividing by two so the resulting terrain elevation matches the
+        # original map.
+        heights8 = bytes([h // 2 for h in heights16])
         tile_bytes = struct.pack("<" + "H" * len(tiles16), *tiles16)
 
         # --- Step 4: build header (GAME chunk)
