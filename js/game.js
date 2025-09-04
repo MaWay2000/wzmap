@@ -2468,11 +2468,10 @@ function drawMap3D() {
   }
   renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
   const showTileId = !!(typeof showTileIdCheckbox !== "undefined" && showTileIdCheckbox && showTileIdCheckbox.checked);
-  const tileCount = tileImages.length || getTileCount(tilesetIndex);
   const uniqueTiles = new Map();
   for (let y = 0; y < mapH; ++y) {
     for (let x = 0; x < mapW; ++x) {
-      const tileIdx = mapTiles[y][x] % tileCount;
+      const tileIdx = mapTiles[y][x];
       const hVal = mapHeights[y][x];
       const key = showHeight ? `${tileIdx}_${hVal}` : String(tileIdx);
       if (!uniqueTiles.has(key)) {
@@ -2483,14 +2482,17 @@ function drawMap3D() {
   }
   const tileGeometry = new THREE.BoxGeometry(1, 1, 1);
   uniqueTiles.forEach(({ tileIdx, height: heightVal, positions }) => {
-    let img = tileImages[tileIdx];
-    let tex;
+    const img = tileImages[tileIdx];
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
     if (img && img.complete && img.naturalWidth > 0) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 32;
-      canvas.height = 32;
-      const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, 32, 32);
+    } else {
+      ctx.fillStyle = '#393';
+      ctx.fillRect(0, 0, 32, 32);
+    }
 // --- draw small type swatch on map when enabled ---
 try {
   if (typeof showTileTypesOnMapCheckbox !== 'undefined' && showTileTypesOnMapCheckbox && showTileTypesOnMapCheckbox.checked) {
@@ -2525,17 +2527,12 @@ try {
         ctx.fillText(heightVal, 16, 32);
         ctx.restore();
       }
-      tex = new THREE.CanvasTexture(canvas);
-      tex.magFilter = THREE.NearestFilter;
-      tex.minFilter = THREE.LinearMipMapLinearFilter;
-      tex.wrapS = THREE.ClampToEdgeWrapping;
-      tex.wrapT = THREE.ClampToEdgeWrapping;
-    } else {
-      tex = null;
-    }
-    const material = tex ?
-      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }) :
-      new THREE.MeshBasicMaterial({ color: 0x393, side: THREE.DoubleSide });
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.LinearMipMapLinearFilter;
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    const material = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
     const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, positions.length);
     positions.forEach((pos, i) => {
       const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
