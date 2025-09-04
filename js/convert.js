@@ -66,7 +66,7 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
     tiles * 4
   );
 
-  // Output format: "map " header + unused 4 bytes + width + height + 3 bytes/tile
+  // Output format: "map " header + version + width + height + 3 bytes/tile
   const out = new Uint8Array(16 + tiles * 3);
   out[0] = 0x6d; // 'm'
   out[1] = 0x61; // 'a'
@@ -74,24 +74,27 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
   out[3] = 0x20; // ' '
 
   const dvOut = new DataView(out.buffer);
+  dvOut.setUint32(4, 39, true);     // classic binary map version (3 bytes/tile)
   dvOut.setInt32(8, width, true);
   dvOut.setInt32(12, height, true);
 
+  const TILE_ROTSHIFT = 12;          // from maploader.js
+
   for (let i = 0; i < tiles; i++) {
     const val = gridIn.getUint32(i * 4, true);
-    const height16 = val & 0xffff;
-    const tile16 = (val >>> 16) & 0xffff;
+    const tile16 = val & 0xffff;          // lower 16 bits = tile + rotation
+    const height16 = val >>> 16;          // upper 16 bits = height
 
-    const baseTile = tile16 >>> 2; // strip rotation bits
+    const baseTile = tile16 >>> 2;        // strip rotation bits
     const rotation = tile16 & 0x03;
 
     const mappedTile = (ttypesMap && ttypesMap[tile16] !== undefined)
       ? ttypesMap[tile16]
       : baseTile;
 
-    out[16 + 3 * i] = mappedTile & 0xff;         // tile index
-    out[16 + 3 * i + 1] = rotation & 0x03;       // store rotation 0–3
-    out[16 + 3 * i + 2] = Math.min(height16 >> 2, 255); // scale height to 0–255
+    const tilenum = (mappedTile & 0x01ff) | (rotation << TILE_ROTSHIFT);
+    dvOut.setUint16(16 + 3 * i, tilenum, true);
+    out[16 + 3 * i + 2] = Math.min(height16 >> 1, 255); // scale height to 0–255
   }
 
   return out;
