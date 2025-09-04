@@ -2502,8 +2502,8 @@ try {
       tex = null;
     }
     const material = tex ?
-      new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide }) :
-      new THREE.MeshLambertMaterial({ color: 0x393, side: THREE.DoubleSide });
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }) :
+      new THREE.MeshBasicMaterial({ color: 0x393, side: THREE.DoubleSide });
     const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, positions.length);
     positions.forEach((pos, i) => {
       const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
