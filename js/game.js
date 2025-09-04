@@ -2514,7 +2514,8 @@ try {
       const rotationMatrix = new THREE.Matrix4().makeRotationY(rotation);
       const scaleMatrix = new THREE.Matrix4().makeScale(flipX, h, flipZ);
       const translationMatrix = new THREE.Matrix4().makeTranslation(pos.x + 0.5, h / 2, pos.y + 0.5);
-      matrix.multiply(translationMatrix).multiply(rotationMatrix).multiply(scaleMatrix);
+      // Apply rotation before flip so flip flags reflect the final tile orientation
+      matrix.multiply(translationMatrix).multiply(scaleMatrix).multiply(rotationMatrix);
       instancedMesh.setMatrixAt(i, matrix);
     });
     instancedMesh.instanceMatrix.needsUpdate = true;
