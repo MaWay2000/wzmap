@@ -2,7 +2,7 @@
 wz map editor
 
 maps/ -> Map folder
-maps/index.php -> generates map list (scans directory and updates maps/filelist.txt file):
+maps/index.php -> generates map list (PHP required) (scans directory and updates maps/filelist.txt file):
 maps/filelist.txt -> list of maps, u see "brose server maps" can add map names manualy and drop files to /map folder
 
 js/ -> javascript folder
