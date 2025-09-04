@@ -18,15 +18,29 @@ export function parseBinaryMap(fileData) {
   }
 
   const dv = new DataView(fileData.buffer, fileData.byteOffset, fileData.byteLength);
-  const mapVersion = dv.getUint32(4, true);      // 39 or 40+
+  let mapVersion = dv.getUint32(4, true);      // 39 or 40+
   const width      = dv.getUint32(8, true);
   const height     = dv.getUint32(12, true);
 
   if (width <= 0 || width > 256 || height <= 0 || height > 256) return null;
 
   const numTiles = width * height;
-  const bytesPerTile = (mapVersion >= 40) ? 4 : 3;
   const gridStart = 16;
+
+  // Some community maps report version 39 but store four bytes per tile
+  // (v40 layout).  Detect this by checking the file length and fall back to
+  // the v40 interpretation if there's enough data for it.
+  const expectedV39 = gridStart + numTiles * 3;
+  const expectedV40 = gridStart + numTiles * 4;
+
+  let bytesPerTile = (mapVersion >= 40) ? 4 : 3;
+  let treatAsV40 = false;
+
+  if (mapVersion === 39 && fileData.length >= expectedV40) {
+    bytesPerTile = 4;
+    treatAsV40 = true;
+  }
+
   const need = gridStart + numTiles * bytesPerTile;
   if (fileData.length < need) return null;
 
@@ -41,7 +55,7 @@ export function parseBinaryMap(fileData) {
       ofs += 2;
 
       let h;
-      if (mapVersion >= 40) {
+      if (mapVersion >= 40 || treatAsV40) {
         // v40+: 16-bit full-range height
         h = dv.getUint16(ofs, true);
         ofs += 2;
