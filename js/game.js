@@ -82,6 +82,7 @@ if (showHeightBtn) {
 
 // Tile types on 3D map toggle
 const showTileTypesOnMapCheckbox = document.getElementById('showTileTypesOnMap');
+const showTileTypesCheckbox = document.getElementById('displayTileTypes');
 const showTileInfoCheckbox = document.getElementById('showTileInfo');
 const tileInfoButtonsDiv = document.getElementById('tileInfoButtons');
 const tileOptionsBox = document.getElementById('tileOptions');
