@@ -82,7 +82,7 @@ export async function loadAllTiles(tilesetIndex, count = getTileCount(tilesetInd
     for (let i = 0; i < count; i++) if (imgs[i]) out.push(imgs[i]);
 
     try {
-      console.log(`[tileset] ${folder} -> loaded ${out.length} tiles (declared count 1046 ${count})`);
+      console.log(`[tileset] ${folder} -> loaded ${out.length} tiles (declared count ${count})`);
     } catch {}
     return out;
   })();

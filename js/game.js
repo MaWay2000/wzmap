@@ -2444,7 +2444,8 @@ function drawMap3D() {
   const uniqueTiles = new Map();
   for (let y = 0; y < mapH; ++y) {
     for (let x = 0; x < mapW; ++x) {
-      const tileIdx = mapTiles[y][x] % tileCount;
+      const rawIdx = mapTiles[y][x] & 0x7f;
+      const tileIdx = rawIdx < tileCount ? rawIdx : 0;
       const hVal = mapHeights[y][x];
       const key = showHeight ? `${tileIdx}_${hVal}` : String(tileIdx);
       if (!uniqueTiles.has(key)) {
