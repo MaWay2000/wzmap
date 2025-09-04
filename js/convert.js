@@ -1,5 +1,5 @@
 // convert.js
-// Convert Gamma-style game.map data to classic 3-byte-per-tile map format.
+// Convert Gamma-style game.map data to binary v40 map format (4 bytes per tile).
 // Based on gamma_to_classic.py
 
 // Parse tile types (.ttp or .ttypes) into a mapping table
@@ -34,7 +34,7 @@ export function parseTTypes(data) {
   return mapping;
 }
 
-// Convert Gamma-style game.map to Classic 3-byte-per-tile format
+// Convert Gamma-style game.map to binary v40 (4 bytes per tile)
 export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
   if (!gammaData || gammaData.length < 16) return null;
 
@@ -66,15 +66,15 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
     tiles * 4
   );
 
-  // Output format: "map " header + version + width + height + 3 bytes/tile
-  const out = new Uint8Array(16 + tiles * 3);
+  // Output format: "map " header + version + width + height + 4 bytes/tile
+  const out = new Uint8Array(16 + tiles * 4);
   out[0] = 0x6d; // 'm'
   out[1] = 0x61; // 'a'
   out[2] = 0x70; // 'p'
   out[3] = 0x20; // ' '
 
   const dvOut = new DataView(out.buffer);
-  dvOut.setUint32(4, 10, true);     // classic v10 binary map version (3 bytes/tile)
+  dvOut.setUint32(4, 40, true);     // modern v40 binary map version (4 bytes/tile)
   dvOut.setInt32(8, width, true);
   dvOut.setInt32(12, height, true);
 
@@ -93,8 +93,9 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
       : baseTile;
 
     const tilenum = (mappedTile & 0x01ff) | (rotation << TILE_ROTSHIFT);
-    dvOut.setUint16(16 + 3 * i, tilenum, true);
-    out[16 + 3 * i + 2] = Math.min(height16 >> 1, 255); // scale height to 0–255
+    const offset = 16 + 4 * i;
+    dvOut.setUint16(offset, tilenum, true);
+    dvOut.setUint16(offset + 2, height16, true); // preserve 16-bit height
   }
 
   return out;
