@@ -1,39 +1,70 @@
 // maploader.js
 
+// --- Constants from WZ sources (used to unpack the 16-bit tile "texture" field)
+const ELEVATION_SCALE = 2;             // v39 stores height/2 in a byte
+const TILE_XFLIP   = 0x8000;
+const TILE_YFLIP   = 0x4000;
+const TILE_ROTMASK = 0x3000;
+const TILE_ROTSHIFT = 12;
+const TILE_TRIFLIP = 0x0800;
+const TILE_NUMMASK = 0x01ff;           // 9-bit tile index
+
 // ------------------------
-// Binary .map grid parsing (3 bytes/tile)
+// Binary .map grid parsing (v39=3 bytes/tile, v40+=4 bytes/tile)
 // ------------------------
 export function parseBinaryMap(fileData) {
-  if (
-    fileData.length >= 16 &&
-    String.fromCharCode(...fileData.slice(0, 3)) === "map"
-  ) {
-    let width = fileData[8] | (fileData[9] << 8) | (fileData[10] << 16) | (fileData[11] << 24);
-    let height = fileData[12] | (fileData[13] << 8) | (fileData[14] << 16) | (fileData[15] << 24);
+  if (fileData.length < 16 || String.fromCharCode(fileData[0], fileData[1], fileData[2]) !== "map") {
+    return null;
+  }
 
-    let gridStart = 16;
+  const dv = new DataView(fileData.buffer, fileData.byteOffset, fileData.byteLength);
+  const mapVersion = dv.getUint32(4, true);      // 39 or 40+
+  const width      = dv.getUint32(8, true);
+  const height     = dv.getUint32(12, true);
 
-    if (
-      width > 0 && width <= 256 &&
-      height > 0 && height <= 256 &&
-      fileData.length >= gridStart + width * height * 3
-    ) {
-      let mapTiles = Array(height).fill().map(() => Array(width).fill(0));
-      let mapRotations = Array(height).fill().map(() => Array(width).fill(0));
-      let mapHeights = Array(height).fill().map(() => Array(width).fill(0));
+  if (width <= 0 || width > 256 || height <= 0 || height > 256) return null;
 
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
-          let ofs = gridStart + 3 * (y * width + x);
-          mapTiles[y][x] = fileData[ofs];
-          mapRotations[y][x] = (fileData[ofs + 1] >> 4) & 0x03; // 0–3
-          mapHeights[y][x] = fileData[ofs + 2];
-        }
+  const numTiles = width * height;
+  const bytesPerTile = (mapVersion >= 40) ? 4 : 3;
+  const gridStart = 16;
+  const need = gridStart + numTiles * bytesPerTile;
+  if (fileData.length < need) return null;
+
+  const mapTiles     = Array.from({ length: height }, () => Array(width).fill(0));
+  const mapRotations = Array.from({ length: height }, () => Array(width).fill(0));
+  const mapHeights   = Array.from({ length: height }, () => Array(width).fill(0));
+
+  let ofs = gridStart;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const tilenum = dv.getUint16(ofs, true); // packs tile index + flags
+      ofs += 2;
+
+      let h;
+      if (mapVersion >= 40) {
+        // v40+: 16-bit full-range height
+        h = dv.getUint16(ofs, true);
+        ofs += 2;
+      } else {
+        // v39: 8-bit height stored as height / ELEVATION_SCALE
+        h = dv.getUint8(ofs) * ELEVATION_SCALE;
+        ofs += 1;
       }
-      return { mapW: width, mapH: height, mapTiles, mapRotations, mapHeights, format: "binary" };
+
+      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
+      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0..3
+      // (xFlip/yFlip/triFlip available if you need them)
+      // const xFlip = !!(tilenum & TILE_XFLIP);
+      // const yFlip = !!(tilenum & TILE_YFLIP);
+      // const triFlip = !!(tilenum & TILE_TRIFLIP);
+
+      mapTiles[y][x]     = tileIndex;
+      mapRotations[y][x] = rotation;
+      mapHeights[y][x]   = h;
     }
   }
-  return null;
+
+  return { mapW: width, mapH: height, mapTiles, mapRotations, mapHeights, format: "binary", mapVersion };
 }
 
 // ------------------------
@@ -57,16 +88,16 @@ export function parseJSONMap(text) {
 }
 
 // ------------------------
-// .lev map parsing (very old format)
+// .lev map parsing (very old format — placeholder; adjust to your spec if needed)
 // ------------------------
 export function parseLevMap(fileData) {
   if (fileData.length > 32) {
-    let width = fileData[0];
-    let height = fileData[1];
+    const width = fileData[0];
+    const height = fileData[1];
     if (width > 0 && width <= 256 && height > 0 && height <= 256) {
-      let mapTiles = Array(height).fill().map(() => Array(width).fill(0));
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
+      const mapTiles = Array.from({ length: height }, () => Array(width).fill(0));
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
           mapTiles[y][x] = fileData[2 + y * width + x];
         }
       }
@@ -97,7 +128,7 @@ export async function loadMapUnified(input) {
   const jsonMap = parseJSONMap(text);
   if (jsonMap) return jsonMap;
 
-  // Try binary .map
+  // Try binary .map (v39/v40)
   const binMap = parseBinaryMap(bytes);
   if (binMap) return binMap;
 
@@ -117,7 +148,7 @@ export async function getTilesetIndexFromTtp(zip, TTP_TILESET_MAP) {
 
   const ttpData = await zip.files[ttpFileName].async("uint8array");
   const code = (ttpData[12] << 8) | ttpData[13];
-  let idx = TTP_TILESET_MAP[code] ?? 0;
+  const idx = TTP_TILESET_MAP[code] ?? 0;
   console.log(`Tileset code from ${ttpFileName}: 0x${code.toString(16).padStart(4, '0')} => idx ${idx}`);
   return idx;
 }
