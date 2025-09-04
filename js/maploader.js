@@ -1,16 +1,5 @@
 // maploader.js
 
-import { convertV40GameMapToV10 } from './convert.js';
-
-// --- Constants from WZ sources ---
-// Classic v10 maps store terrain height directly as an 8-bit value.
-const TILE_XFLIP   = 0x8000;
-const TILE_YFLIP   = 0x4000;
-const TILE_ROTMASK = 0x3000;
-const TILE_ROTSHIFT = 12;
-const TILE_TRIFLIP = 0x0800;
-const TILE_NUMMASK = 0x01ff;           // 9-bit tile index
-
 // ------------------------
 // Binary .map grid parsing (v10=3 bytes/tile, v39+=4 bytes/tile)
 // ------------------------
@@ -42,44 +31,42 @@ export function parseBinaryMap(fileData) {
   let ofs = gridStart;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const tilenum = dv.getUint16(ofs, true); ofs += 2;
-
-      let h;
-      if (mapVersion >= 39) {
-        // v39+: 16-bit full-range height
-        h = dv.getUint16(ofs, true);
-        ofs += 2;
+      let value;
+      if (bytesPerTile === 3) {
+        const b0 = fileData[ofs];
+        const b1 = fileData[ofs + 1];
+        const b2 = fileData[ofs + 2];
+        value = b0 | (b1 << 8) | (b2 << 16); // 24-bit little-endian
       } else {
-        // v10: 8-bit height value
-        h = dv.getUint8(ofs); ofs += 1;
+        value = dv.getUint32(ofs, true);     // 32-bit little-endian
       }
+      ofs += bytesPerTile;
 
-      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
-      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0–3
-      const xFlip     = !!(tilenum & TILE_XFLIP);
-      const yFlip     = !!(tilenum & TILE_YFLIP);
-      const triFlip   = !!(tilenum & TILE_TRIFLIP);
+      const heightVal = value & 0x7ff;            // 11-bit height
+      const tileIndex = (value >>> 11) & 0x3ff;   // 10-bit tile id
+      const rotation  = (value >>> 21) & 0x3;     // 0..3
+      const triFlip   = !!((value >>> 23) & 0x1); // v40 flag23
 
       mapTiles[y][x]     = tileIndex;
       mapRotations[y][x] = rotation;
-      mapHeights[y][x]   = h;
-      mapXFlip[y][x]     = xFlip;
-      mapYFlip[y][x]     = yFlip;
+      mapHeights[y][x]   = heightVal;
+      mapXFlip[y][x]     = false;   // no x/y flip flags in this format
+      mapYFlip[y][x]     = false;
       mapTriFlip[y][x]   = triFlip;
     }
   }
 
-  return { 
-    mapW: width, 
-    mapH: height, 
-    mapTiles, 
-    mapRotations, 
-    mapHeights, 
-    mapXFlip, 
-    mapYFlip, 
+  return {
+    mapW: width,
+    mapH: height,
+    mapTiles,
+    mapRotations,
+    mapHeights,
+    mapXFlip,
+    mapYFlip,
     mapTriFlip,
-    format: "binary", 
-    mapVersion 
+    format: "binary",
+    mapVersion
   };
 }
 
@@ -157,16 +144,9 @@ export async function loadMapUnified(input) {
   const jsonMap = parseJSONMap(text);
   if (jsonMap) return jsonMap;
 
-  // Try binary .map (v10, v39 or v40)
+  // Try binary .map (v10 or v40)
   if (bytes.length >= 16 && String.fromCharCode(bytes[0], bytes[1], bytes[2]) === "map") {
-    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const version = dv.getUint32(4, true);
-    let mapBytes = bytes;
-    if (version >= 39) {
-      const converted = convertV40GameMapToV10(bytes);
-      if (converted) mapBytes = converted;
-    }
-    const binMap = parseBinaryMap(mapBytes);
+    const binMap = parseBinaryMap(bytes);
     if (binMap) return binMap;
   }
 
