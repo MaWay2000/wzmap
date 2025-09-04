@@ -100,3 +100,100 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
 
   return out;
 }
+
+// Convert binary v10 game.map (3 bytes per tile) to v40 format (4 bytes per tile)
+export function convertV10GameMapToV40(v10Data) {
+  if (!v10Data || v10Data.length < 16) return null;
+
+  // Expect "map " header and version 10
+  if (
+    v10Data[0] !== 0x6d || // m
+    v10Data[1] !== 0x61 || // a
+    v10Data[2] !== 0x70 || // p
+    v10Data[3] !== 0x20 || // space
+    new DataView(v10Data.buffer, v10Data.byteOffset, 16).getUint32(4, true) !== 10
+  ) {
+    return null;
+  }
+
+  const dvIn = new DataView(v10Data.buffer, v10Data.byteOffset, v10Data.byteLength);
+  const width = dvIn.getUint32(8, true);
+  const height = dvIn.getUint32(12, true);
+  if (width <= 0 || height <= 0) return null;
+
+  const tiles = width * height;
+
+  // Output buffer with 4 bytes per tile
+  const out = new Uint8Array(16 + tiles * 4);
+  out[0] = 0x6d; // 'm'
+  out[1] = 0x61; // 'a'
+  out[2] = 0x70; // 'p'
+  out[3] = 0x20; // ' '
+
+  const dvOut = new DataView(out.buffer);
+  dvOut.setUint32(4, 40, true); // v40 map version
+  dvOut.setUint32(8, width, true);
+  dvOut.setUint32(12, height, true);
+
+  for (let i = 0; i < tiles; i++) {
+    const inOffset = 16 + i * 3;
+    const tilenum = dvIn.getUint16(inOffset, true);
+    const height8 = dvIn.getUint8(inOffset + 2);
+
+    const outOffset = 16 + i * 4;
+    dvOut.setUint16(outOffset, tilenum, true);
+    dvOut.setUint16(outOffset + 2, height8 << 1, true); // expand to 16-bit height
+  }
+
+  return out;
+}
+
+// Convert binary v39/v40 game.map (4 bytes per tile) to v10 format (3 bytes per tile)
+export function convertV40GameMapToV10(v40Data) {
+  if (!v40Data || v40Data.length < 16) return null;
+
+  // Expect "map " header and version >=39
+  const dvHeader = new DataView(v40Data.buffer, v40Data.byteOffset, 16);
+  const version = dvHeader.getUint32(4, true);
+  if (
+    v40Data[0] !== 0x6d || // m
+    v40Data[1] !== 0x61 || // a
+    v40Data[2] !== 0x70 || // p
+    v40Data[3] !== 0x20 || // space
+    version < 39
+  ) {
+    return null;
+  }
+
+  const dvIn = new DataView(v40Data.buffer, v40Data.byteOffset, v40Data.byteLength);
+  const width = dvIn.getUint32(8, true);
+  const height = dvIn.getUint32(12, true);
+  if (width <= 0 || height <= 0) return null;
+
+  const tiles = width * height;
+
+  const out = new Uint8Array(16 + tiles * 3);
+  out[0] = 0x6d; // 'm'
+  out[1] = 0x61; // 'a'
+  out[2] = 0x70; // 'p'
+  out[3] = 0x20; // ' '
+
+  const dvOut = new DataView(out.buffer);
+  dvOut.setUint32(4, 10, true); // v10 map version
+  dvOut.setUint32(8, width, true);
+  dvOut.setUint32(12, height, true);
+
+  for (let i = 0; i < tiles; i++) {
+    const inOffset = 16 + i * 4;
+    const tilenum = dvIn.getUint16(inOffset, true);
+    const height16 = dvIn.getUint16(inOffset + 2, true);
+    let height8 = height16 >>> 1; // reduce to 8-bit
+    if (height8 > 255) height8 = 255;
+
+    const outOffset = 16 + i * 3;
+    dvOut.setUint16(outOffset, tilenum, true);
+    dvOut.setUint8(outOffset + 2, height8);
+  }
+
+  return out;
+}
