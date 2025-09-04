@@ -3,8 +3,8 @@
 
 export function parseTTypes(data) {
   if (!data) return null;
-  // Support older plain-text .ttp files for backwards compatibility
   if (typeof data === 'string') {
+    // fallback: old plain-text .ttp files
     const lines = data.split(/\r?\n/);
     const mapping = [];
     for (const line of lines) {
@@ -19,22 +19,12 @@ export function parseTTypes(data) {
     return mapping;
   }
 
-  // Binary .ttp file: verify header and build mapping stripping rotation bits
-  if (
-    data[0] !== 0x74 || // t
-    data[1] !== 0x74 || // t
-    data[2] !== 0x79 || // y
-    data[3] !== 0x70    // p
-  ) {
-    return null;
-  }
   const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const entryCount = dv.getUint32(8, true);
   const mapping = [];
   for (let i = 0; i < entryCount; i++) {
     for (let rot = 0; rot < 4; rot++) {
-      // Map all rotated versions of the tile ID to the base index
-      mapping[(i << 2) | rot] = i;
+      mapping[(i << 2) | rot] = i; // map all 4 rotated IDs to base index
     }
   }
   return mapping;
@@ -87,12 +77,13 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
     const val = gridIn.getUint32(i * 4, true);
     const height16 = val & 0xffff;
     const tile16 = (val >>> 16) & 0xffff;
-    const baseTile = tile16 >>> 2; // drop rotation bits
-    const mappedTile =
-      ttypesMap && ttypesMap[tile16] !== undefined ? ttypesMap[tile16] : baseTile;
+    const baseTile  = tile16 >>> 2;               // strip rotation bits
+    const mappedTile = (ttypesMap && ttypesMap[tile16] !== undefined)
+        ? ttypesMap[tile16]
+        : baseTile;
     out[16 + 3 * i] = mappedTile & 0xff;
-    out[16 + 3 * i + 1] = 0; // rotation unknown -> 0
-    out[16 + 3 * i + 2] = height16 & 0xff; // keep lowest 8 bits
+    out[16 + 3 * i + 1] = 0;                      // rotation (unknown) → 0
+    out[16 + 3 * i + 2] = height16 & 0xff;
   }
 
   return out;
