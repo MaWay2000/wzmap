@@ -14,7 +14,7 @@ function normalizeTexPath(name){
 
 let showPanelIdsCheckbox;
 import { TILESETS, getTileCount, loadAllTiles, clearTileCache } from './tileset.js';
-import { parseMapGrid, getTilesetIndexFromTtp } from './maploader.js';
+import { loadMapUnified, getTilesetIndexFromTtp } from './maploader.js';
 import { convertGammaGameMapToClassic, parseTTypes } from './convert.js';
 import { cameraState, resetCameraTarget, setupKeyboard } from './camera.js';
 import { parsePie, loadPieGeometry } from "./pie.js";
@@ -2202,26 +2202,18 @@ async function loadMapFile(file) {
   let found = false;
   let autoTs = 0;
   if (fileExt === 'map') {
-    const buf = await file.arrayBuffer();
-    let fileData = new Uint8Array(buf);
-    const converted = convertGammaGameMapToClassic(fileData);
-    if (converted) fileData = converted;
+    const mapData = await loadMapUnified(file);
+    console.log("Loaded map format:", mapData.format, mapData);
     await setTileset(autoTs);
-    const result = parseMapGrid(fileData);
-    if (result) {
-      mapW = result.mapW;
-      mapH = result.mapH;
-      mapTiles = result.mapTiles;
-      mapRotations = result.mapRotations;
-      mapHeights = result.mapHeights;
-      resetCameraTarget(mapW, mapH, threeContainer);
-      infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + file.name + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
-      drawMap3D();
-      hideOverlay();
-      return;
-    }
-    infoDiv.innerHTML = '<b style="color:red">Failed to decode this map file!</b>';
-    showOverlay("Failed to load map. Please select another file.");
+    mapW = mapData.mapW;
+    mapH = mapData.mapH;
+    mapTiles = mapData.mapTiles;
+    mapRotations = mapData.mapRotations;
+    mapHeights = mapData.mapHeights;
+    resetCameraTarget(mapW, mapH, threeContainer);
+    infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + file.name + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
+    drawMap3D();
+    hideOverlay();
     return;
   }
   try {
@@ -2243,7 +2235,8 @@ async function loadMapFile(file) {
       const converted = convertGammaGameMapToClassic(fileData, ttypesMap);
       if (converted) fileData = converted;
       await setTileset(autoTs);
-      const result = parseMapGrid(fileData);
+      const result = await loadMapUnified(new File([fileData], mapFileName));
+      console.log("Loaded map format:", result.format, result);
       if (result) {
         mapW = result.mapW;
         mapH = result.mapH;
