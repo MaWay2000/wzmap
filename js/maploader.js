@@ -1,6 +1,6 @@
 // maploader.js
 
-// --- Constants from WZ sources (used to unpack the 16-bit tile "texture" field)
+// --- Constants from WZ sources ---
 const ELEVATION_SCALE = 2;             // v39 stores height/2 in a byte
 const TILE_XFLIP   = 0x8000;
 const TILE_YFLIP   = 0x4000;
@@ -18,29 +18,15 @@ export function parseBinaryMap(fileData) {
   }
 
   const dv = new DataView(fileData.buffer, fileData.byteOffset, fileData.byteLength);
-  let mapVersion = dv.getUint32(4, true);      // 39 or 40+
+  const mapVersion = dv.getUint32(4, true);      // 39 or 40+
   const width      = dv.getUint32(8, true);
   const height     = dv.getUint32(12, true);
 
   if (width <= 0 || width > 256 || height <= 0 || height > 256) return null;
 
   const numTiles = width * height;
+  const bytesPerTile = (mapVersion >= 40) ? 4 : 3;
   const gridStart = 16;
-
-  // Some community maps report version 39 but store four bytes per tile
-  // (v40 layout).  Detect this by checking the file length and fall back to
-  // the v40 interpretation if there's enough data for it.
-  const expectedV39 = gridStart + numTiles * 3;
-  const expectedV40 = gridStart + numTiles * 4;
-
-  let bytesPerTile = (mapVersion >= 40) ? 4 : 3;
-  let treatAsV40 = false;
-
-  if (mapVersion === 39 && fileData.length >= expectedV40) {
-    bytesPerTile = 4;
-    treatAsV40 = true;
-  }
-
   const need = gridStart + numTiles * bytesPerTile;
   if (fileData.length < need) return null;
 
@@ -51,30 +37,30 @@ export function parseBinaryMap(fileData) {
   let ofs = gridStart;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const tilenum = dv.getUint16(ofs, true); // packs tile index + flags
-      ofs += 2;
+      if (mapVersion >= 40) {
+        // --- v40+ format: 2 bytes texture + 2 bytes full-range height ---
+        const tilenum = dv.getUint16(ofs, true); ofs += 2;
+        const height16 = dv.getUint16(ofs, true); ofs += 2;
 
-      let h;
-      if (mapVersion >= 40 || treatAsV40) {
-        // v40+: 16-bit full-range height
-        h = dv.getUint16(ofs, true);
-        ofs += 2;
+        const tileIndex = tilenum & TILE_NUMMASK;
+        const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT;
+
+        mapTiles[y][x]     = tileIndex;
+        mapRotations[y][x] = rotation;
+        mapHeights[y][x]   = height16;
       } else {
-        // v39: 8-bit height stored as height / ELEVATION_SCALE
-        h = dv.getUint8(ofs) * ELEVATION_SCALE;
-        ofs += 1;
+        // --- v39 format: 2 bytes texture + 1 byte height (scaled ×2) ---
+        const tilenum = dv.getUint16(ofs, true); ofs += 2;
+        const hByte   = dv.getUint8(ofs); ofs += 1;
+
+        const tileIndex = tilenum & TILE_NUMMASK;
+        const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT;
+        const height8   = hByte * ELEVATION_SCALE;
+
+        mapTiles[y][x]     = tileIndex;
+        mapRotations[y][x] = rotation;
+        mapHeights[y][x]   = height8;
       }
-
-      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
-      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0..3
-      // (xFlip/yFlip/triFlip available if you need them)
-      // const xFlip = !!(tilenum & TILE_XFLIP);
-      // const yFlip = !!(tilenum & TILE_YFLIP);
-      // const triFlip = !!(tilenum & TILE_TRIFLIP);
-
-      mapTiles[y][x]     = tileIndex;
-      mapRotations[y][x] = rotation;
-      mapHeights[y][x]   = h;
     }
   }
 
@@ -102,7 +88,7 @@ export function parseJSONMap(text) {
 }
 
 // ------------------------
-// .lev map parsing (very old format — placeholder; adjust to your spec if needed)
+// .lev map parsing (very old format — placeholder; adjust if needed)
 // ------------------------
 export function parseLevMap(fileData) {
   if (fileData.length > 32) {
