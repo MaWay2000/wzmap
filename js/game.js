@@ -605,6 +605,10 @@ function populateStructureFilter() {
 let activeTab = 'view';
 window.activeTab = activeTab;
 let brushSize = 1;
+let heightMax = 255;
+let heightInput;
+let heightSlider;
+let selectedHeight = 0;
 let highlightMesh = null;
 let previewGroup = null;
 let lastMouseEvent = null;
@@ -644,6 +648,33 @@ function pushUndo(action) {
   undoStack.push(action);
   redoStack.length = 0;
   updateUndoRedoButtons();
+}
+
+function updateHeightUI(maxVal) {
+  heightMax = maxVal;
+  if (heightInput) {
+    heightInput.max = maxVal;
+    if (parseInt(heightInput.value, 10) > maxVal) {
+      heightInput.value = maxVal;
+      selectedHeight = maxVal;
+    }
+  }
+  if (heightSlider) {
+    heightSlider.max = maxVal;
+    if (parseInt(heightSlider.value, 10) > maxVal) {
+      heightSlider.value = maxVal;
+    }
+  }
+  const presets = document.querySelectorAll('.height-preset');
+  if (presets.length >= 5) {
+    const step = Math.round(maxVal / 4);
+    const values = [0, step, step * 2, step * 3, maxVal];
+    presets.forEach((btn, idx) => {
+      const v = values[idx];
+      btn.textContent = v;
+      btn.setAttribute('data-val', v);
+    });
+  }
 }
 
 function setMapState(w, h, tiles, rotations, heights, xflip = [], yflip = [], triflip = []) {
@@ -1120,7 +1151,7 @@ const initDom = () => {
         for (let x = minX; x <= maxX; x++) {
           if (x >= 0 && x < mapW && y >= 0 && y < mapH) {
             const oldHeight = mapHeights[y][x];
-            const nh = Math.max(0, Math.min(255, newHeight));
+            const nh = Math.max(0, Math.min(heightMax, newHeight));
             if (oldHeight !== nh) {
               changes.push({ x, y, oldHeight, newHeight: nh });
               mapHeights[y][x] = nh;
@@ -1171,12 +1202,12 @@ const initDom = () => {
       renderTexturePalette();
     });
   }
-  const heightInput = document.getElementById('heightValueInput');
-  const heightSlider = document.getElementById('heightSlider');
+  heightInput = document.getElementById('heightValueInput');
+  heightSlider = document.getElementById('heightSlider');
   if (heightInput && heightSlider) {
     selectedHeight = parseInt(heightInput.value, 10) || 0;
     const syncHeightControls = (val) => {
-      const clamped = Math.max(0, Math.min(255, val));
+      const clamped = Math.max(0, Math.min(heightMax, val));
       selectedHeight = clamped;
       heightInput.value = clamped;
       heightSlider.value = clamped;
@@ -1416,7 +1447,7 @@ function handleEditClick(event) {
         const ty = tileY + dy;
         if (tx >= 0 && tx < mapW && ty >= 0 && ty < mapH) {
           const oldHeight = mapHeights[ty][tx];
-          const nh = Math.max(0, Math.min(255, newHeight));
+          const nh = Math.max(0, Math.min(heightMax, newHeight));
           if (oldHeight !== nh) {
             changes.push({ x: tx, y: ty, oldHeight, newHeight: nh });
             mapHeights[ty][tx] = nh;
@@ -2020,7 +2051,6 @@ function colorizeTileTypeOptions() {
   let terrainSpeedModifiers = null;
   let tileTooltipDiv = null;
   let selectedTileType = 0;
-  let selectedHeight = 0;
   function parseTileTypes(data) {
   if (!data || data.length < 12) return [];
   const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
@@ -2203,6 +2233,7 @@ async function loadMapFile(file) {
     mapXFlip = mapData.mapXFlip || mapXFlip;
     mapYFlip = mapData.mapYFlip || mapYFlip;
     mapTriFlip = mapData.mapTriFlip || mapTriFlip;
+    updateHeightUI(mapData.mapVersion >= 40 ? 1023 : 255);
     resetCameraTarget(mapW, mapH, threeContainer);
     infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + file.name + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
     drawMap3D();
@@ -2239,6 +2270,7 @@ async function loadMapFile(file) {
         mapXFlip = result.mapXFlip || mapXFlip;
         mapYFlip = result.mapYFlip || mapYFlip;
         mapTriFlip = result.mapTriFlip || mapTriFlip;
+        updateHeightUI(result.mapVersion >= 40 ? 1023 : 255);
         const ttpName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('.ttp') && !zip.files[fn].dir);
         if (ttpName) {
           const ttpData = await zip.files[ttpName].async('uint8array');
