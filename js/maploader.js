@@ -1,7 +1,7 @@
 // maploader.js
 
 // --- Constants from WZ sources ---
-// Classic v39 maps store terrain height directly as an 8-bit value.
+// Classic v10 maps store terrain height directly as an 8-bit value.
 const TILE_XFLIP   = 0x8000;
 const TILE_YFLIP   = 0x4000;
 const TILE_ROTMASK = 0x3000;
@@ -10,7 +10,7 @@ const TILE_TRIFLIP = 0x0800;
 const TILE_NUMMASK = 0x01ff;           // 9-bit tile index
 
 // ------------------------
-// Binary .map grid parsing (v39=3 bytes/tile, v40+=4 bytes/tile)
+// Binary .map grid parsing (v10=3 bytes/tile, v39+=4 bytes/tile)
 // ------------------------
 export function parseBinaryMap(fileData) {
   if (fileData.length < 16 || String.fromCharCode(fileData[0], fileData[1], fileData[2]) !== "map") {
@@ -18,14 +18,14 @@ export function parseBinaryMap(fileData) {
   }
 
   const dv = new DataView(fileData.buffer, fileData.byteOffset, fileData.byteLength);
-  const mapVersion = dv.getUint32(4, true);      // 39 or 40+
+  const mapVersion = dv.getUint32(4, true);      // 10, 39 or 40
   const width      = dv.getUint32(8, true);
   const height     = dv.getUint32(12, true);
 
   if (width <= 0 || width > 256 || height <= 0 || height > 256) return null;
 
   const numTiles = width * height;
-  const bytesPerTile = (mapVersion >= 40) ? 4 : 3;
+  const bytesPerTile = (mapVersion >= 39) ? 4 : 3;
   const gridStart = 16;
   const need = gridStart + numTiles * bytesPerTile;
   if (fileData.length < need) return null;
@@ -43,12 +43,12 @@ export function parseBinaryMap(fileData) {
       const tilenum = dv.getUint16(ofs, true); ofs += 2;
 
       let h;
-      if (mapVersion >= 40) {
-        // v40+: 16-bit full-range height
+      if (mapVersion >= 39) {
+        // v39+: 16-bit full-range height
         h = dv.getUint16(ofs, true);
         ofs += 2;
       } else {
-        // v39: 8-bit height value
+        // v10: 8-bit height value
         h = dv.getUint8(ofs); ofs += 1;
       }
 
@@ -155,7 +155,7 @@ export async function loadMapUnified(input) {
   const jsonMap = parseJSONMap(text);
   if (jsonMap) return jsonMap;
 
-  // Try binary .map (v39/v40)
+  // Try binary .map (v10, v39 or v40)
   const binMap = parseBinaryMap(bytes);
   if (binMap) return binMap;
 

@@ -2233,7 +2233,7 @@ async function loadMapFile(file) {
     mapXFlip = mapData.mapXFlip || mapXFlip;
     mapYFlip = mapData.mapYFlip || mapYFlip;
     mapTriFlip = mapData.mapTriFlip || mapTriFlip;
-    updateHeightUI(mapData.mapVersion >= 40 ? 1023 : 255);
+    updateHeightUI(mapData.mapVersion >= 39 ? 1023 : 255);
     resetCameraTarget(mapW, mapH, threeContainer);
     infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + file.name + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
     drawMap3D();
@@ -2270,7 +2270,7 @@ async function loadMapFile(file) {
         mapXFlip = result.mapXFlip || mapXFlip;
         mapYFlip = result.mapYFlip || mapYFlip;
         mapTriFlip = result.mapTriFlip || mapTriFlip;
-        updateHeightUI(result.mapVersion >= 40 ? 1023 : 255);
+        updateHeightUI(result.mapVersion >= 39 ? 1023 : 255);
         const ttpName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('.ttp') && !zip.files[fn].dir);
         if (ttpName) {
           const ttpData = await zip.files[ttpName].async('uint8array');

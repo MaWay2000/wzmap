@@ -74,7 +74,7 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
   out[3] = 0x20; // ' '
 
   const dvOut = new DataView(out.buffer);
-  dvOut.setUint32(4, 39, true);     // classic binary map version (3 bytes/tile)
+  dvOut.setUint32(4, 10, true);     // classic v10 binary map version (3 bytes/tile)
   dvOut.setInt32(8, width, true);
   dvOut.setInt32(12, height, true);
 
