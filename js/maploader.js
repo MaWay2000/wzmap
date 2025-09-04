@@ -2,12 +2,12 @@
 
 // --- Constants from WZ sources (used to unpack the 16-bit tile "texture" field)
 const ELEVATION_SCALE = 2;             // v39 stores height/2 in a byte
-const TILE_INDEX_SHIFT = 5;            // low 5 bits store rotation/flip flags
-const TILE_INDEX_MASK  = 0x01ff;       // 9-bit tile index after shifting
-const TILE_ROTMASK     = 0x0003;       // rotation stored in lowest 2 bits
-const TILE_XFLIP       = 0x0008;
-const TILE_YFLIP       = 0x0010;
-const TILE_TRIFLIP     = 0x0004;
+const TILE_XFLIP   = 0x8000;
+const TILE_YFLIP   = 0x4000;
+const TILE_ROTMASK = 0x3000;
+const TILE_ROTSHIFT = 12;
+const TILE_TRIFLIP = 0x0800;
+const TILE_NUMMASK = 0x01ff;           // 9-bit tile index
 
 // ------------------------
 // Binary .map grid parsing (v39=3 bytes/tile, v40+=4 bytes/tile)
@@ -51,9 +51,9 @@ export function parseBinaryMap(fileData) {
         ofs += 1;
       }
 
-      const tileIndex = (tilenum >> TILE_INDEX_SHIFT) & TILE_INDEX_MASK; // base tile
-      const rotation  = tilenum & TILE_ROTMASK;                            // 0..3
-      // (xFlip/yFlip/triFlip available if needed)
+      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
+      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0..3
+      // (xFlip/yFlip/triFlip available if you need them)
       // const xFlip = !!(tilenum & TILE_XFLIP);
       // const yFlip = !!(tilenum & TILE_YFLIP);
       // const triFlip = !!(tilenum & TILE_TRIFLIP);
