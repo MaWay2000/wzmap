@@ -1,8 +1,5 @@
 import * as THREE from './three.module.js';
 
-// nu dabar tai testas !
-// https://github.dev/MaWay2000/wzmap 1013
-// dar testas
 function normalizeTexPath(name){
   let n = String(name || '').replace(/\\/g,'/').toLowerCase();
   n = n.replace(/^\.+\//, '');
@@ -36,7 +33,6 @@ function setOverlayText(msg){
   else if (overlayMsg) { overlayMsg.textContent = msg; }
 }
 function showOverlay(msg){
-  // If a message is provided, show it; otherwise hide the text block and only show the button
   if (typeof msg === 'string' && msg.length > 0) {
     setOverlayText(msg);
     if (overlayText) overlayText.style.display = 'block';
@@ -45,7 +41,6 @@ function showOverlay(msg){
   }
   if (overlayMsg) overlayMsg.style.display = 'flex';
 }
-// ensure single showOverlay
 window.showOverlay = showOverlay;
 function hideOverlay(){
   if (overlayMsg) overlayMsg.style.display = 'none';
@@ -56,8 +51,8 @@ function hideOverlay(){
     window.UI.showTopBar(true);
   }
 }
-// ensure single hideOverlay
 window.hideOverlay = hideOverlay;
+
 // ---- Configurable assets base paths (root defaults) ----
 if (typeof window !== 'undefined') {
   if (typeof window.STRUCTURES_JSON === 'undefined') window.STRUCTURES_JSON = 'structure.json';
@@ -65,6 +60,15 @@ if (typeof window !== 'undefined') {
   if (typeof window.PIES_BASE === 'undefined') window.PIES_BASE = 'pies/';
   if (typeof window.TEX_BASE === 'undefined') window.TEX_BASE = 'classic/texpages/texpages/';
 }
+
+// Extend tileset codes to support Gamma maps (0x0300)
+export const TTP_TILESET_MAP = {
+  0x0100: 0, // Arizona
+  0x0200: 1, // Urban
+  0x0000: 2, // Rockies
+  0x0300: 3  // Gamma
+};
+
 const showTileIdCheckbox = document.getElementById('showTileId');
 const showHeightBtn = document.getElementById('showHeightBtn');
 let showHeight = false;
@@ -75,46 +79,30 @@ if (showHeightBtn) {
     drawMap3D();
   });
 }
+
 // Tile types on 3D map toggle
 const showTileTypesOnMapCheckbox = document.getElementById('showTileTypesOnMap');
-// Toggle for displaying tile info buttons
 const showTileInfoCheckbox = document.getElementById('showTileInfo');
 const tileInfoButtonsDiv = document.getElementById('tileInfoButtons');
 const tileOptionsBox = document.getElementById('tileOptions');
 const tileShowBtn = document.getElementById('tileShowBtn');
-// New: top-level map toggle for tile-type dots
-const showTileTypesCheckbox = document.getElementById('showTileTypes');
+
 showPanelIdsCheckbox = document.getElementById('showPanelIds');
 if (showPanelIdsCheckbox) {
   showPanelIdsCheckbox.addEventListener('change', () => {
     if (typeof renderTexturePalette === 'function') renderTexturePalette();
   });
 }
+
 let scene, camera, renderer, mesh;
-// Ensure tile-related globals are initialized before any calls that rely on them.
 let tileImages = [];
 let tileTypesById = [];
-// Selected tile info must be defined before any code that might render the palette
-// to avoid accessing it prior to initialization.
 let selectedTileId = 0;
 let selectedRotation = 0;
 const TILE_TYPE_COLORS = [
-  '#ff0',
-  '#0f0',
-  '#f00',
-  '#00f',
-  '#f0f',
-  '#0ff',
-  '#fff',
-  '#000',
-  '#888',
-  '#ffa500',
-  '#8a2be2',
-  '#00ced1'
+  '#ff0','#0f0','#f00','#00f','#f0f','#0ff','#fff','#000','#888','#ffa500','#8a2be2','#00ced1'
 ];
 const TILE_ICON_SIZE = 41;
-// Ensure animationId is defined before any calls to drawMap3D during
-// initial script execution.
 let animationId = null;
 if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
