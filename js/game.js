@@ -1947,12 +1947,6 @@ function renderTexturePalette() {
 }
 const DEFAULT_GRID = 16;
 const CAM_EDGE_MARGIN = 400;
-const TTP_TILESET_MAP = {
-  0x0100: 0,
-  0x0200: 1,
-  0x0000: 2,
-  0x0300: 3  // Gamma
-};
 let tilesetIndex = 0;
 let mapW = DEFAULT_GRID, mapH = DEFAULT_GRID;
 let mapTiles = Array(mapH).fill().map(() => Array(mapW).fill(0));
