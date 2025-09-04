@@ -1,5 +1,7 @@
 // maploader.js
 
+import { convertV40GameMapToV10 } from './convert.js';
+
 // --- Constants from WZ sources ---
 // Classic v10 maps store terrain height directly as an 8-bit value.
 const TILE_XFLIP   = 0x8000;
@@ -156,8 +158,17 @@ export async function loadMapUnified(input) {
   if (jsonMap) return jsonMap;
 
   // Try binary .map (v10, v39 or v40)
-  const binMap = parseBinaryMap(bytes);
-  if (binMap) return binMap;
+  if (bytes.length >= 16 && String.fromCharCode(bytes[0], bytes[1], bytes[2]) === "map") {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const version = dv.getUint32(4, true);
+    let mapBytes = bytes;
+    if (version >= 39) {
+      const converted = convertV40GameMapToV10(bytes);
+      if (converted) mapBytes = converted;
+    }
+    const binMap = parseBinaryMap(mapBytes);
+    if (binMap) return binMap;
+  }
 
   // Try .lev
   const levMap = parseLevMap(bytes);
