@@ -7,7 +7,7 @@ const TILE_YFLIP   = 0x4000;
 const TILE_ROTMASK = 0x3000;
 const TILE_ROTSHIFT = 12;
 const TILE_TRIFLIP = 0x0800;
-const TILE_NUMMASK = 0x01ff;           // 9-bit tile index (v10/v39)
+const TILE_NUMMASK = 0x01ff;           // 9-bit tile index
 
 // ------------------------
 // Binary .map grid parsing (v10=3 bytes/tile, v39+=4 bytes/tile)
@@ -52,23 +52,11 @@ export function parseBinaryMap(fileData) {
         h = dv.getUint8(ofs); ofs += 1;
       }
 
-      let tileIndex, rotation, xFlip, yFlip, triFlip;
-      if (mapVersion >= 40) {
-        // v40+: orientation bits are stored in the lower 5 bits
-        const orient = tilenum & 0x1f;
-        tileIndex = tilenum >>> 5;            // 11-bit tile index
-        rotation  = orient & 0x03;            // bits 0-1
-        xFlip     = !!(orient & 0x04);        // bit 2
-        yFlip     = !!(orient & 0x08);        // bit 3
-        triFlip   = !!(orient & 0x10);        // bit 4
-      } else {
-        // v10/v39: orientation bits are stored in the upper bits
-        tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
-        rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0–3
-        xFlip     = !!(tilenum & TILE_XFLIP);
-        yFlip     = !!(tilenum & TILE_YFLIP);
-        triFlip   = !!(tilenum & TILE_TRIFLIP);
-      }
+      const tileIndex = tilenum & TILE_NUMMASK;                 // 0..511
+      const rotation  = (tilenum & TILE_ROTMASK) >> TILE_ROTSHIFT; // 0–3
+      const xFlip     = !!(tilenum & TILE_XFLIP);
+      const yFlip     = !!(tilenum & TILE_YFLIP);
+      const triFlip   = !!(tilenum & TILE_TRIFLIP);
 
       mapTiles[y][x]     = tileIndex;
       mapRotations[y][x] = rotation;

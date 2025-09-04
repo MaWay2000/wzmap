@@ -78,6 +78,8 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
   dvOut.setInt32(8, width, true);
   dvOut.setInt32(12, height, true);
 
+  const TILE_ROTSHIFT = 12;          // from maploader.js
+
   for (let i = 0; i < tiles; i++) {
     const val = gridIn.getUint32(i * 4, true);
     const tile16 = val & 0xffff;          // lower 16 bits = tile + rotation
@@ -90,10 +92,7 @@ export function convertGammaGameMapToClassic(gammaData, ttypesMap) {
       ? ttypesMap[tile16]
       : baseTile;
 
-    // v40 stores the 11-bit tile index in the upper bits and orientation
-    // (rotation + flip flags) in the lower 5 bits. The Gamma format only
-    // encodes rotation, so we preserve that here.
-    const tilenum = (mappedTile << 5) | (rotation & 0x03);
+    const tilenum = (mappedTile & 0x01ff) | (rotation << TILE_ROTSHIFT);
     const offset = 16 + 4 * i;
     dvOut.setUint16(offset, tilenum, true);
     dvOut.setUint16(offset + 2, height16, true); // preserve 16-bit height
