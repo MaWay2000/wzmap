@@ -646,12 +646,15 @@ function pushUndo(action) {
   updateUndoRedoButtons();
 }
 
-function setMapState(w, h, tiles, rotations, heights) {
+function setMapState(w, h, tiles, rotations, heights, xflip = [], yflip = [], triflip = []) {
   mapW = w;
   mapH = h;
   mapTiles = tiles;
   mapRotations = rotations;
   mapHeights = heights;
+  mapXFlip = xflip.length ? xflip : Array(h).fill().map(() => Array(w).fill(false));
+  mapYFlip = yflip.length ? yflip : Array(h).fill().map(() => Array(w).fill(false));
+  mapTriFlip = triflip.length ? triflip : Array(h).fill().map(() => Array(w).fill(false));
 
   const sizeXInput = document.getElementById('sizeXInput');
   const sizeYInput = document.getElementById('sizeYInput');
@@ -702,7 +705,7 @@ function applyAction(action, mode) {
     drawMap3D();
   } else if (action.type === 'resize') {
     const state = mode === 'undo' ? action.oldState : action.newState;
-    setMapState(state.w, state.h, state.tiles, state.rotations, state.heights);
+    setMapState(state.w, state.h, state.tiles, state.rotations, state.heights, state.xflip, state.yflip, state.triflip);
   } else if (action.type === 'structure') {
     if (mode === 'undo') {
       objectsGroup.remove(action.group);
@@ -1953,6 +1956,9 @@ let mapW = DEFAULT_GRID, mapH = DEFAULT_GRID;
 let mapTiles = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapHeights = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapRotations = Array(mapH).fill().map(() => Array(mapW).fill(0));
+let mapXFlip = Array(mapH).fill().map(() => Array(mapW).fill(false));
+let mapYFlip = Array(mapH).fill().map(() => Array(mapW).fill(false));
+let mapTriFlip = Array(mapH).fill().map(() => Array(mapW).fill(false));
 const TILE_TYPE_NAMES = [
   "Sand",
   "Sandy Brush",
@@ -2194,6 +2200,9 @@ async function loadMapFile(file) {
     mapTiles = mapData.mapTiles;
     mapRotations = mapData.mapRotations;
     mapHeights = mapData.mapHeights;
+    mapXFlip = mapData.mapXFlip || mapXFlip;
+    mapYFlip = mapData.mapYFlip || mapYFlip;
+    mapTriFlip = mapData.mapTriFlip || mapTriFlip;
     resetCameraTarget(mapW, mapH, threeContainer);
     infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + file.name + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
     drawMap3D();
@@ -2227,6 +2236,9 @@ async function loadMapFile(file) {
         mapTiles = result.mapTiles;
         mapRotations = result.mapRotations;
         mapHeights = result.mapHeights;
+        mapXFlip = result.mapXFlip || mapXFlip;
+        mapYFlip = result.mapYFlip || mapYFlip;
+        mapTriFlip = result.mapTriFlip || mapTriFlip;
         const ttpName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('.ttp') && !zip.files[fn].dir);
         if (ttpName) {
           const ttpData = await zip.files[ttpName].async('uint8array');
@@ -2494,11 +2506,13 @@ try {
       new THREE.MeshLambertMaterial({ color: 0x393, side: THREE.DoubleSide });
     const instancedMesh = new THREE.InstancedMesh(tileGeometry, material, positions.length);
     positions.forEach((pos, i) => {
-        const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
-        const rotation = -(mapRotations[pos.y][pos.x] % 4) * Math.PI / 2;
-        const matrix = new THREE.Matrix4();
+      const h = Math.max(pos.h * HEIGHT_SCALE, 0.01);
+      const rotation = -(mapRotations[pos.y][pos.x] % 4) * Math.PI / 2;
+      const flipX = mapXFlip[pos.y][pos.x] ? -1 : 1;
+      const flipZ = mapYFlip[pos.y][pos.x] ? -1 : 1;
+      const matrix = new THREE.Matrix4();
       const rotationMatrix = new THREE.Matrix4().makeRotationY(rotation);
-      const scaleMatrix = new THREE.Matrix4().makeScale(1, h, 1);
+      const scaleMatrix = new THREE.Matrix4().makeScale(flipX, h, flipZ);
       const translationMatrix = new THREE.Matrix4().makeTranslation(pos.x + 0.5, h / 2, pos.y + 0.5);
       matrix.multiply(translationMatrix).multiply(rotationMatrix).multiply(scaleMatrix);
       instancedMesh.setMatrixAt(i, matrix);
@@ -2606,17 +2620,26 @@ function resizeMap(newW, newH) {
     h: mapH,
     tiles: mapTiles,
     rotations: mapRotations,
-    heights: mapHeights
+    heights: mapHeights,
+    xflip: mapXFlip,
+    yflip: mapYFlip,
+    triflip: mapTriFlip
   };
   const newTiles = Array(newH).fill().map(() => Array(newW).fill(0));
   const newRotationsArr = Array(newH).fill().map(() => Array(newW).fill(0));
   const newHeightsArr = Array(newH).fill().map(() => Array(newW).fill(0));
+  const newXFlipArr = Array(newH).fill().map(() => Array(newW).fill(false));
+  const newYFlipArr = Array(newH).fill().map(() => Array(newW).fill(false));
+  const newTriFlipArr = Array(newH).fill().map(() => Array(newW).fill(false));
   for (let y = 0; y < newH; y++) {
     for (let x = 0; x < newW; x++) {
       if (y < oldState.h && x < oldState.w) {
         newTiles[y][x] = mapTiles[y][x];
         newRotationsArr[y][x] = mapRotations[y][x];
         newHeightsArr[y][x] = mapHeights[y][x];
+        newXFlipArr[y][x] = mapXFlip[y][x];
+        newYFlipArr[y][x] = mapYFlip[y][x];
+        newTriFlipArr[y][x] = mapTriFlip[y][x];
       }
     }
   }
@@ -2625,9 +2648,12 @@ function resizeMap(newW, newH) {
     h: newH,
     tiles: newTiles,
     rotations: newRotationsArr,
-    heights: newHeightsArr
+    heights: newHeightsArr,
+    xflip: newXFlipArr,
+    yflip: newYFlipArr,
+    triflip: newTriFlipArr
   };
-  setMapState(newW, newH, newTiles, newRotationsArr, newHeightsArr);
+  setMapState(newW, newH, newTiles, newRotationsArr, newHeightsArr, newXFlipArr, newYFlipArr, newTriFlipArr);
   pushUndo({ type: 'resize', oldState, newState });
 }
 function getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH) {
