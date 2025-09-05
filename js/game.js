@@ -20,6 +20,17 @@ import { STRUCTURE_TURRETS } from "./structure_turrets.js";
 import { loadSensorDefs, getSensorModels } from "./sensors.js";
 import { buildDroidGroup } from "./droidGroup.js";
 
+let bodyDefs, propDefs, weaponDefs;
+async function loadComponentDefs() {
+  if (bodyDefs && propDefs && weaponDefs) return;
+  const base = (typeof window !== 'undefined' && window.PIES_BASE) ? window.PIES_BASE : 'pies/';
+  [bodyDefs, propDefs, weaponDefs] = await Promise.all([
+    fetch(base + 'components/bodies/body.json').then(r => r.json()).catch(() => ({})),
+    fetch(base + 'components/prop/propulsion.json').then(r => r.json()).catch(() => ({})),
+    fetch(base + 'components/weapons/weapons.json').then(r => r.json()).catch(() => ({}))
+  ]);
+}
+
 const tilesetSelect = document.getElementById('tilesetSelect');
 const fileListDiv = document.getElementById('fileList');
 const infoDiv = document.getElementById('info');
@@ -2211,6 +2222,7 @@ async function loadDroidsFromZip(zip) {
   const droidName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('droid.json') && !zip.files[fn].dir);
   if (!droidName) return;
   try {
+    await loadComponentDefs();
     const text = await zip.files[droidName].async('string');
     const data = JSON.parse(text);
     const entries = Array.isArray(data) ? data : Array.isArray(data.droids) ? data.droids : Object.values(data);
@@ -2240,9 +2252,38 @@ async function loadDroidsFromZip(zip) {
           if (Array.isArray(val)) val.forEach(v => parts.push(toPath(v, prefix)));
           else parts.push(toPath(val, prefix));
         };
-        addPart(entry.body, 'components/bodies/');
-        addPart(entry.propulsion, 'components/prop/');
-        addPart(entry.weapon || entry.weapons, 'components/weapons/');
+        const addWeapon = val => {
+          if (!val) return;
+          const wd = weaponDefs && weaponDefs[val];
+          if (wd) {
+            if (wd.model) addPart(wd.model, 'components/weapons/');
+            if (wd.mountModel) addPart(wd.mountModel, 'components/weapons/');
+          } else {
+            addPart(val, 'components/weapons/');
+          }
+        };
+        const bodyId = entry.body;
+        const propId = entry.propulsion;
+        if (bodyId) {
+          const bd = bodyDefs && bodyDefs[bodyId];
+          if (bd && bd.model) addPart(bd.model, 'components/bodies/');
+          else addPart(bodyId, 'components/bodies/');
+          if (bd && bd.propulsionExtraModels && propId) {
+            const extra = bd.propulsionExtraModels[propId];
+            if (extra) {
+              if (typeof extra === 'string') addPart(extra, 'components/prop/');
+              else Object.values(extra).forEach(v => addPart(v, 'components/prop/'));
+            }
+          }
+        }
+        if (propId) {
+          const pd = propDefs && propDefs[propId];
+          if (pd && pd.model) addPart(pd.model, 'components/prop/');
+          else addPart(propId, 'components/prop/');
+        }
+        const weapons = entry.weapon || entry.weapons;
+        if (Array.isArray(weapons)) weapons.forEach(addWeapon);
+        else addWeapon(weapons);
         return parts.length ? parts : null;
       })();
       if (pieList && pieList.length) {
