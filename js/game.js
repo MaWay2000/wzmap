@@ -2266,8 +2266,10 @@ async function loadDroidsFromZip(zip) {
           if (!val) return;
           const wd = weaponDefs && weaponDefs[val];
           if (wd) {
-            if (wd.model) addPart(wd.model, 'components/weapons/');
-            if (wd.mountModel) addPart(wd.mountModel, 'components/weapons/');
+            const modelPath = wd.model && toPath(wd.model, 'components/weapons/');
+            const mountPath = wd.mountModel && toPath(wd.mountModel, 'components/weapons/');
+            if (modelPath) parts.push(modelPath);
+            if (mountPath && mountPath !== modelPath) parts.push(mountPath);
           } else {
             addPart(val, 'components/weapons/');
           }
