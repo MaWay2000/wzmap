@@ -360,6 +360,7 @@
       <label for="wzLoader" id="overlayBrowseBtn" class="overlay-btn">Browse map…</label>
       <button id="overlayServerBtn" class="overlay-btn" style="margin-left:10px;">Browse server maps</button>
       <button id="overlayUrlBtn" class="overlay-btn" style="margin-left:10px;">Download official maps</button>
+      <button id="overlayNewBtn" class="overlay-btn" style="margin-left:10px;">New Map</button>
       <input type="file" id="wzLoader" accept=".wz,.zip,.7z,.map,.gam,.json" style="position:absolute;left:-9999px;width:0.1px;height:0.1px;opacity:0;">
       <div style="margin-top:10px;font-size:14px;color:#aab;">Please wait, it can take some time…</div>
     </div>
@@ -385,6 +386,7 @@
       const overlayEl = document.getElementById('overlayMsg');
       const serverBtn = document.getElementById('overlayServerBtn');
       const urlBtn = document.getElementById('overlayUrlBtn');
+      const newBtn = document.getElementById('overlayNewBtn');
       if(serverBtn){
         const fileListWidth = 360;
         serverBtn.addEventListener('click', () => {
@@ -402,6 +404,14 @@
       if(urlBtn){
         urlBtn.addEventListener('click', () => {
           window.open('https://maps.wz2100.net/', '_blank');
+        });
+      }
+      if(newBtn){
+        newBtn.addEventListener('click', () => {
+          window.UI.hideOverlay();
+          window.UI.showTopBar(true);
+          window.UI.setMapFilename('Untitled Map');
+          if(typeof window.newMap === 'function') window.newMap();
         });
       }
       if (btn && input){

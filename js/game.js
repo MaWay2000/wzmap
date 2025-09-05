@@ -2813,6 +2813,23 @@ function resizeMap(newW, newH) {
   setMapState(newW, newH, newTiles, newRotationsArr, newHeightsArr, newXFlipArr, newYFlipArr, newTriFlipArr);
   pushUndo({ type: 'resize', oldState, newState });
 }
+
+function newMap() {
+  const w = DEFAULT_GRID;
+  const h = DEFAULT_GRID;
+  const tiles = Array(h).fill().map(() => Array(w).fill(0));
+  const rotations = Array(h).fill().map(() => Array(w).fill(0));
+  const heights = Array(h).fill().map(() => Array(w).fill(0));
+  const xflip = Array(h).fill().map(() => Array(w).fill(false));
+  const yflip = Array(h).fill().map(() => Array(w).fill(false));
+  const triflip = Array(h).fill().map(() => Array(w).fill(false));
+  setMapState(w, h, tiles, rotations, heights, xflip, yflip, triflip);
+  undoStack.length = 0;
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+}
+window.newMap = newMap;
+
 function getStructurePlacementPosition(group, tileX, tileY, sizeX, sizeY, minH) {
   const centerX = group.userData.centerX;
   const centerZ = group.userData.centerZ;
