@@ -374,8 +374,16 @@
     window.UI = {
       setMapFilename(name){ const el=document.getElementById('mapFilename'); if(el){ el.textContent = name || ''; } },
       showTopBar(on=true){ document.getElementById('uiBar')?.classList.toggle('hidden', !on); },
-      hideOverlay(){ document.getElementById('overlayMsg')?.classList.add('hidden'); document.body.classList.remove('overlay-open'); },
-      showOverlay(){ document.getElementById('overlayMsg')?.classList.remove('hidden'); document.body.classList.add('overlay-open'); },
+      hideOverlay(){
+        const el = document.getElementById('overlayMsg');
+        if(el){ el.classList.add('hidden'); el.style.display = 'none'; }
+        document.body.classList.remove('overlay-open');
+      },
+      showOverlay(){
+        const el = document.getElementById('overlayMsg');
+        if(el){ el.classList.remove('hidden'); el.style.display = 'flex'; }
+        document.body.classList.add('overlay-open');
+      },
     };
 
     // Label triggers file input natively (no JS needed), but we also add a safety click handler
