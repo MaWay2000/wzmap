@@ -1997,10 +1997,11 @@ function renderTexturePalette() {
     selectedImg.style.outline = '2px solid #8cf';
   }
 }
-const DEFAULT_GRID = 16;
+const DEFAULT_MAP_W = 20;
+const DEFAULT_MAP_H = 40;
 const CAM_EDGE_MARGIN = 400;
 let tilesetIndex = 0;
-let mapW = DEFAULT_GRID, mapH = DEFAULT_GRID;
+let mapW = DEFAULT_MAP_W, mapH = DEFAULT_MAP_H;
 let mapTiles = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapHeights = Array(mapH).fill().map(() => Array(mapW).fill(0));
 let mapRotations = Array(mapH).fill().map(() => Array(mapW).fill(0));
@@ -2814,9 +2815,10 @@ function resizeMap(newW, newH) {
   pushUndo({ type: 'resize', oldState, newState });
 }
 
-function newMap() {
-  const w = DEFAULT_GRID;
-  const h = DEFAULT_GRID;
+async function newMap() {
+  await setTileset(0);
+  const w = DEFAULT_MAP_W;
+  const h = DEFAULT_MAP_H;
   const tiles = Array(h).fill().map(() => Array(w).fill(0));
   const rotations = Array(h).fill().map(() => Array(w).fill(0));
   const heights = Array(h).fill().map(() => Array(w).fill(0));
