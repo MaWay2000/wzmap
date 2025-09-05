@@ -49,7 +49,9 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
         baseMat = new THREE.MeshLambertMaterial({ color: 0x8888ff, transparent: opacityOverride !== null, opacity: opacityOverride !== null ? opacityOverride : 1 });
       }
       const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-      baseMesh.position.set(-cX, -cY, -cZ);
+      // Anchor the base of the model at y = 0 so optional floor models
+      // remain at ground level instead of hovering halfway up the structure.
+      baseMesh.position.set(-cX, -bb2.min.y, -cZ);
       group.add(baseMesh);
 
       for (const extra of def.pies.slice(1)) {
@@ -73,7 +75,8 @@ export async function buildStructureGroup(def, rotation, sizeX, sizeY, scaleOver
             extraMat = new THREE.MeshLambertMaterial({ color: 0x8888ff, transparent: opacityOverride !== null, opacity: opacityOverride !== null ? opacityOverride : 1 });
           }
           const extraMesh = new THREE.Mesh(extraGeo, extraMat);
-          extraMesh.position.set(-ecX, -ecY, -ecZ);
+          // Position extras so their lowest point sits on the floor as well.
+          extraMesh.position.set(-ecX, -tb.min.y, -ecZ);
           group.add(extraMesh);
         } catch (_) {}
       }
