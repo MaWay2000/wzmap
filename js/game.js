@@ -105,6 +105,10 @@ const TILE_TYPE_COLORS = [
 ];
 const TILE_ICON_SIZE = 41;
 let animationId = null;
+const PLAYER_COLORS = [
+  0xff0000, 0x0000ff, 0x00ff00, 0xffff00, 0xff00ff,
+  0x00ffff, 0xffffff, 0x888888, 0xff8800, 0x0088ff
+];
 if (showTileInfoCheckbox && tileInfoButtonsDiv) {
   const updateTileInfoVisibility = () => {
     const visible = showTileInfoCheckbox.checked;
@@ -2202,6 +2206,38 @@ async function loadStructuresFromZip(zip) {
   }
 }
 
+async function loadDroidsFromZip(zip) {
+  const droidName = Object.keys(zip.files).find(fn => fn.toLowerCase().endsWith('droid.json') && !zip.files[fn].dir);
+  if (!droidName) return;
+  try {
+    const text = await zip.files[droidName].async('string');
+    const data = JSON.parse(text);
+    const entries = Object.values(data);
+    entries.forEach(entry => {
+      const posX = (entry.position?.[0] ?? 0) / 128;
+      const posZ = (entry.position?.[1] ?? 0) / 128;
+      const tileX = Math.floor(posX);
+      const tileY = Math.floor(posZ);
+      if (tileX < 0 || tileY < 0 || tileX >= mapW || tileY >= mapH) return;
+      const h = (mapHeights?.[tileY]?.[tileX] ?? 0) * HEIGHT_SCALE + 0.05;
+      const geom = new THREE.ConeGeometry(0.3, 0.6, 4);
+      const color = PLAYER_COLORS[(entry.startpos ?? 0) % PLAYER_COLORS.length];
+      const mat = new THREE.MeshLambertMaterial({ color });
+      const mesh = new THREE.Mesh(geom, mat);
+      const yaw = (entry.rotation?.[1] ?? 0) * (2 * Math.PI / 65536);
+      mesh.rotation.y = -yaw;
+      mesh.position.set(posX, h, posZ);
+      mesh.userData.cullable = true;
+      objectsGroup.add(mesh);
+    });
+    if (objectsGroup && !scene.children.includes(objectsGroup)) {
+      scene.add(objectsGroup);
+    }
+  } catch (err) {
+    console.error('Failed to load droids from droid.json:', err);
+  }
+}
+
 async function loadMapFile(file) {
   fileListDiv.innerHTML = "";
   infoDiv.textContent = "";
@@ -2282,6 +2318,7 @@ async function loadMapFile(file) {
           tileTypesById = new Array(tileImages.length).fill(0);
         }
         await loadStructuresFromZip(zip);
+        await loadDroidsFromZip(zip);
         resetCameraTarget(mapW, mapH, threeContainer);
         infoDiv.innerHTML = '<b>Loaded map grid:</b> <span style="color:yellow">' + mapFileName + '</span><br>Tileset: ' + TILESETS[tilesetIndex].name + '<br>Size: ' + mapW + 'x' + mapH;
         drawMap3D();
