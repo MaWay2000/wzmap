@@ -2165,7 +2165,7 @@ async function loadStructuresFromZip(zip) {
     if (!STRUCTURE_DEFS.length) {
       try { await loadStructureDefs(); } catch (e) {}
     }
-    const entries = Object.values(data);
+    const entries = Array.isArray(data) ? data : Array.isArray(data.structures) ? data.structures : Object.values(data);
     const promises = entries.map(entry => {
       const name = typeof entry.name === 'string' ? entry.name.toLowerCase() : null;
       if (!name) return Promise.resolve();
@@ -2212,7 +2212,7 @@ async function loadDroidsFromZip(zip) {
   try {
     const text = await zip.files[droidName].async('string');
     const data = JSON.parse(text);
-    const entries = Object.values(data);
+    const entries = Array.isArray(data) ? data : Array.isArray(data.droids) ? data.droids : Object.values(data);
     entries.forEach(entry => {
       const posX = (entry.position?.[0] ?? 0) / 128;
       const posZ = (entry.position?.[1] ?? 0) / 128;
