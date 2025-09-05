@@ -18,6 +18,7 @@ import { parsePie, loadPieGeometry } from "./pie.js";
 import { buildStructureGroup } from "./structureGroup.js";
 import { STRUCTURE_TURRETS } from "./structure_turrets.js";
 import { loadSensorDefs, getSensorModels } from "./sensors.js";
+import { buildDroidGroup } from "./droidGroup.js";
 
 const tilesetSelect = document.getElementById('tilesetSelect');
 const fileListDiv = document.getElementById('fileList');
@@ -2213,24 +2214,43 @@ async function loadDroidsFromZip(zip) {
     const text = await zip.files[droidName].async('string');
     const data = JSON.parse(text);
     const entries = Array.isArray(data) ? data : Array.isArray(data.droids) ? data.droids : Object.values(data);
-    entries.forEach(entry => {
+    for (const entry of entries) {
       const posX = (entry.position?.[0] ?? 0) / 128;
       const posZ = (entry.position?.[1] ?? 0) / 128;
       const tileX = Math.floor(posX);
       const tileY = Math.floor(posZ);
-      if (tileX < 0 || tileY < 0 || tileX >= mapW || tileY >= mapH) return;
+      if (tileX < 0 || tileY < 0 || tileX >= mapW || tileY >= mapH) continue;
       // Lift droids slightly above the terrain to avoid z-fighting
       const h = (mapHeights?.[tileY]?.[tileX] ?? 0) * HEIGHT_SCALE + 0.07;
+      const yaw = (entry.rotation?.[1] ?? 0) * (2 * Math.PI / 65536);
+      const pieList = Array.isArray(entry.pies) ? entry.pies
+        : Array.isArray(entry.models) ? entry.models
+        : entry.pie ? [entry.pie]
+        : entry.model ? [entry.model]
+        : null;
+      if (pieList && pieList.length) {
+        try {
+          const group = await buildDroidGroup(pieList);
+          const cX = group.userData.centerX || 0;
+          const cZ = group.userData.centerZ || 0;
+          const minY = group.userData.minY || 0;
+          group.position.set(posX - cX, h - minY, posZ - cZ);
+          group.rotation.y = -yaw;
+          objectsGroup.add(group);
+          continue;
+        } catch (e) {
+          console.warn('Failed to build droid from pies:', e);
+        }
+      }
       const geom = new THREE.ConeGeometry(0.3, 0.6, 4);
       const color = PLAYER_COLORS[(entry.startpos ?? 0) % PLAYER_COLORS.length];
       const mat = new THREE.MeshLambertMaterial({ color });
       const mesh = new THREE.Mesh(geom, mat);
-      const yaw = (entry.rotation?.[1] ?? 0) * (2 * Math.PI / 65536);
       mesh.rotation.y = -yaw;
       mesh.position.set(posX, h, posZ);
       mesh.userData.cullable = true;
       objectsGroup.add(mesh);
-    });
+    }
     if (objectsGroup && !scene.children.includes(objectsGroup)) {
       scene.add(objectsGroup);
     }
