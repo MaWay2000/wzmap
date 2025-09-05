@@ -2219,7 +2219,8 @@ async function loadDroidsFromZip(zip) {
       const tileX = Math.floor(posX);
       const tileY = Math.floor(posZ);
       if (tileX < 0 || tileY < 0 || tileX >= mapW || tileY >= mapH) return;
-      const h = (mapHeights?.[tileY]?.[tileX] ?? 0) * HEIGHT_SCALE + 0.05;
+      // Lift droids slightly above the terrain to avoid z-fighting
+      const h = (mapHeights?.[tileY]?.[tileX] ?? 0) * HEIGHT_SCALE + 0.07;
       const geom = new THREE.ConeGeometry(0.3, 0.6, 4);
       const color = PLAYER_COLORS[(entry.startpos ?? 0) % PLAYER_COLORS.length];
       const mat = new THREE.MeshLambertMaterial({ color });
