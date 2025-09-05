@@ -2223,11 +2223,28 @@ async function loadDroidsFromZip(zip) {
       // Lift droids slightly above the terrain to avoid z-fighting
       const h = (mapHeights?.[tileY]?.[tileX] ?? 0) * HEIGHT_SCALE + 0.07;
       const yaw = (entry.rotation?.[1] ?? 0) * (2 * Math.PI / 65536);
-      const pieList = Array.isArray(entry.pies) ? entry.pies
-        : Array.isArray(entry.models) ? entry.models
-        : entry.pie ? [entry.pie]
-        : entry.model ? [entry.model]
-        : null;
+      const pieList = (() => {
+        if (Array.isArray(entry.pies)) return entry.pies;
+        if (Array.isArray(entry.models)) return entry.models;
+        if (entry.pie) return [entry.pie];
+        if (entry.model) return [entry.model];
+        const parts = [];
+        const toPath = (val, prefix = '') => {
+          let name = String(val);
+          if (!name.toLowerCase().endsWith('.pie')) name += '.pie';
+          if (name.includes('/')) return name;
+          return prefix + name;
+        };
+        const addPart = (val, prefix) => {
+          if (!val) return;
+          if (Array.isArray(val)) val.forEach(v => parts.push(toPath(v, prefix)));
+          else parts.push(toPath(val, prefix));
+        };
+        addPart(entry.body, 'components/bodies/');
+        addPart(entry.propulsion, 'components/prop/');
+        addPart(entry.weapon || entry.weapons, 'components/weapons/');
+        return parts.length ? parts : null;
+      })();
       if (pieList && pieList.length) {
         try {
           const group = await buildDroidGroup(pieList);
