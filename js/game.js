@@ -20,14 +20,15 @@ import { STRUCTURE_TURRETS } from "./structure_turrets.js";
 import { loadSensorDefs, getSensorModels } from "./sensors.js";
 import { buildDroidGroup } from "./droidGroup.js";
 
-let bodyDefs, propDefs, weaponDefs;
+let bodyDefs, propDefs, weaponDefs, templateDefs;
 async function loadComponentDefs() {
-  if (bodyDefs && propDefs && weaponDefs) return;
+  if (bodyDefs && propDefs && weaponDefs && templateDefs) return;
   const base = (typeof window !== 'undefined' && window.PIES_BASE) ? window.PIES_BASE : 'pies/';
-  [bodyDefs, propDefs, weaponDefs] = await Promise.all([
+  [bodyDefs, propDefs, weaponDefs, templateDefs] = await Promise.all([
     fetch(base + 'components/bodies/body.json').then(r => r.json()).catch(() => ({})),
     fetch(base + 'components/prop/propulsion.json').then(r => r.json()).catch(() => ({})),
-    fetch(base + 'components/weapons/weapons.json').then(r => r.json()).catch(() => ({}))
+    fetch(base + 'components/weapons/weapons.json').then(r => r.json()).catch(() => ({})),
+    fetch(base + 'components/templates.json').then(r => r.json()).catch(() => ({}))
   ]);
 }
 
@@ -2227,6 +2228,15 @@ async function loadDroidsFromZip(zip) {
     const data = JSON.parse(text);
     const entries = Array.isArray(data) ? data : Array.isArray(data.droids) ? data.droids : Object.values(data);
     for (const entry of entries) {
+      if (entry.template && templateDefs && templateDefs[entry.template]) {
+        const t = templateDefs[entry.template];
+        entry.body ||= t.body;
+        entry.propulsion ||= t.propulsion;
+        if (!entry.weapon && !entry.weapons) {
+          if (Array.isArray(t.weapons)) entry.weapons = t.weapons.slice();
+          else if (t.weapon) entry.weapon = t.weapon;
+        }
+      }
       const posX = (entry.position?.[0] ?? 0) / 128;
       const posZ = (entry.position?.[1] ?? 0) / 128;
       const tileX = Math.floor(posX);
